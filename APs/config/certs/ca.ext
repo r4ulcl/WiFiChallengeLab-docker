@@ -1,0 +1,11 @@
+
+extensions = x509v3
+ 
+[ x509v3 ]
+basicConstraints      = CA:true,pathlen:0
+crlDistributionPoints = URI:http://WiFi.ca.es/ca/mustermann.crl
+nsCertType            = sslCA,emailCA,objCA
+nsCaPolicyUrl         = "http://WiFi.ca.es/ca/policy.htm"
+nsCaRevocationUrl     = "http://WiFi.ca.es/ca/heimpold.crl"
+nsComment             = "WiFi CA"
+
