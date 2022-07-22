@@ -31,7 +31,7 @@ macchanger -r wlan19    # Other 4
 #macchanger -m 98:ab:c9:01:8d:e1 wlan18 # Other 4
 #macchanger -m 76:c4:de:29:5f:b9 wlan19 # Other 5
 
-#vwifi-client 192.168.190.15  > /root/vwifi-client.log &
+#vwifi-client 192.168.190.15  > /root/logs/vwifi-client.log &
 
 dnsmasq
 
@@ -39,35 +39,35 @@ dnsmasq
 
 # Open
 ip addr add 192.168.0.1/24 dev wlan6
-hostapd /root/open/hostapd_open.conf > /root/hostapd_open.log &
+hostapd /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
 
 # WEP hidden
 ip addr add 192.168.1.1/24 dev wlan7
-hostapd /root/wep/hostapd_wep_hidden.conf > /root/hostapd_wep_hidden.log &
+hostapd /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
 
 # PSK
 ip addr add 192.168.2.1/24 dev wlan8
-hostapd /root/psk/hostapd_wpa.conf > /root/hostapd_wpa.log &
+hostapd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
 
 # PSK WPS
 ip addr add 192.168.3.1/24 dev wlan9
-hostapd /root/psk/hostapd_wps.conf > /root/hostapd_wps.log &
+hostapd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # PSK krack
 #ip addr add 192.168.4.1/24 dev wlan10
-#/root/krack/hostapd-2.6/hostapd/hostapd /root/psk/hostapd_krack.conf > /root/hostapd_krack.log &
+#/root/krack/hostapd-2.6/hostapd/hostapd /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
 
 # MGT
 ip addr add 192.168.5.1/24 dev wlan11
-hostapd /root/mgt/hostapd-wpe.conf > /root/hostapd-wpe.log &
+hostapd /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
 
 # MGT Relay
 ip addr add 192.168.6.1/24 dev wlan12
-hostapd /root/mgt/hostapd-wpe-relay.conf > /root/hostapd-wpe-relay.log &
+hostapd /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
 
 # MGT TLS
 ip addr add 192.168.7.1/24 dev wlan13
-hostapd /root/mgt/hostapd-wpe-tls.conf > /root/hostapd-wpe-tls.log &
+hostapd /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
 
 #TODO
 #ip addr add 192.168.8.1/24 dev wlan14
@@ -75,21 +75,21 @@ hostapd /root/mgt/hostapd-wpe-tls.conf > /root/hostapd-wpe-tls.log &
 
 # PSK Other
 ip addr add 192.168.9.1/24 dev wlan15
-hostapd /root/psk/hostapd_other0.conf > /root/hostapd_other0.log & 
+hostapd /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log & 
 
 ip addr add 192.168.10.1/24 dev wlan16
-hostapd /root/psk/hostapd_other1.conf > /root/hostapd_other1.log & 
+hostapd /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log & 
 
 ip addr add 192.168.11.1/24 dev wlan17
-hostapd /root/psk/hostapd_other2.conf > /root/hostapd_other2.log & 
+hostapd /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log & 
 
 ip addr add 192.168.12.1/24 dev wlan18
-hostapd /root/psk/hostapd_other3.conf > /root/hostapd_other3.log & 
+hostapd /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
 
 
-ip addr del 192.168.190.15/24 dev enp0s3
+#ip addr del 192.168.190.15/24 dev enp0s3
 
-#bash /root/checkVWIFI.sh > /root/checkVWIFI.log &
+#bash /root/checkVWIFI.sh > /root/logs/checkVWIFI.log &
 
 
 #systemctl stop networking
@@ -97,5 +97,7 @@ echo "ALL SET"
 
 #Generate WEP traffic
 ping 192.168.1.2 > /dev/null 2>&1
+
+/bin/bash
 
 wait

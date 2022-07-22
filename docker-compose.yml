@@ -1,15 +1,29 @@
 version: '3.9'
 services:
   #UNTESTED
-  ap:
-    build: ./ap/
+  aps:
+    build: ./APs/
     restart: unless-stopped
     container_name: WiFiChallengeLab-AP
-    env_file: .env
+    env_file: ./APs/.env
     volumes:
-      - ./ap:/etc/WiFiChallengeLab/ap
+      - /lib/modules:/lib/modules
+      - ./logsAP:/root/logs/
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+    network_mode: host #NETNS
+    privileged: true #NETNS
+
+  clients:
+    build: ./Clients/
+    restart: unless-stopped
+    container_name: WiFiChallengeLab-Clients
+    env_file: ./Clients/.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./logsClient:/root/logs/
     depends_on:
-      - client
+      - aps
     environment:
       - DATABASE_URL=$DATABASE_URL
     network_mode: host #NETNS

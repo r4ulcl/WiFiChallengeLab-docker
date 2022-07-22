@@ -1,4 +1,3 @@
-
 server=8.8.8.8
 server=8.8.4.4
 dhcp-option=3 #Disable default router gateway

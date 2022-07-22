@@ -36,11 +36,11 @@ if [[ -z "$IFACE" ]]; then
    fi
 fi
 
-NS="ns-ap"
-VETH="veth1"
-VPEER="vpeer1"
-VETH_ADDR="10.200.1.1"
-VPEER_ADDR="10.200.1.2"
+NS="ns-client"
+VETH="veth2"
+VPEER="vpeer2"
+VETH_ADDR="10.200.2.1"
+VPEER_ADDR="10.200.2.2"
 
 trap cleanup EXIT
 
@@ -57,23 +57,11 @@ ip netns add $NS
 
 
 #----------------------------WiFiChallenge---------------------------------------------------------
-#Check kill to avoid all problems
 
-airmon-ng check kill
+sleep 15 # wait for AP docker
 
-# Define vlan for all dockers (in host, is the same mac80211_hwsim)
-#14 radios for AP
-#13 radios for Clients
-#6 for the attacker
-
-sudo modprobe mac80211_hwsim -r
-sudo modprobe mac80211_hwsim radios=33
-
-# Rename interfaces APwlan, ClientWlan, wlan0 wlan5
-#TODO?
-
-# Add WiFi interfaces 6-20
-for I in `seq 6 19` ; do
+# Add WiFi interfaces wlan 20-32
+for I in `seq 20 32` ; do
 	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
 	iw phy $PHY set netns name /run/netns/$NS
 done
@@ -114,7 +102,7 @@ iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
 iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
 
 # Get into namespace and exec startAP
-ip netns exec ${NS} /bin/bash /root/startAPs.sh --rcfile <(echo "PS1=\"${NS}> \"")
-#·ip netns exec ${NS} /bin/bash --rcfile <(echo "PS1=\"${NS}> \"")
+ip netns exec ${NS} /bin/bash /root/startClients.sh --rcfile <(echo "PS1=\"${NS}> \"")
+#ip netns exec ${NS} /bin/bash --rcfile <(echo "PS1=\"${NS}> \"")
 
 # if closed
