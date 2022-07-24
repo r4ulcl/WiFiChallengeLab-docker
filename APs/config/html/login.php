@@ -65,13 +65,13 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT
   echo "<br><br>";
 }
 
-if (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false) { //only MGT Relay
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only MGT Relay
   echo "<br><br>";
   echo "Regional Router Login";
   echo "<br><br>";
 }
 
-if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only ENTERPRISE
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
   echo "<br><br>";
   echo "Global Router Login";
   echo "<br><br>";
@@ -83,7 +83,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only ENTERPRISE
 
 <?php
   /* Check IP from GLOBAL */
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false){
     session_start(); /* Starts the session */
     $Username = 'GLOBAL\GlobalAdmin';
     $Password = 'SuperSuperSecure@!@';
@@ -96,7 +96,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only ENTERPRISE
   }
 
   # Check IP from CONTOSOREG Relay
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false){
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
     session_start(); /* Starts the session */
     $Username = 'CONTOSOREG\luis.da';
     $Password = 'u89gh68!6fcv56ed';
@@ -135,7 +135,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only ENTERPRISE
 </form>
 
 <?php
-if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only MGT
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
     echo "<br><br>";
     echo "Hello Global Admin:";
     echo "<br><br>";

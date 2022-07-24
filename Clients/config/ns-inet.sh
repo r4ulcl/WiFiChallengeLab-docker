@@ -61,8 +61,8 @@ ip netns add $NS
 echo "Waiting to APs (15 secs)"
 sleep 15 # wait for AP docker
 
-# Add WiFi interfaces wlan 26-45
-for I in `seq 26 45` ; do
+# Add WiFi interfaces wlan 40-59
+for I in `seq 40 59` ; do
 	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
 	iw phy $PHY set netns name /run/netns/$NS
 done

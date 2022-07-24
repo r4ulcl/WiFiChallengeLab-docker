@@ -24,6 +24,7 @@ COPY config/interfaces /etc/network/interfaces
 
 #Copy HTML files
 COPY config/html /var/www/html/
+RUN mkdir /var/www/html/secretCA/
 RUN cp /root/mgt/certs/ca.crt /var/www/html/secretCA/ca.crt.txt ;split -l 15  /root/mgt/certs/ca.key /var/www/html/secretCA/ca.key.txt. -a1 ; cp /root/mgt/certs/ca.serial /var/www/html/secretCA/ca.serial.txt ; cp /root/mgt/certs/server.crt /var/www/html/secretCA/server.crt.txt ; split -l 15 /root/mgt/certs/server.key /var/www/html/secretCA/server.key.txt. -a1 ; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
 
 #WPS 

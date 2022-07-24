@@ -11,7 +11,7 @@ echo "<br><br>";
 echo "<br><br>";
 
 if ($_SESSION["Username"]  == "GLOBAL\GlobalAdmin") {
-    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only TLS	
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only TLS	
 		echo "FLAG: WnIlomDsedsOj5I5AQzG0ZoMIhmJIJeejksyma64";
 	} else {
 		echo "Your Princess Is in Another Castle!";
@@ -19,7 +19,7 @@ if ($_SESSION["Username"]  == "GLOBAL\GlobalAdmin") {
 }
 
 if ($_SESSION["Username"]  == "CONTOSO\Administrator") {
-	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only TLS	
+	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
 		echo "FLAG: aY62tP67g5hK4f";
 	} else {
 		echo "Your Princess Is in Another Castle!";
