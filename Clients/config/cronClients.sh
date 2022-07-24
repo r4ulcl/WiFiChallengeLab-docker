@@ -12,9 +12,9 @@ do
 	#	ip addr add 192.168.190.16/24 dev enp0s3
 	#fi
 
-
+	killall dhclient_wifichallenge 2> /dev/nill &
 	for N in `seq 20 32`; do
-		dhclient wlan$N 2> /dev/nill &
+		dhclient_wifichallenge wlan$N 2> /dev/nill &
 	done
 
 	# Start Apache in client for Client isolation test
@@ -23,8 +23,9 @@ do
 
 	sleep 60
 
+	killall dhclient_wifichallenge 2> /dev/nill &
 	for N in `seq 20 32`; do
-		dhclient wlan$N 2> /dev/nill &
+		dhclient_wifichallenge wlan$N 2> /dev/nill &
 	done
 
 	sleep 10

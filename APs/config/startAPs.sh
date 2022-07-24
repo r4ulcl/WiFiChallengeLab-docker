@@ -33,25 +33,31 @@ macchanger -r wlan19    # Other 4
 
 #vwifi-client 192.168.190.15  > /root/logs/vwifi-client.log &
 
+bash /root/cronAPs.sh > /root/logs/cronAPs.log &
+
+
 dnsmasq
+
+
+mkdir /root/logs/ 2> /dev/nil
 
 #TODO RE ORDER ALL WLAN and IP -> 0 OPN, 1 WEP, 2 PSK, 3 PSK WPS, 4 MGT, 5 MGTRelay, 6 MGT TLS, 7 8 , 9,10,11,12,13 others
 
 # Open
 ip addr add 192.168.0.1/24 dev wlan6
-hostapd /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
+hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
 
 # WEP hidden
 ip addr add 192.168.1.1/24 dev wlan7
-hostapd /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
+hostapd_aps /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
 
 # PSK
 ip addr add 192.168.2.1/24 dev wlan8
-hostapd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
+hostapd_aps /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
 
 # PSK WPS
 ip addr add 192.168.3.1/24 dev wlan9
-hostapd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
+hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # PSK krack
 #ip addr add 192.168.4.1/24 dev wlan10
@@ -59,15 +65,15 @@ hostapd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # MGT
 ip addr add 192.168.5.1/24 dev wlan11
-hostapd /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
+hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
 
 # MGT Relay
 ip addr add 192.168.6.1/24 dev wlan12
-hostapd /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
+hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
 
 # MGT TLS
 ip addr add 192.168.7.1/24 dev wlan13
-hostapd /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
+hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
 
 #TODO
 #ip addr add 192.168.8.1/24 dev wlan14
@@ -75,16 +81,16 @@ hostapd /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
 
 # PSK Other
 ip addr add 192.168.9.1/24 dev wlan15
-hostapd /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log & 
+hostapd_aps /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log & 
 
 ip addr add 192.168.10.1/24 dev wlan16
-hostapd /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log & 
+hostapd_aps /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log & 
 
 ip addr add 192.168.11.1/24 dev wlan17
-hostapd /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log & 
+hostapd_aps /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log & 
 
 ip addr add 192.168.12.1/24 dev wlan18
-hostapd /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
+hostapd_aps /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
 
 
 #ip addr del 192.168.190.15/24 dev enp0s3

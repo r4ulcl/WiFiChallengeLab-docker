@@ -28,6 +28,11 @@ RUN update-rc.d apache2 defaults
 
 #RUN apt-get update && apt-get install -y linux-image-amd64 linux-headers-amd64
 
+#Change name of wpa_supplicant to avoid airmon-ng check kill and dhclient
+RUN cp /sbin/wpa_supplicant /sbin/wpa_wifichallenge_supplicant
+RUN cp /sbin/dhclient /sbin/dhclien-wifichallenge
+
+
 #Fix buf soft lockup, delete in docker?
 #RUN echo "kernel.watchdog_thresh=20" > /etc/sysctl.d/99-watchdog_thresh.conf && sysctl -p  /etc/sysctl.d/99-watchdog_thresh.conf
 

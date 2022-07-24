@@ -21,10 +21,10 @@ macchanger -m 80:18:44:BF:72:77 wlan27
 macchanger -m B0:72:BF:B0:78:88 wlan28
 macchanger -m B0:72:BF:44:B0:99 wlan29
 
-macchanger -m 10:F9:6F:AC:53:10 wlan230
+macchanger -m 10:F9:6F:AC:53:10 wlan30
 
-macchanger -m 10:F9:6F:AC:53:11 wlan231
-macchanger -m 10:F9:6F:AC:53:12 wlan232
+macchanger -m 10:F9:6F:AC:53:11 wlan31
+macchanger -m 10:F9:6F:AC:53:12 wlan32
 
 sleep 5
 
@@ -41,23 +41,20 @@ bash /root/cronClients.sh > /root/logs/cronClients.log &
 # Reconnect to send the Identity and check certificate always
 
 # Delete logs to >> always
-rm /root/wpa_supplicantMSCHAP.log 2> /dev/nill
-rm /root/wpa_supplicantGTC.log 2> /dev/nill
-rm /root/wpa_supplicantMSCHAP_relay.log 2> /dev/nill
-rm /root/wpa_supplicantTLS.log 2> /dev/nill
+rm /root/logs/ 2> /dev/nill
 
 # MGT .5
 while :
 do
     TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s wpa_supplicant -Dnl80211 -iwlan20 -c /root/mgtClient/wpa_mschapv2.conf >> /root/logs/wpa_supplicantMSCHAP.log &
+    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -iwlan20 -c /root/mgtClient/wpa_mschapv2.conf >> /root/logs/wpa_wifichallenge_supplicantMSCHAP.log &
     wait $!
 done &
 
 while :
 do
     TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s wpa_supplicant -Dnl80211 -iwlan21 -c /root/mgtClient/wpa_gtc.conf  >> /root/logs/wpa_supplicantGTC.log &
+    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -iwlan21 -c /root/mgtClient/wpa_gtc.conf  >> /root/logs/wpa_wifichallenge_supplicantGTC.log &
     wait $!
 done &
 
@@ -65,7 +62,7 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_supplicant -Dnl80211 -iwlan230 -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/wpa_supplicantMSCHAP_relay.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -iwlan30 -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/wpa_wifichallenge_supplicantMSCHAP_relay.log &
     wait $!
 done &
 
@@ -73,23 +70,23 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_supplicant -Dnl80211 -iwlan22 -c /root/mgtClient/wpa_TLS.conf >> /root/logs/wpa_supplicantTLS.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -iwlan22 -c /root/mgtClient/wpa_TLS.conf >> /root/logs/wpa_wifichallenge_supplicantTLS.log &
     wait $!
 done &
 # Wait for this ID at the end
 LAST=$!
 
 # PSK .2
-sudo wpa_supplicant -Dnl80211 -iwlan23 -c /root/pskClient/wpa_psk.conf > /root/logs/wpa_supplicantPSK3.log &
-sudo wpa_supplicant -Dnl80211 -iwlan24 -c /root/pskClient/wpa_psk.conf > /root/logs/wpa_supplicantPSK4.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan23 -c /root/pskClient/wpa_psk.conf > /root/logs/wpa_wifichallenge_supplicantPSK3.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan24 -c /root/pskClient/wpa_psk.conf > /root/logs/wpa_wifichallenge_supplicantPSK4.log &
 
-sudo wpa_supplicant -Dnl80211 -iwlan25 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/wpa_supplicantNoAP5.log &
-sudo wpa_supplicant -Dnl80211 -iwlan26 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/wpa_supplicantNoAP6.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan25 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/wpa_wifichallenge_supplicantNoAP5.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan26 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/wpa_wifichallenge_supplicantNoAP6.log &
 
 # OPEN .0
-sudo wpa_supplicant -Dnl80211 -iwlan27 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_supplicantOpen7.log &
-sudo wpa_supplicant -Dnl80211 -iwlan28 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_supplicantOpen8.log &
-sudo wpa_supplicant -Dnl80211 -iwlan29 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_supplicantOpen9.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan27 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen7.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan28 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen8.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan29 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen9.log &
 
 sleep 10
 

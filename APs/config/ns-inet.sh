@@ -59,7 +59,7 @@ ip netns add $NS
 #----------------------------WiFiChallenge---------------------------------------------------------
 #Check kill to avoid all problems
 
-airmon-ng check kill
+#airmon-ng check kill
 
 # Define vlan for all dockers (in host, is the same mac80211_hwsim)
 #14 radios for AP

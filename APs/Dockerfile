@@ -11,6 +11,9 @@ COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
 COPY config/certs/ /root/mgt/certs/
 
+#Copy cron
+COPY config/cronAPs.sh /root/
+
 #Update certs
 #RUN cd /root/mgt/certs/ ; make install
 
@@ -26,6 +29,10 @@ RUN touch /var/run/hostapd_wps_pin_requests
 
 #Apache
 RUN update-rc.d apache2 defaults
+
+
+#Change name of wpa_supplicant to avoid airmon-ng check kill, etc
+RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
 
 
 #RUN apt-get update && apt-get install -y linux-image-amd64 linux-headers-amd64
