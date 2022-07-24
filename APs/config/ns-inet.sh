@@ -62,18 +62,18 @@ ip netns add $NS
 #airmon-ng check kill
 
 # Define vlan for all dockers (in host, is the same mac80211_hwsim)
-#14 radios for AP
-#13 radios for Clients
-#6 for the attacker
+#0-5 for the attacker
+#6-25 radios for AP
+#26-45 radios for Clients
 
 sudo modprobe mac80211_hwsim -r
-sudo modprobe mac80211_hwsim radios=33
+sudo modprobe mac80211_hwsim radios=46
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?
 
 # Add WiFi interfaces 6-20
-for I in `seq 6 19` ; do
+for I in `seq 6 25` ; do
 	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
 	iw phy $PHY set netns name /run/netns/$NS
 done

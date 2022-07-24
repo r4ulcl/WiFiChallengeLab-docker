@@ -16,24 +16,36 @@ macchanger -m F0:9F:C2:71:22:22 wlan8 # PSK
 macchanger -m F0:9F:C2:71:22:33 wlan9 # PSK WPS
 macchanger -m F0:9F:C2:71:22:44 wlan10 # PSK VULN KRACKS TODO
 macchanger -m F0:9F:C2:71:22:55 wlan11 # MGT
-macchanger -m F0:9F:C2:71:22:66 wlan12 # MGT Relay
-macchanger -m F0:9F:C2:71:22:77 wlan13 # MGT TLS
-macchanger -m F0:9F:C2:71:22:88 wlan14 # TODO
+macchanger -m F0:9F:C2:71:22:5A wlan12 # MGT 2
+macchanger -m F0:9F:C2:71:22:66 wlan13 # MGT Relay
+macchanger -m F0:9F:C2:71:22:77 wlan14 # MGT TLS
+
 
 macchanger -r wlan15     # Other 0
 macchanger -r wlan16    # Other 1
 macchanger -r wlan17    # Other 2
 macchanger -r wlan18    # Other 3
-macchanger -r wlan19    # Other 4
-#macchanger -m 8d:4c:02:22:c9:33 wlan15 # Other 1
-#macchanger -m 4f:c2:15:67:f1:87 wlan16 # Other 2
-#macchanger -m f8:b5:cd:67:50:d5 wlan17 # Other 3
-#macchanger -m 98:ab:c9:01:8d:e1 wlan18 # Other 4
-#macchanger -m 76:c4:de:29:5f:b9 wlan19 # Other 5
+macchanger -r wlan19    # TODO
+macchanger -r wlan20    # TODO
+macchanger -r wlan21    # TODO
+macchanger -r wlan22    # TODO
+macchanger -r wlan23    # TODO
+macchanger -r wlan24    # TODO
+macchanger -r wlan25    # TODO
+
+
+mkdir /root/logs/ 2> /dev/nil
+
+#Start nzyme
+service postgresql start
+sudo ip link set wlan25 down
+sudo iw wlan25 set monitor control
+sudo ip link set wlan25 up
+bash /usr/share/nzyme/bin/nzyme > /root/logs/nzyme.log 2>&1  &
 
 #vwifi-client 192.168.190.15  > /root/logs/vwifi-client.log &
 
-bash /root/cronAPs.sh > /root/logs/cronAPs.log &
+bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 
 
 dnsmasq
@@ -66,13 +78,15 @@ hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 # MGT
 ip addr add 192.168.5.1/24 dev wlan11
 hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
+ip addr add 192.168.5.1/24 dev wlan12
+hostapd_aps /root/mgt/hostapd-wpe2.conf > /root/logs/hostapd-wpe2.log &
 
 # MGT Relay
-ip addr add 192.168.6.1/24 dev wlan12
+ip addr add 192.168.6.1/24 dev wlan13
 hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
 
 # MGT TLS
-ip addr add 192.168.7.1/24 dev wlan13
+ip addr add 192.168.7.1/24 dev wlan14
 hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
 
 #TODO

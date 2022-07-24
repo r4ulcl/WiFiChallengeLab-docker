@@ -1,6 +1,8 @@
 FROM debian
 #FROM kalilinux/kali-rolling
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod
+#nzyme install
+RUN apt-get update && apt-get install -y libpcap0.8 openjdk-11-jre-headless wireless-tools systemd libpam-systemd postgresql gettext-base curl python3
 
 #RUN date
 
@@ -42,6 +44,12 @@ RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
 
 COPY config/ns-inet.sh /root/
 COPY config/startAPs.sh /root/
+
+#nzyme
+RUN curl -s https://assets.nzyme.org/releases/nzyme-1.2.2.deb -o nzyme.deb && dpkg -i nzyme.deb && rm nzyme.deb
+COPY config/nzyme.conf  /etc/nzyme/nzyme.conf
+RUN service postgresql start && sudo -u postgres psql -c "create database nzyme;" && sudo -u postgres psql -c "create user nzyme with encrypted password 'NEW_PASSWORD'; grant all privileges on database nzyme to nzyme;"
+#/bin/sh /usr/share/nzyme/bin/nzyme
 
 
 # exec ns-inet.sh and waits aits

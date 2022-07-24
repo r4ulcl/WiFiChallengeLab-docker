@@ -115,7 +115,7 @@ if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
 		<br>
 		# 802.11 Options<br>
 		ssid=wifi-corp<br>
-		channel=1<br>";
+		channel=6<br>";
 	    echo "Certificate Authority:  <a href=\"/secretCA/\"> http://", $_SERVER['SERVER_ADDR'], "/secretCA/ </a>";
 }
 
