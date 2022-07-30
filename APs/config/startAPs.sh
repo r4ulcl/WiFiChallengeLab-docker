@@ -3,8 +3,6 @@ date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
-
-
 service apache2 start
 
 # Wlan first 6 for attacker, next 14 for AP, rest for client
@@ -25,7 +23,7 @@ macchanger -r wlan19     # Other 0
 macchanger -r wlan20    # Other 1
 macchanger -r wlan21    # Other 2
 macchanger -r wlan22    # Other 3
-#macchanger -r wlan23    # TODO
+macchanger -r wlan23    # WPA3
 #macchanger -r wlan24    # TODO
 macchanger -r wlan25    # NZYME WIDS
 #macchanger -r wlan26    # TODO
@@ -35,13 +33,6 @@ macchanger -r wlan25    # NZYME WIDS
 
 
 mkdir /root/logs/ 2> /dev/nil
-
-#Start nzyme
-service postgresql start
-sudo ip link set wlan25 down
-sudo iw wlan25 set monitor control
-sudo ip link set wlan25 up
-bash /usr/share/nzyme/bin/nzyme > /root/logs/nzyme.log 2>&1  &
 
 #vwifi-client 192.168.190.15  > /root/logs/vwifi-client.log &
 
@@ -58,6 +49,8 @@ mkdir /root/logs/ 2> /dev/nil
 # Open
 ip addr add 192.168.0.1/24 dev wlan10
 hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
+
+opennds -s #-f > /root/logs/opennds.log &
 
 # WEP hidden
 ip addr add 192.168.1.1/24 dev wlan11
@@ -106,18 +99,22 @@ hostapd_aps /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log &
 ip addr add 192.168.12.1/24 dev wlan22
 hostapd_aps /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
 
+# WPA3 WPE
+ip addr add 192.168.13.1/24 dev wlan23
+#hostapd_aps /root/wpa3/hostapd-wpa3.conf > /root/logs/hostapd_wpa3.log &
 
 #ip addr del 192.168.190.15/24 dev enp0s3
 
 #bash /root/checkVWIFI.sh > /root/logs/checkVWIFI.log &
 
+#Generate WEP traffic
+ping 192.168.1.2 > /dev/null 2>&1 &
 
 #systemctl stop networking
 echo "ALL SET"
 
-#Generate WEP traffic
-ping 192.168.1.2 > /dev/null 2>&1
 
 /bin/bash
+
 
 wait

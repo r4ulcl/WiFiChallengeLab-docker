@@ -1,16 +1,15 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod
-#nzyme install
-RUN apt-get update && apt-get install -y libpcap0.8 openjdk-11-jre-headless wireless-tools systemd libpam-systemd postgresql gettext-base curl python3
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod iputils-ping
 
-#RUN date
+RUN date
 
 #Copy config files
 COPY config/open/ /root/open/
 COPY config/wep/ /root/wep/
 COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
+COPY config/wpa3/ /root/wpa3/
 COPY config/certs/ /root/mgt/certs/
 
 #Copy cron
@@ -38,6 +37,12 @@ RUN update-rc.d apache2 defaults
 RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
 
 
+# Hostapd 2.6 krackattacks
+RUN apt-get install -y wget
+RUN cd /root && mkdir krack && cd krack && wget https://w1.fi/releases/hostapd-2.6.tar.gz && tar -zxf hostapd-2.6.tar.gz \
+	&& cd hostapd-2.6/hostapd && cp defconfig .config && sed -i '/CONFIG_LIBNL32=y/s/^#//g' .config # remove comment \
+	&& make
+
 #RUN apt-get update && apt-get install -y linux-image-amd64 linux-headers-amd64
 
 # Fix buf soft lockup, delete in docker?
@@ -46,12 +51,18 @@ RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
 COPY config/ns-inet.sh /root/
 COPY config/startAPs.sh /root/
 
-#nzyme
-RUN curl -s https://assets.nzyme.org/releases/nzyme-1.2.2.deb -o nzyme.deb && dpkg -i nzyme.deb && rm nzyme.deb
-COPY config/nzyme.conf  /etc/nzyme/nzyme.conf
-RUN service postgresql start && sudo -u postgres psql -c "create database nzyme;" && sudo -u postgres psql -c "create user nzyme with encrypted password 'NEW_PASSWORD'; grant all privileges on database nzyme to nzyme;"
-#/bin/sh /usr/share/nzyme/bin/nzyme
+#opennds
+RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.75.tar.gz \
+	; tar  -xf libmicrohttpd-0.9.75.tar.gz ; cd libmicrohttpd-0.9.75 \
+	; ./configure --disable-https ; make ; sudo rm /usr/local/lib/libmicrohttpd* \
+	; sudo make install ; sudo rm /etc/ld.so.cache ; sudo ldconfig -v ; cd ..
 
+RUN cd && wget https://codeload.github.com/opennds/opennds/tar.gz/v9.7.0 && tar -xf v9.7.0 && cd openNDS-9.7.0 \
+	 && make && make install && rm -rf ~/openNDS-9.7.0 ~/libmicrohttpd-0.9.75
+
+COPY config/opennds.conf /etc/opennds/opennds.conf
+COPY config/theme_user-email-login-basic.sh /usr/lib/opennds/
+RUN chmod +x /usr/lib/opennds/theme_user-email-login-basic.sh
 
 # exec ns-inet.sh and waits aits
 CMD ["/bin/bash", "/root/ns-inet.sh"]

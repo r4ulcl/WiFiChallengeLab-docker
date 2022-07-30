@@ -29,3 +29,52 @@ services:
     network_mode: host #NETNS
     privileged: true #NETNS
 
+#  attacker:
+#    build: ./Attacker/
+#    restart: unless-stopped
+#    container_name: WiFiChallengeLab-Attacker
+#    env_file: ./Attacker/.env
+#    volumes:
+#      - /lib/modules:/lib/modules
+#      - ./Attacker/shared:/root/shared/
+#    depends_on:
+#      - aps
+#    environment:
+#      - DATABASE_URL=$DATABASE_URL
+#    network_mode: host #NETNS
+#    privileged: true #NETNS
+
+  nzyme:
+    build: ./nzyme/
+    restart: unless-stopped
+    container_name: nzyme
+    env_file: ./nzyme/.env
+    volumes:
+      - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
+      - ./logsNzyme:/var/log/nzyme/
+    #ports:
+    #  - "22900:22900"
+    depends_on:
+      - nzyme_db
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
+      - EXTERNAL_URL=$EXTERNAL_URL
+    network_mode: host #USB Antena
+    privileged: true #USB Antena
+
+  nzyme_db:
+    image: postgres:latest
+    restart: unless-stopped
+    env_file: ./nzyme/.env
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASS
+    volumes:
+      - ./nzyme/data:/var/lib/postgresql/data
+    network_mode: host #USB Antena
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
+      interval: 10s
+      start_period: 30s

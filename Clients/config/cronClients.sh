@@ -13,9 +13,9 @@ do
 	#fi
 
 	#26-45
-	killall dhclient_wifichallenge 2> /dev/nill &
+	killall dhclien-wifichallenge 2> /dev/nill &
 	for N in `seq 40 59`; do
-		dhclient_wifichallenge wlan$N 2> /dev/nill &
+		dhclien-wifichallenge wlan$N 2> /dev/nill &
 	done
 
 	# Start Apache in client for Client isolation test
@@ -24,9 +24,9 @@ do
 
 	sleep 60
 
-	killall dhclient_wifichallenge 2> /dev/nill &
+	killall dhclien-wifichallenge 2> /dev/nill &
 	for N in `seq 40 59`; do
-		dhclient_wifichallenge wlan$N 2> /dev/nill &
+		dhclien-wifichallenge wlan$N 2> /dev/nill &
 	done
 
 	sleep 10

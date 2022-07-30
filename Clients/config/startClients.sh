@@ -41,6 +41,11 @@ sleep 5
 
 #sleep 15
 
+# Delete logs to >> always
+mkdir /root/logs/ 2> /dev/nill
+rm /root/logs/ 2> /dev/nill
+
+# Exec cronClient
 bash /root/cronClients.sh > /root/logs/cronClients.log &
 
 #ip addr del 192.168.190.15/24 dev enp0s3
@@ -48,9 +53,6 @@ bash /root/cronClients.sh > /root/logs/cronClients.log &
 
 # WPA SUPPLICANT OUPUT TO FILE
 # Reconnect to send the Identity and check certificate always
-
-# Delete logs to >> always
-rm /root/logs/ 2> /dev/nill
 
 # MGT .5
 while :
@@ -95,9 +97,29 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan46 -c /root/pskClient/wpa_psk_
 # OPEN .0
 sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan47 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen7.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan48 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen8.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan40 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen9.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan49 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen9.log &
 
-sleep 10
+sleep 5
+
+#OPN GET IP and accept captive portal
+echo 'Starting OPN clients'
+for N in `seq 47 49`; do
+	echo "Starting wlan$N"
+	dhclien-wifichallenge wlan$N 2> /dev/nill &
+
+	LOGIN=`curl --silent --interface wlan$N http://192.168.0.1:2050/login`
+	# Get FAS
+	URL=`echo $LOGIN | grep fas | grep -oP "(?<=href=').*?(?=')"`
+	#LOGIN
+	CONFIRM=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1"`
+	#Get custom to confirm
+	CUSTOM=`echo "$CONFIRM" |  grep 'custom' | grep -oP '(?<=value=").*?(?=")'`
+	# Confirm
+	CONNECTED=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
+
+done
+
+sleep 5
 
 ping 192.168.0.1 > /dev/nill &
 ping 192.168.1.1 > /dev/nill &
