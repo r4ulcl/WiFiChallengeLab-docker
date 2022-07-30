@@ -8,15 +8,15 @@ service apache2 start
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
 #F0:9F:C2:71 ubiquiti
-macchanger -m F0:9F:C2:71:22:00 wlan10 # OPN
+macchanger -m F0:9F:C2:71:22:10 wlan10 # OPN
 macchanger -m F0:9F:C2:71:22:11 wlan11 # WEP
-macchanger -m F0:9F:C2:71:22:22 wlan12 # PSK
-macchanger -m F0:9F:C2:71:22:33 wlan13 # PSK WPS
-macchanger -m F0:9F:C2:71:22:44 wlan14 # PSK VULN KRACKS TODO
-macchanger -m F0:9F:C2:71:22:55 wlan15 # MGT
-macchanger -m F0:9F:C2:71:22:5A wlan16 # MGT 2
-macchanger -m F0:9F:C2:71:22:66 wlan17 # MGT Relay
-macchanger -m F0:9F:C2:71:22:77 wlan18 # MGT TLS
+macchanger -m F0:9F:C2:71:22:12 wlan12 # PSK
+macchanger -m F0:9F:C2:71:22:13 wlan13 # PSK WPS
+macchanger -m F0:9F:C2:71:22:14 wlan14 # PSK VULN KRACKS TODO
+macchanger -m F0:9F:C2:71:22:15 wlan15 # MGT
+macchanger -m F0:9F:C2:71:22:1A wlan16 # MGT 2
+macchanger -m F0:9F:C2:71:22:16 wlan17 # MGT Relay
+macchanger -m F0:9F:C2:71:22:17 wlan18 # MGT TLS
 
 
 macchanger -r wlan19     # Other 0

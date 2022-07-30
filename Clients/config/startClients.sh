@@ -7,26 +7,26 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 #sudo modprobe mac80211_hwsim radios=13
 #26-45
-macchanger -m 10:F9:6F:07:6C:00 wlan40
-macchanger -m 10:F9:6F:BA:6C:11 wlan41
-macchanger -m 10:F9:6F:BA:18:22 wlan42
+macchanger -m 10:F9:6F:07:6C:40 wlan40
+macchanger -m 10:F9:6F:BA:6C:41 wlan41
+macchanger -m 10:F9:6F:BA:18:42 wlan42
 
-macchanger -m 28:6C:07:6F:F9:33 wlan43
+macchanger -m 28:6C:07:6F:F9:43 wlan43
 macchanger -m 28:6C:07:6F:F9:44 wlan44
 
-macchanger -m B4:99:BA:6F:F9:55 wlan45
-macchanger -m 78:C1:A7:BF:72:66 wlan46
+macchanger -m B4:99:BA:6F:F9:45 wlan45
+macchanger -m 78:C1:A7:BF:72:46 wlan46
 
-macchanger -m 80:18:44:BF:72:77 wlan47
-macchanger -m B0:72:BF:B0:78:88 wlan48
-macchanger -m B0:72:BF:44:B0:99 wlan49
+macchanger -m 80:18:44:BF:72:47 wlan47
+macchanger -m B0:72:BF:B0:78:48 wlan48
+macchanger -m B0:72:BF:44:B0:49 wlan49
 
-macchanger -m 10:F9:6F:AC:53:10 wlan50
+macchanger -m 10:F9:6F:AC:53:50 wlan50
 
 
 #TODO
-macchanger -m 10:F9:6F:AC:53:11 wlan51
-macchanger -m 10:F9:6F:AC:53:12 wlan52
+macchanger -m 10:F9:6F:AC:53:51 wlan51
+macchanger -m 10:F9:6F:AC:53:52 wlan52
 macchanger -r wlan53
 macchanger -r wlan54
 macchanger -r wlan55
@@ -99,13 +99,13 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan47 -c /root/openClient/open_su
 sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan48 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen8.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -iwlan49 -c /root/openClient/open_supplicant.conf > /root/logs/wpa_wifichallenge_supplicantOpen9.log &
 
-sleep 5
+sleep 10
 
 #OPN GET IP and accept captive portal
 echo 'Starting OPN clients'
 for N in `seq 47 49`; do
 	echo "Starting wlan$N"
-	dhclien-wifichallenge wlan$N 2> /dev/nill &
+	dhclien-wifichallenge wlan$N 2> /dev/nill
 
 	LOGIN=`curl --silent --interface wlan$N http://192.168.0.1:2050/login`
 	# Get FAS
@@ -117,7 +117,7 @@ for N in `seq 47 49`; do
 	# Confirm
 	CONNECTED=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
 
-done
+done & #Can take a while
 
 sleep 5
 
@@ -125,7 +125,7 @@ ping 192.168.0.1 > /dev/nill &
 ping 192.168.1.1 > /dev/nill &
 ping 192.168.2.1 > /dev/nill &
 
-sleep 10 && echo "ALL SET" &
+sleep 10 && echo "ALL SET"
 
 /bin/bash
 
