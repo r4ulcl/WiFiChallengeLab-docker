@@ -4,7 +4,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchang
 
 RUN apt-get install -y inetutils-ping isc-dhcp-client
 
-RUN date
+#RUN date
 
 #Copy config files
 COPY config/mgtClient/ /root/mgtClient/

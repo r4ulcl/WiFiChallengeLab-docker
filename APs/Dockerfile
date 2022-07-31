@@ -1,6 +1,6 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod iputils-ping
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base
 
 RUN date
 
@@ -12,14 +12,17 @@ COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/certs/ /root/mgt/certs/
 
+#COPY var file
+COPY config/wlan_config /root/
+
 #Copy cron
 COPY config/cronAPs.sh /root/
 
 #Update certs
 #RUN cd /root/mgt/certs/ ; make install
 
-COPY config/dnsmasq.conf /etc/dnsmasq.conf
-COPY config/interfaces /etc/network/interfaces
+COPY config/dnsmasq.conf /etc/dnsmasq.conf.tmp
+COPY config/interfaces /etc/network/interfaces.tmp
 
 #Copy HTML files
 COPY config/html /var/www/html/

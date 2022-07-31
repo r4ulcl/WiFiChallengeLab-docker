@@ -1,4 +1,4 @@
-interface=wlan22
+interface=$WLAN_OTHER3
 driver=nl80211
 
 hw_mode=g

@@ -1,4 +1,4 @@
-interface=wlan11
+interface=$WLAN_WEP
 driver=nl80211
 ignore_broadcast_ssid=2
 

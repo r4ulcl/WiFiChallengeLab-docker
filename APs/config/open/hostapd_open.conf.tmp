@@ -1,4 +1,4 @@
-interface=
+interface=$WLAN_OPN
 driver=nl80211
 
 hw_mode=g

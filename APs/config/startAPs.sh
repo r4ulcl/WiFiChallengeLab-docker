@@ -1,4 +1,44 @@
 #!/bin/bash
+
+envsubst_tmp (){
+    for F in ./*.tmp ; do
+        echo $F
+        NEW=`basename $F .tmp`
+        envsubst < $F > $NEW
+        rm $F
+    done
+}
+
+#LOAD VARIABLES FROM FILE (EXPORT)
+set -a
+source /root/wlan_config
+
+
+
+#Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
+
+envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
+envsubst < /etc/dnsmasq.conf.tmp > /etc/dnsmasq.conf
+
+# Replace var in config AP files
+#OPN
+cd /root/open/
+envsubst_tmp
+#WEP
+cd /root/wep/
+envsubst_tmp
+#PSK
+cd /root/psk/
+envsubst_tmp
+#WPA3
+cd /root/psk/
+envsubst_tmp
+#MGT
+cd /root/mgt/
+envsubst_tmp
+
+cd
+
 date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
@@ -8,24 +48,24 @@ service apache2 start
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
 #F0:9F:C2:71 ubiquiti
-macchanger -m F0:9F:C2:71:22:10 wlan10 # OPN
-macchanger -m F0:9F:C2:71:22:11 wlan11 # WEP
-macchanger -m F0:9F:C2:71:22:12 wlan12 # PSK
-macchanger -m F0:9F:C2:71:22:13 wlan13 # PSK WPS
-macchanger -m F0:9F:C2:71:22:14 wlan14 # PSK VULN KRACKS TODO
-macchanger -m F0:9F:C2:71:22:15 wlan15 # MGT
-macchanger -m F0:9F:C2:71:22:1A wlan16 # MGT 2
-macchanger -m F0:9F:C2:71:22:16 wlan17 # MGT Relay
-macchanger -m F0:9F:C2:71:22:17 wlan18 # MGT TLS
+macchanger -m $MAC_OPN $WLAN_OPN # OPN
+macchanger -m $MAC_WEP $WLAN_WEP # WEP
+macchanger -m $MAC_PSK $WLAN_PSK # PSK
+macchanger -m $MAC_WPS $WLAN_WPS # PSK WPS
+macchanger -m $MAC_KRACK $WLAN_KRACK # PSK VULN KRACKS TODO
+macchanger -m $MAC_MGT $WLAN_MGT # MGT
+macchanger -m $MAC_MGT2 $WLAN_MGT2 # MGT 2
+macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY # MGT Relay
+macchanger -m $MAC_MGTTLS $WLAN_MGTTLS # MGT TLS
 
 
-macchanger -r wlan19     # Other 0
-macchanger -r wlan20    # Other 1
-macchanger -r wlan21    # Other 2
-macchanger -r wlan22    # Other 3
-macchanger -r wlan23    # WPA3
+macchanger -r $WLAN_OTHER0     # Other 0
+macchanger -r $WLAN_OTHER1    # Other 1
+macchanger -r $WLAN_OTHER2    # Other 2
+macchanger -r $WLAN_OTHER3    # Other 3
+macchanger -r $WLAN_WPA3    # WPA3
 #macchanger -r wlan24    # TODO
-macchanger -r wlan25    # NZYME WIDS
+macchanger -r $WLAN_NZYME    # NZYME WIDS
 #macchanger -r wlan26    # TODO
 #macchanger -r wlan27    # TODO
 #macchanger -r wlan28    # TODO
@@ -34,7 +74,6 @@ macchanger -r wlan25    # NZYME WIDS
 
 mkdir /root/logs/ 2> /dev/nil
 
-#vwifi-client 192.168.190.15  > /root/logs/vwifi-client.log &
 
 bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 
@@ -47,68 +86,68 @@ mkdir /root/logs/ 2> /dev/nil
 #TODO RE ORDER ALL WLAN and IP -> 0 OPN, 1 WEP, 2 PSK, 3 PSK WPS, 4 MGT, 5 MGTRelay, 6 MGT TLS, 7 8 , 9,10,11,12,13 others
 
 # Open
-ip addr add 192.168.0.1/24 dev wlan10
+ip addr add $IP_OPN.1/24 dev $WLAN_OPN
 hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
 
-opennds -s #-f > /root/logs/opennds.log &
+opennds > /root/logs/opennds.log 2>&1
 
 # WEP hidden
-ip addr add 192.168.1.1/24 dev wlan11
+ip addr add $IP_WEP.1/24 dev $WLAN_WEP
 hostapd_aps /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
 
 # PSK
-ip addr add 192.168.2.1/24 dev wlan12
+ip addr add $IP_PSK.1/24 dev $WLAN_PSK
 hostapd_aps /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
 
 # PSK WPS
-ip addr add 192.168.3.1/24 dev wlan13
+ip addr add $IP_WPS.1/24 dev $WLAN_WPS
 hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # PSK krack
-#ip addr add 192.168.4.1/24 dev wlan14
+#ip addr add $IP_4.1/24 dev $WLAN_KRACK
 #/root/krack/hostapd-2.6/hostapd/hostapd /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
 
 # MGT
-ip addr add 192.168.5.1/24 dev wlan15
+ip addr add $IP_MGT.1/24 dev $WLAN_MGT
 hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
-ip addr add 192.168.5.1/24 dev wlan16
+ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
 hostapd_aps /root/mgt/hostapd-wpe2.conf > /root/logs/hostapd-wpe2.log &
 
 # MGT Relay
-ip addr add 192.168.6.1/24 dev wlan17
+ip addr add $IP_MGTRELAY.1/24 dev $WLAN_MGTRELAY
 hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
 
 # MGT TLS
-ip addr add 192.168.7.1/24 dev wlan18
+ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
 hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
 
 #TODO
-#ip addr add 192.168.8.1/24 dev wlan18
+#ip addr add $IP_8.1/24 dev $WLAN_MGTTLS
 
 
 # PSK Other
-ip addr add 192.168.9.1/24 dev wlan19
+ip addr add $IP_OTHER0.1/24 dev $WLAN_OTHER0
 hostapd_aps /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log & 
 
-ip addr add 192.168.10.1/24 dev wlan20
+ip addr add $IP_OTHER1.1/24 dev $WLAN_OTHER1
 hostapd_aps /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log & 
 
-ip addr add 192.168.11.1/24 dev wlan21
+ip addr add $IP_OTHER2.1/24 dev $WLAN_OTHER2
 hostapd_aps /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log & 
 
-ip addr add 192.168.12.1/24 dev wlan22
+ip addr add $IP_OTHER3.1/24 dev $WLAN_OTHER3
 hostapd_aps /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
 
 # WPA3 WPE
-ip addr add 192.168.13.1/24 dev wlan23
+ip addr add $IP_WPA3.1/24 dev $WLAN_WPA3
 #hostapd_aps /root/wpa3/hostapd-wpa3.conf > /root/logs/hostapd_wpa3.log &
 
-#ip addr del 192.168.190.15/24 dev enp0s3
+#ip addr del $IP_190.15/24 dev enp0s3
 
 #bash /root/checkVWIFI.sh > /root/logs/checkVWIFI.log &
 
 #Generate WEP traffic
-ping 192.168.1.2 > /dev/null 2>&1 &
+ping $IP_WEP.2 > /dev/null 2>&1 &
 
 #systemctl stop networking
 echo "ALL SET"

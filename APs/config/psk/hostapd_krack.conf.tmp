@@ -1,11 +1,11 @@
-interface=wlan20
+interface=$WLAN_KRACK
 driver=nl80211
 
 hw_mode=g
 channel=6
-ssid=WIFI-JUAN
+ssid=wifi-tablets
 
 wpa=2
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP CCMP
-wpa_passphrase="qwerty04"
+wpa_passphrase=Password1234

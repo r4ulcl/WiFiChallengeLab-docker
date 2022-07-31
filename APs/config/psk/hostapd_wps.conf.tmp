@@ -1,4 +1,4 @@
-interface=wlan13
+interface=$WLAN_WPS
 driver=nl80211
 ignore_broadcast_ssid=0
 

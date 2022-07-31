@@ -1,10 +1,10 @@
 # Configuration file for hostapd-wpe
 
 # Interface - Probably wlan0 for 802.11, eth0 for wired
-interface=wlan15
+interface=$WLAN_MGTTLS
 
 # May have to change these depending on build location
-eap_user_file=/root/mgt/hostapd-wpe.eap_user
+eap_user_file=/root/mgt/hostapd-wpe-tls.eap_user
 ca_cert=/root/mgt/certs/ca.crt
 server_cert=/root/mgt/certs/server.crt
 private_key=/root/mgt/certs/server.key
@@ -12,7 +12,7 @@ private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 
 # 802.11 Options
-ssid=wifi-corp
+ssid=wifi-global
 channel=44
 
 # WPE Options - Dont need to change these to make it all work 
@@ -1269,7 +1269,7 @@ own_ip_addr=127.0.0.1
 # 0 = disabled (default)
 # 1 = optional
 # 2 = required
-#ieee80211w=0
+ieee80211w=1
 
 # Group management cipher suite
 # Default: AES-128-CMAC (BIP)

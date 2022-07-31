@@ -1,0 +1,11 @@
+interface=$WLAN_OTHER0
+driver=nl80211
+
+hw_mode=g
+channel=3
+ssid=MOVISTAR_JYG2
+
+wpa=2
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP CCMP
+wpa_passphrase="qwerty03"
