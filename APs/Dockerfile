@@ -13,7 +13,7 @@ COPY config/wpa3/ /root/wpa3/
 COPY config/certs/ /root/mgt/certs/
 
 #COPY var file
-COPY config/wlan_config /root/
+COPY config/wlan_config_aps /root/
 
 #Copy cron
 COPY config/cronAPs.sh /root/

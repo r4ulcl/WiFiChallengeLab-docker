@@ -11,7 +11,7 @@ envsubst_tmp (){
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
-source /root/wlan_config
+source /root/wlan_config_aps
 
 
 
