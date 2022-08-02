@@ -2,7 +2,7 @@
 
 envsubst_tmp (){
     for F in ./*.tmp ; do
-        echo $F
+        #echo $F
         NEW=`basename $F .tmp`
         envsubst < $F > $NEW
         rm $F
@@ -48,28 +48,29 @@ service apache2 start
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
 #F0:9F:C2:71 ubiquiti
-macchanger -m $MAC_OPN $WLAN_OPN # OPN
-macchanger -m $MAC_WEP $WLAN_WEP # WEP
-macchanger -m $MAC_PSK $WLAN_PSK # PSK
-macchanger -m $MAC_WPS $WLAN_WPS # PSK WPS
-macchanger -m $MAC_KRACK $WLAN_KRACK # PSK VULN KRACKS TODO
-macchanger -m $MAC_MGT $WLAN_MGT # MGT
-macchanger -m $MAC_MGT2 $WLAN_MGT2 # MGT 2
-macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY # MGT Relay
-macchanger -m $MAC_MGTTLS $WLAN_MGTTLS # MGT TLS
+macchanger -m $MAC_OPN $WLAN_OPN > /root/logs/macchanger.log # OPN
+macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # WEP
+macchanger -m $MAC_PSK $WLAN_PSK >> /root/logs/macchanger.log # PSK
+macchanger -m $MAC_WPS $WLAN_WPS >> /root/logs/macchanger.log # PSK WPS
+macchanger -m $MAC_KRACK $WLAN_KRACK >> /root/logs/macchanger.log # PSK VULN KRACKS TODO
 
+macchanger -m $MAC_MGT $WLAN_MGT >> /root/logs/macchanger.log # MGT
+macchanger -m $MAC_MGT2 $WLAN_MGT2 >> /root/logs/macchanger.log # MGT 2
+macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY >> /root/logs/macchanger.log # MGT Relay
+macchanger -m $MAC_MGTTLS $WLAN_MGTTLS >> /root/logs/macchanger.log # MGT TLS
 
-macchanger -r $WLAN_OTHER0     # Other 0
-macchanger -r $WLAN_OTHER1    # Other 1
-macchanger -r $WLAN_OTHER2    # Other 2
-macchanger -r $WLAN_OTHER3    # Other 3
-macchanger -m $MAC_WPA3 $WLAN_WPA3    # WPA3
-#macchanger -r wlan24    # TODO
-macchanger -r $WLAN_NZYME    # NZYME WIDS
-#macchanger -r wlan26    # TODO
-#macchanger -r wlan27    # TODO
-#macchanger -r wlan28    # TODO
-#macchanger -r wlan29    # TODO
+macchanger -r $WLAN_OTHER0  >> /root/logs/macchanger.log # Other 0
+macchanger -r $WLAN_OTHER1 >> /root/logs/macchanger.log # Other 1
+macchanger -r $WLAN_OTHER2 >> /root/logs/macchanger.log # Other 2
+macchanger -r $WLAN_OTHER3 >> /root/logs/macchanger.log # Other 3
+macchanger -m $MAC_BRUTEFORCE $WLAN_BRUTEFORCE >> /root/logs/macchanger.log # WPA3 Bruteforce
+macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3 DOWNGRADE
+#macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
+macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
+#macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
+#macchanger -r wlan27 >> /root/logs/macchanger.log # TODO
+#macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
+#macchanger -r wlan29 >> /root/logs/macchanger.log # TODO
 
 
 mkdir /root/logs/ 2> /dev/nil
@@ -114,17 +115,17 @@ hostapd_aps /root/psk/hostapd_PMKID.conf > /root/logs/hostapd_PMKID.log &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
-hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd_wpe.log &
+hostapd_aps /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log &
 ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
-hostapd_aps /root/mgt/hostapd-wpe2.conf > /root/logs/hostapd_wpe2.log &
+hostapd_aps /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log &
 
 # MGT Relay
 ip addr add $IP_MGTRELAY.1/24 dev $WLAN_MGTRELAY
-hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd_wpe_relay.log &
+hostapd_aps /root/mgt/hostapd_wpe_relay.conf > /root/logs/hostapd_wpe_relay.log &
 
 # MGT TLS
 ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
-hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd_wpe_tls.log &
+hostapd_aps /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGTTLS
