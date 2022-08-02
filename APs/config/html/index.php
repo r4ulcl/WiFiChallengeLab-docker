@@ -106,7 +106,7 @@ if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
 		echo "AP CONFIG:";
 		echo "<br><br>";
 		echo "
-		eap_user_file=/root/mgt/hostapd-wpe.eap_user<br>
+		eap_user_file=/root/mgt/hostapd_wpe.eap_user<br>
 		ca_cert=/root/mgt/certs/ca.crt<br>
 		server_cert=/root/mgt/certs/server.crt<br>
 		private_key=/root/mgt/certs/server.key<br>
