@@ -31,7 +31,7 @@ envsubst_tmp
 cd /root/psk/
 envsubst_tmp
 #WPA3
-cd /root/psk/
+cd /root/wpa3/
 envsubst_tmp
 #MGT
 cd /root/mgt/
@@ -63,7 +63,7 @@ macchanger -r $WLAN_OTHER0     # Other 0
 macchanger -r $WLAN_OTHER1    # Other 1
 macchanger -r $WLAN_OTHER2    # Other 2
 macchanger -r $WLAN_OTHER3    # Other 3
-macchanger -r $WLAN_WPA3    # WPA3
+macchanger -m $MAC_WPA3 $WLAN_WPA3    # WPA3
 #macchanger -r wlan24    # TODO
 macchanger -r $WLAN_NZYME    # NZYME WIDS
 #macchanger -r wlan26    # TODO
@@ -104,22 +104,27 @@ ip addr add $IP_WPS.1/24 dev $WLAN_WPS
 hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # PSK krack
-#ip addr add $IP_4.1/24 dev $WLAN_KRACK
-#/root/krack/hostapd-2.6/hostapd/hostapd /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
+ip addr add $IP_4.1/24 dev $WLAN_KRACK
+mv /root/krack/hostapd-2.6/hostapd/hostapd /root/krack/hostapd-2.6/hostapd/hostapd_ap
+/root/krack/hostapd-2.6/hostapd/hostapd_ap /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
+
+# PSK PMKID
+ip addr add $IP_PMKID.1/24 dev $WLAN_PMKID
+hostapd_aps /root/psk/hostapd_PMKID.conf > /root/logs/hostapd_PMKID.log &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
-hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd-wpe.log &
+hostapd_aps /root/mgt/hostapd-wpe.conf > /root/logs/hostapd_wpe.log &
 ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
-hostapd_aps /root/mgt/hostapd-wpe2.conf > /root/logs/hostapd-wpe2.log &
+hostapd_aps /root/mgt/hostapd-wpe2.conf > /root/logs/hostapd_wpe2.log &
 
 # MGT Relay
 ip addr add $IP_MGTRELAY.1/24 dev $WLAN_MGTRELAY
-hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd-wpe-relay.log &
+hostapd_aps /root/mgt/hostapd-wpe-relay.conf > /root/logs/hostapd_wpe_relay.log &
 
 # MGT TLS
 ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
-hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd-wpe-tls.log &
+hostapd_aps /root/mgt/hostapd-wpe-tls.conf > /root/logs/hostapd_wpe_tls.log &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGTTLS
@@ -139,8 +144,11 @@ ip addr add $IP_OTHER3.1/24 dev $WLAN_OTHER3
 hostapd_aps /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
 
 # WPA3 WPE
-ip addr add $IP_WPA3.1/24 dev $WLAN_WPA3
-#hostapd_aps /root/wpa3/hostapd-wpa3.conf > /root/logs/hostapd_wpa3.log &
+ip addr add $IP_BRUTEFORCE.1/24 dev $WLAN_BRUTEFORCE
+hostapd_aps /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.log &
+
+ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
+hostapd_aps /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
 
 #ip addr del $IP_190.15/24 dev enp0s3
 

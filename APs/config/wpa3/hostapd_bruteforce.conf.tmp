@@ -84,7 +84,7 @@ ctrl_interface_group=0
 ##### IEEE 802.11 related configuration #######################################
 
 # SSID to be used in IEEE 802.11 management frames
-ssid=test
+ssid=wifi-IT
 # Alternative formats for configuring SSID
 # (double quoted string, hexdump, printf-escaped string)
 #ssid2="test"
@@ -162,7 +162,7 @@ hw_mode=g
 # If CONFIG_ACS build option is enabled, the channel can be selected
 # automatically at run time by setting channel=acs_survey or channel=0, both of
 # which will enable the ACS survey based algorithm.
-channel=1
+channel=6
 
 # Global operating class (IEEE 802.11, Annex E, Table E-4)
 # This option allows hostapd to specify the operating class of the channel
@@ -1680,7 +1680,7 @@ own_ip_addr=127.0.0.1
 # Note that WPA3 is also configured with bit1 since it uses RSN just like WPA2.
 # In other words, for WPA3, wpa=2 is used the configuration (and
 # wpa_key_mgmt=SAE for WPA3-Personal instead of wpa_key_mgmt=WPA-PSK).
-#wpa=2
+wpa=2
 
 # Extended Key ID support for Individually Addressed frames
 #
@@ -1700,7 +1700,7 @@ own_ip_addr=127.0.0.1
 # wpa_psk (dot11RSNAConfigPSKValue)
 # wpa_passphrase (dot11RSNAConfigPSKPassPhrase)
 #wpa_psk=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-#wpa_passphrase=secret passphrase
+wpa_passphrase=chocolate
 
 # Optionally, WPA PSKs can be read from a separate text file (containing list
 # of (PSK,MAC address) pairs. This allows more than one PSK to be configured.
@@ -1741,7 +1741,7 @@ own_ip_addr=127.0.0.1
 # DPP = Device Provisioning Protocol
 # OSEN = Hotspot 2.0 online signup with encryption
 # (dot11RSNAConfigAuthenticationSuitesTable)
-#wpa_key_mgmt=WPA-PSK WPA-EAP
+wpa_key_mgmt=SAE
 
 # Set of accepted cipher suites (encryption algorithms) for pairwise keys
 # (unicast packets). This is a space separated list of algorithms:
