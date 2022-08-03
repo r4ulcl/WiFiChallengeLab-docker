@@ -66,7 +66,11 @@ ip netns add $NS
 #10-39 radios for AP
 #40-59 radios for Clients
 
-sudo modprobe mac80211_hwsim -r
+#if wlan < 20 (AP wifis) no executed 
+if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; do
+   sudo modprobe mac80211_hwsim -r
+fi
+
 sudo modprobe mac80211_hwsim radios=60
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5

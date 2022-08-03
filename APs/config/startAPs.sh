@@ -1,11 +1,15 @@
 #!/bin/bash
 
+# TODO move to Dockerfile
 envsubst_tmp (){
     for F in ./*.tmp ; do
-        #echo $F
-        NEW=`basename $F .tmp`
-        envsubst < $F > $NEW
-        rm $F
+        #DO it only first time
+        if [ "$F" != "/*.tmp" ]; then 
+            #echo $F
+            NEW=`basename $F .tmp`
+            envsubst < $F > $NEW
+            rm $F
+        fi
     done
 }
 

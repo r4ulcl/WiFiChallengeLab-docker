@@ -3,6 +3,14 @@ Docker version of WiFiChallengeLab
 
 ## Install
 
+
+### Docker inside an arch host
+
+Exec modprobe in host:
+``` bash
+sudo modprobe mac80211_hwsim radios=60
+```
+
 ### Using the VM
 
 ### Install in your VM or host using docker
