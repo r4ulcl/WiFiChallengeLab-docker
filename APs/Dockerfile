@@ -2,7 +2,7 @@ FROM debian
 #FROM kalilinux/kali-rolling
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base
 
-RUN date
+#RUN date
 
 #Copy config files
 COPY config/open/ /root/open/
@@ -43,8 +43,11 @@ RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
 # Hostapd 2.6 krackattacks
 RUN apt-get install -y wget
 RUN cd /root && mkdir krack && cd krack && wget https://w1.fi/releases/hostapd-2.6.tar.gz && tar -zxf hostapd-2.6.tar.gz \
-	&& cd hostapd-2.6/hostapd && cp defconfig .config && sed -i '/CONFIG_LIBNL32=y/s/^#//g' .config # remove comment \
+	&& cd hostapd-2.6/hostapd && cp defconfig .config && sed -i '/CONFIG_LIBNL32=y/s/^#//g' .config \
 	&& make
+
+#PMKID
+RUN cd ; git clone git://w1.fi/hostap.git ; cd hostap ; curl -o hostapd/.config 'https://raw.githubusercontent.com/Cablethief/hostapd-mana/master/hostapd/.config'  ; curl -o give_pmkid.patch 'https://raw.githubusercontent.com/Cablethief/hostap_pmkidding/master/give_pmkid.patch' ; git apply give_pmkid.patch ; make -C hostapd
 
 #RUN apt-get update && apt-get install -y linux-image-amd64 linux-headers-amd64
 

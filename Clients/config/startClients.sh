@@ -99,6 +99,13 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
+    wait $!
+done &
+
+# MGT TLS .7 phishing
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS_PHISHING -c /root/mgtClient/wpa_TLS_phishing.conf >> /root/logs/supplicantTLS_phishing.log &
     wait $!
 done &

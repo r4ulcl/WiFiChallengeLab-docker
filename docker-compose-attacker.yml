@@ -25,6 +25,21 @@ services:
     network_mode: host #NETNS
     privileged: true #NETNS
 
+#  attacker:
+#    build: ./Attacker/
+#    restart: unless-stopped
+#    container_name: WiFiChallengeLab-Attacker
+#    env_file: ./Attacker/.env
+#    volumes:
+#      - /lib/modules:/lib/modules
+#      - ./Attacker/shared:/root/shared/
+#    depends_on:
+#      - aps
+#    environment:
+#      - DATABASE_URL=$DATABASE_URL
+#    network_mode: host #NETNS
+#    privileged: true #NETNS
+
 #  nzyme:
 #    build: ./nzyme/
 #    restart: unless-stopped

@@ -43,7 +43,7 @@ date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
-service apache2 start
+service apache2 start > /root/logs/apache2.log 2>&1 &
 
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
@@ -105,13 +105,13 @@ ip addr add $IP_WPS.1/24 dev $WLAN_WPS
 hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
 
 # PSK krack
-ip addr add $IP_4.1/24 dev $WLAN_KRACK
+ip addr add $IP_KRACK.1/24 dev $WLAN_KRACK
 mv /root/krack/hostapd-2.6/hostapd/hostapd /root/krack/hostapd-2.6/hostapd/hostapd_ap
 /root/krack/hostapd-2.6/hostapd/hostapd_ap /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
 
 # PSK PMKID
 ip addr add $IP_PMKID.1/24 dev $WLAN_PMKID
-hostapd_aps /root/psk/hostapd_PMKID.conf > /root/logs/hostapd_PMKID.log &
+/root/hostap/hostapd/hostapd /root/psk/hostapd_PMKID.conf > /root/logs/hostapd_PMKID.log &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT

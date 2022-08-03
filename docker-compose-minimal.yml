@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  aps:
+    build: ./APs/
+    restart: unless-stopped
+    container_name: WiFiChallengeLab-APs
+    env_file: ./APs/.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./logsAP:/root/logs/
+    network_mode: host #NETNS
+    privileged: true #NETNS
+
+  clients:
+    build: ./Clients/
+    restart: unless-stopped
+    container_name: WiFiChallengeLab-Clients
+    env_file: ./Clients/.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./logsClient:/root/logs/
+    depends_on:
+      - aps
+    network_mode: host #NETNS
+    privileged: true #NETNS

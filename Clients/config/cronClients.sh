@@ -23,7 +23,7 @@ do
 	done
 
 	# Start Apache in client for Client isolation test
-	service apache2 start
+	service apache2 start > /root/logs/apache2.log 2>&1 &
 
 
 	sleep 60
@@ -44,6 +44,10 @@ do
 
 	# MGT TLS
 	curl -s "http://$IP_TLS.1/login.php" --interface $WLAN_TLS --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data-raw 'Username=GLOBAL%5CGlobalAdmin&Password=SuperSuperSecure%40%21%40&Submit=Login' --cookie-jar /tmp/userGlobal  &
+
+	# MGT TLS PHISHING
+	# TODO use template, get redirect and POST
+	curl -s "http://$IP_TLS_PHISHING.1/login.php" --interface $WLAN_TLS_PHISHING --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' --data-raw 'Username=GLOBAL%5CGlobalManager&Password=password1%40%21&Submit=Login' --cookie-jar /tmp/userGlobal  &
 
 	# PSK, only login if cookies error
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_WPA_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
