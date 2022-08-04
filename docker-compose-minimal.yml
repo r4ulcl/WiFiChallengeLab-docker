@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.4'
 services:
   aps:
     build: ./APs/
