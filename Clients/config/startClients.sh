@@ -124,6 +124,10 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN1 -c /root/openClient/ope
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN2 -c /root/openClient/open_supplicant.conf > /root/logs/supplicantOpen2.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN3 -c /root/openClient/open_supplicant.conf > /root/logs/supplicantOpen3.log &
 
+# WPA3 .52
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Client/downgrade_psk.conf > /root/logs/supplicantWPA3Downgrade.log &
+
+
 sleep 10
 
 #OPN GET IP and accept captive portal

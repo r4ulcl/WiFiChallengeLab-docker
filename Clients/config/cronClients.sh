@@ -74,6 +74,8 @@ do
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}'`
 	curl -s "http://$SERVER/login.php" --interface $WLAN_TLS_PHISHING --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=GLOBAL\Manager&Password=CorpoGlobal2022&Submit=Login' --cookie-jar /tmp/userTLSPhishing &
 
+	# WPA3 Downgrade
+    curl -s "http://$IP_DOWNGRADE.1/login.php" --interface $WLAN_DOWNGRADE --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=manager1&Password=Aaa23dF4r&Submit=Login' --cookie-jar /tmp/userManager1 &
 
 
 	sleep 60
