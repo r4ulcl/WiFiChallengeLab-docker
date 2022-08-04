@@ -4,11 +4,11 @@
 envsubst_tmp (){
     for F in ./*.tmp ; do
         #DO it only first time
-        if [ "$F" != "/*.tmp" ]; then 
+        if [ "$F" != '/*.tmp' ]; then 
             #echo $F
             NEW=`basename $F .tmp`
             envsubst < $F > $NEW
-            rm $F
+            rm $F 2> /dev/nil
         fi
     done
 }

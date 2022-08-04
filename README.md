@@ -13,7 +13,15 @@ sudo modprobe mac80211_hwsim radios=60
 
 ### Using the VM
 
-### Install in your VM or host using docker
+### Install in your VM or host using docker-compose
+
+#### Requirements
+
+- A Linux host with at least 2 CPU cores and 2 GB of RAM.
+- docker
+- docker-compose
+
+#### Preparation
 
 ## Usage
 

@@ -141,7 +141,7 @@ for N in `seq 47 49`; do
 	CUSTOM=`echo "$CONFIRM" |  grep 'custom' | grep -oP '(?<=value=").*?(?=")'`
 	# Confirm
 	CONNECTED=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
-
+	echo "DONE wlan$N"	
 done & #Can take a while
 
 sleep 5

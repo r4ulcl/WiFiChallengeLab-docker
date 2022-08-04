@@ -25,6 +25,8 @@ available_interfaces()
 }
 
 IFACE="$1"
+#FORCE IFACE
+IFACE=`ip route show | grep 'default via' | awk '{print $5}'`
 if [[ -z "$IFACE" ]]; then
    ifaces=($(available_interfaces))
    if [[ ${#ifaces[@]} -gt 0 ]]; then
@@ -34,6 +36,9 @@ if [[ -z "$IFACE" ]]; then
       echo "Usage: ./ns-inet <IFACE>"
       exit 1
    fi
+else
+   IFACE=`ip route show | grep 'default via' | awk '{print $5}'`
+   echo "Using interface $IFACE"
 fi
 
 NS="ns-ap"
@@ -67,7 +72,7 @@ ip netns add $NS
 #40-59 radios for Clients
 
 #if wlan < 20 (AP wifis) no executed 
-if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; do
+if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; then
    sudo modprobe mac80211_hwsim -r
 fi
 
