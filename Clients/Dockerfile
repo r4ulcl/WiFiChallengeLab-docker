@@ -14,6 +14,7 @@ COPY config/certs/ /root/certs/
 COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/
+COPY config/wpa3Client/ /root/wpa3Client/
 
 #Update certs
 #RUN cd /root/mgt/certs/ ; make install
