@@ -105,10 +105,19 @@ done &
 # MGT TLS .7 phishing
 while :
 do
-    TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
+    TIMEOUT=$(( ( RANDOM % 30 )  + 30 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS_PHISHING -c /root/mgtClient/wpa_TLS_phishing.conf >> /root/logs/supplicantTLS_phishing.log &
     wait $!
 done &
+
+# MGT Legacy MD5 .17
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 100 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_LEGACY -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
+    wait $!
+done &
+
 # Wait for this ID at the end
 LAST=$!
 
@@ -131,27 +140,28 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Clien
 sleep 10
 
 #OPN GET IP and accept captive portal
+wlanList="wlan47 wlan48 wlan49"
 echo 'Starting OPN clients'
-for N in `seq 47 49`; do
-	echo "Starting wlan$N"
-	dhclien-wifichallenge wlan$N 2> /dev/nill
+for WLAN in $wlanList; do
+	echo "Starting $WLAN"
+	dhclien-wifichallenge $WLAN 2> /dev/nill
 
-	LOGIN=`curl --silent --interface wlan$N http://192.168.0.1:2050/login`
+	LOGIN=`curl --silent --interface $WLAN http://192.168.0.1:2050/login`
 	# Get FAS
 	URL=`echo $LOGIN | grep fas | grep -oP "(?<=href=').*?(?=')"`
 	#LOGIN
-	CONFIRM=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1"`
+	CONFIRM=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1"`
 	#Get custom to confirm
 	CUSTOM=`echo "$CONFIRM" |  grep 'custom' | grep -oP '(?<=value=").*?(?=")'`
 	# Confirm
-	CONNECTED=`curl --silent -interface wlan$N "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
-	echo "DONE wlan$N"	
+	CONNECTED=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
+	echo "DONE $WLAN"	
 done & #Can take a while
 
 sleep 5
 
 ping 192.168.0.1 > /dev/nill &
-ping 192.168.1.1 > /dev/nill &
+#ping -I wlan 192.168.1.1 > /dev/nill &
 ping 192.168.2.1 > /dev/nill &
 
 sleep 10 && echo "ALL SET"
