@@ -4,6 +4,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchang
 
 RUN apt-get install -y inetutils-ping isc-dhcp-client
 
+RUN apt-get install -y smbmap
 #RUN date
 
 #COPY var file
@@ -15,6 +16,9 @@ COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/
 COPY config/wpa3Client/ /root/wpa3Client/
+
+#Copy connectINET.sh
+COPY config/connectINET.sh /root/
 
 #Update certs
 #RUN cd /root/mgt/certs/ ; make install
