@@ -1700,7 +1700,7 @@ wpa=2
 # wpa_psk (dot11RSNAConfigPSKValue)
 # wpa_passphrase (dot11RSNAConfigPSKPassPhrase)
 #wpa_psk=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-wpa_passphrase=chocolate
+wpa_passphrase=chocolate1
 
 # Optionally, WPA PSKs can be read from a separate text file (containing list
 # of (PSK,MAC address) pairs. This allows more than one PSK to be configured.
