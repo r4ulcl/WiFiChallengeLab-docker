@@ -25,10 +25,10 @@ mkdir $TOOLS
 #gpg -a --export ED444FF07D8D0BF6 | sudo apt-key add -
 #sudo apt update
 
-sudo apt install nmap -y
+sudo apt-get install nmap -y
 
 # Python
-sudo apt install -y python3 
+sudo apt-get install -y python3 
 
 
 # EAP_buster
@@ -44,8 +44,8 @@ cd ..
 
 #wifi_db
 cd $TOOLS
-sudo apt install python3-pip -y
-sudo apt install tshark -y
+sudo apt-get install python3-pip -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
 git clone https://github.com/RaulCalvoLaorden/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
@@ -59,8 +59,8 @@ chmod +x pcapFilter.sh
 cd $TOOLS
 git clone https://github.com/s0lst1c3/eaphammer.git
 cd eaphammer
-for L in `cat kali-dependencies.txt` ; do echo $L; apt install $L -y ;done
-sudo apt install dsniff apache2 -y
+for L in `cat kali-dependencies.txt` ; do echo $L; apt-get install $L -y ;done
+sudo apt-get install dsniff apache2 -y
 sudo systemctl stop apache2
 sudo systemctl disable apache2
 sudo update-rc.d apache2 disable
@@ -89,28 +89,28 @@ cd /etc/hostapd-wpe/certs
 make install
 
 #aircrack
-apt install aircrack-ng -y
+apt-get install aircrack-ng -y
 
-apt install hashcat -y
+apt-get install hashcat -y
 
 
 # Creap
 cd $TOOLS
 git clone https://github.com/Snizz/crEAP
 #Arp-scan
-apt install arp-scan -y
+apt-get install arp-scan -y
 
 
 #airgeddon
-sudo apt install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd-y
-sudo apt install asleap bettercap ettercap-text-only hcxtools hcxdumptool bully mdk4 beef-xss -y
+sudo apt-get install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd-y
+sudo apt-get install asleap bettercap ettercap-text-only hcxtools hcxdumptool bully mdk4 beef-xss -y
 sudo systemctl disable lighttpd
 sudo systemctl stop lighttpd
 cd $TOOLS
 git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
 cd airgeddon
 #sudo bash airgeddon.sh
-sudo apt install golang git build-essential libpcap-dev libusb-1.0-0-dev libnetfilter-queue-dev -y
+sudo apt-get install golang git build-essential libpcap-dev libusb-1.0-0-dev libnetfilter-queue-dev -y
 go get -u github.com/bettercap/bettercap
 
 
@@ -127,7 +127,7 @@ sudo ln -s /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
 
 #eapeak
 cd $TOOLS
-sudo apt install python-dev libssl-dev swig python3-dev gcc python-m2crypto -y
+sudo apt-get install python-dev libssl-dev swig python3-dev gcc python-m2crypto -y
 sudo pip3 install pipenv
 
 #pip2 install m2crypto
@@ -137,6 +137,7 @@ pipenv --two install
 #pipenv shell
 
 # Reaver
+sudo apt-get install libpcap-dev -y
 cd $TOOLS
 git clone https://github.com/t6x/reaver-wps-fork-t6x
 cd reaver-wps-fork-t6x*
@@ -180,17 +181,24 @@ pip2 install service_identity
 #pinecone
 #start_hotspot.sh
 
-#wifipumpkin3
+# wifipumpkin3
+cd $TOOLS
+sudo apt-get -y install python3-dev libssl-dev libffi-dev build-essential python3 -y
+sudo apt-get  install -y python3-pyqt5 python3-bs4 python3-dnslib python3-dnspython python3-flask-restful python3-isc-dhcp-leases python3-netaddr python3-scapy python3-tabulate python3-termcolor python3-twisted python3-urwid
+git clone https://github.com/P0cL4bs/wifipumpkin3.git
+cd wifipumpkin3
+sed -i 's/python3.7/python3/g' makefile
+sudo make install
 
+# LN home user 
 chown -R user $TOOLS
 ln -s $TOOLS /home/user/tools
 
-
-
 # NEW
-sudo apt install macchanger -y
-sudo apt install curl -y
-sudo apt install wireshark-qt -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get install macchanger -y
+sudo apt-get install curl -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get install wireshark-qt -y
+
 
 # wacker WPA3 brute force online
 cd $TOOLS
@@ -206,7 +214,7 @@ ls -al wpa_supplicant
 
 
 
-#Enable ssh
-apt-get install -y ssh
-echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
+#Enable ssh (if dont use vagrant)
+#apt-get install -y ssh
+#echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
 
