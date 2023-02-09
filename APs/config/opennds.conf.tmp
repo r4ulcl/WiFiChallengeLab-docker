@@ -22,7 +22,7 @@
 # Typically on OpenWrt it is br-lan for the wired and wireless lan combined in a bridge.
 # On generic Linux though, it might be wlan0
 #
-GatewayInterface wlan10
+GatewayInterface $WLAN_OPN
 gatewayfqdn disable
 
 #Login user 

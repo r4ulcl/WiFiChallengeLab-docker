@@ -9,6 +9,11 @@ envsubst_tmp (){
     done
 }
 
+function retry { 
+    $1 && echo "success" || (echo "fail" && retry $1) 
+}
+
+
 date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
@@ -140,13 +145,13 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Clien
 sleep 10
 
 #OPN GET IP and accept captive portal
-wlanList="wlan47 wlan48 wlan49"
+wlanList="$WLAN_OPN1 $WLAN_OPN2 $WLAN_OPN3"
 echo 'Starting OPN clients'
 for WLAN in $wlanList; do
 	echo "Starting $WLAN"
-	dhclien-wifichallenge $WLAN 2> /dev/nill
+	retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
 
-	LOGIN=`curl --silent --interface $WLAN http://192.168.0.1:2050/login`
+	LOGIN=`curl --silent --interface $WLAN http://$IP_OPN1.1:2050/login`
 	# Get FAS
 	URL=`echo $LOGIN | grep fas | grep -oP "(?<=href=').*?(?=')"`
 	#LOGIN
@@ -160,9 +165,9 @@ done & #Can take a while
 
 sleep 5
 
-ping 192.168.0.1 > /dev/nill &
+ping $IP_OPN1.1 > /dev/nill &
 #ping -I wlan 192.168.1.1 > /dev/nill &
-ping 192.168.2.1 > /dev/nill &
+ping $IP_WPA_PSK.1 > /dev/nill &
 
 sleep 10 && echo "ALL SET"
 
