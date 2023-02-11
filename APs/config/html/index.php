@@ -69,7 +69,7 @@ if ($_SESSION["Username"]  == "test2") {
 }
 
 if ($_SESSION["Username"]  == "free1") {
-    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.0.') !== false) { //only OPN	
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN	
 		echo "FLAG: CNq6gDIqLfjROhN";
 	} else {
 		echo "Your Princess Is in Another Castle!";
@@ -77,7 +77,7 @@ if ($_SESSION["Username"]  == "free1") {
 }
 
 if ($_SESSION["Username"]  == "free2") {
-	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.0.') !== false) { //only OPN	
+	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN	
 		echo "FLAG: Bo8JJqByJ2b6yc4";
 	} else {
 		echo "Your Princess Is in Another Castle!";

@@ -31,7 +31,7 @@ exit;
 }
 
 
-if (strpos($_SERVER['REMOTE_ADDR'], '192.168.0.') !== false) { //only OPEN
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPEN
   echo "<br><br>";
   echo "Open Router Login";
   echo "<br><br>";

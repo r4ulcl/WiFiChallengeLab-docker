@@ -2,7 +2,7 @@
 echo "<br><br>";
 echo "<br><br>";
 echo "<br><br>";
-if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.0.') !== false) { //only OPN
+if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN
     echo "FLAG: jg67f7sad87g387g";
 } elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only HIDDEN
     echo "FLAG: IkZ4ZeDqgfQ3eUU";
