@@ -7,8 +7,7 @@ fi
 
 # Rockyou
 cd 
-wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
-
+curl https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -s -L | head -n 1000000 > ~/rockyou-top100000.txt
 
 
 # Hacking tools
@@ -44,7 +43,7 @@ cd ..
 
 #wifi_db
 cd $TOOLS
-sudo apt-get install python3-pip -y
+sudo apt-get install python3-pip sqlitebrowser -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
 git clone https://github.com/RaulCalvoLaorden/wifi_db
 cd wifi_db
@@ -203,7 +202,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install wireshark-qt -y
 # wacker WPA3 brute force online
 cd $TOOLS
 git clone https://github.com/blunderbuss-wctf/wacker
-apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev
+sudo apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev
 cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
 git apply wpa_supplicant.patch
 cd wpa_supplicant-2.10/wpa_supplicant
