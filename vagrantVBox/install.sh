@@ -6,6 +6,24 @@ sudo apt-get update
 ## Install drivers modprobe 
 sudo apt-get install -y linux-generic
 
+# Add SWAP file
+# Set the size of the swap file in bytes
+swap_size=4G
+# Create a new file to be used as a swap file
+sudo fallocate -l $swap_size /swapfile
+# Set the correct permissions on the file
+sudo chmod 600 /swapfile
+# Format the file as a swap file
+sudo mkswap /swapfile
+# Enable the swap file
+sudo swapon /swapfile
+# Make the change permanent by adding the following line to /etc/fstab
+echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
+# Confirm the swap file is working
+free -h
+
+
+
 # Create user user and delete default ubuntu
 ##sudo userdel -r ubuntu
 
@@ -22,6 +40,9 @@ sudo apt-get install -y linux-generic
 ##sudo bash -c "echo '$user_name ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
 # Confirm that the user has been created
 ##echo "User $user_name has been created with password $user_password and added to the sudo group."
+user_name="ubuntu"
+user_password="pass"
+echo "$user_name:$user_password" | sudo chpasswd
 
 
 ## Install Docker
@@ -33,13 +54,13 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 ## Install docker-compose
-sudo apt-get install -y docker-compose
+#sudo apt-get install -y docker-compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 ## Go to WiFiChallengeFolder (git clone...)
 cp -r /media/WiFiChallenge /root/
 cd /root/WiFiChallenge
-
-
 
 ## Install RDP server
 sudo bash Attacker/installRDP.sh
@@ -48,6 +69,7 @@ sudo bash Attacker/installRDP.sh
 sudo bash Attacker/installTools.sh
 
 ## Enable docker
+sudo docker-compose -f docker-compose.yml build
 sudo docker-compose -f docker-compose-minimal.yml up -d
 
 
@@ -86,8 +108,39 @@ sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 
 # Configure GUI when user open terminal first time, then delete
 echo '
-whoami > ~/whoami
+# Enable dock
+gnome-extensions enable ubuntu-dock@ubuntu.com
+gnome-extensions enable ubuntu-appindicators@ubuntu.com
+gnome-extensions enable desktop-icons@csoriano
 
+# Set background
+
+gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
+
+
+# Dark theme
+# Check if gnome-tweaks is installed
+if ! [ -x "$(command -v gnome-tweaks)" ]; then
+  sudo apt-get -y  install gnome-tweaks
+fi
+
+# Change theme to Adwaita-dark
+gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+
+# Change icon theme to Adwaita
+gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
+
+sudo rm -rf /root/WiFiChallenge/zerofile 2> /dev/null
+
+# Auto delete
+sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
+' > /etc/configureUser.sh
+
+echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+
+
+# Configure GUI when user open terminal first time, then delete in ubuntu user
+echo '
 # Enable dock
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
@@ -111,7 +164,23 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
 # Auto delete
-sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
-' > /etc/configureUser.sh
+sed -i "s/bash \/etc\/configureUserubuntu.sh//g" /home/ubuntu/.bashrc
+' > /etc/configureUserubuntu.sh
 
-echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+echo 'bash /etc/configureUserubuntu.sh' >> /home/ubuntu/.bashrc
+
+
+# Enable SSH password login
+# Open the SSH server configuration file for editing
+sudo sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+# Add the line if it doesn't exist
+grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config || echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config > /dev/null
+# Restart the SSH server to apply the changes
+sudo service ssh restart
+
+# Make VM smallest posible
+sudo apt-get -y autoremove
+sudo apt-get -y autoclean
+sudo apt-get -y clean
+sudo dd if=/dev/zero of=zerofile bs=1M
+sudo rm -rf /root/WiFiChallenge/zerofile
