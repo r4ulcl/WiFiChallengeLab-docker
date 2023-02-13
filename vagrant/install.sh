@@ -19,30 +19,31 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 # Make the change permanent by adding the following line to /etc/fstab
 echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
-# Confirm the swap file is working
-free -h
 
-
-
-# Create user user and delete default ubuntu
-##sudo userdel -r ubuntu
-
-# Define the new user name and password
-##user_name="user"
-##user_password="pass"
-# Create the new user
-##sudo adduser --quiet --disabled-password --gecos "" $user_name
-# Set the password for the new user
-##echo "$user_name:$user_password" | sudo chpasswd
+# Create a sudo user
+# Create the user
+sudo useradd -m -s /bin/bash user
+echo "user:pass" | sudo chpasswd
 # Add the user to the sudo group
-##sudo usermod -aG sudo $user_name
-# Add the user to the sudoers file without password prompt
-##sudo bash -c "echo '$user_name ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-# Confirm that the user has been created
-##echo "User $user_name has been created with password $user_password and added to the sudo group."
-user_name="ubuntu"
-user_password="pass"
-echo "$user_name:$user_password" | sudo chpasswd
+sudo usermod -aG sudo user
+# Configure sudo to not prompt for a password
+echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/user
+sudo chmod 0440 /etc/sudoers.d/user
+
+# Allow user to scan WiFi
+echo '[Allow Wifi Scan]
+Identity=unix-user:*
+Action=org.freedesktop.NetworkManager.wifi.scan;org.freedesktop.NetworkManager.enable-disable-wifi;org.freedesktop.NetworkManager.settings.modify.own;org.freedesktop.NetworkManager.settings.modify.system;org.freedesktop.NetworkManager.network-control
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes' >> /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla
+
+echo '[Allow Colord all Users]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+ResultAny=no
+ResultInactive=no
+ResultActive=yes' > /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
 
 
 ## Install Docker
@@ -63,14 +64,21 @@ cp -r /media/WiFiChallenge /root/
 cd /root/WiFiChallenge
 
 ## Install RDP server
+echo 'Install RDP server'
 sudo bash Attacker/installRDP.sh
 
 ## Install hacking WiFi tools
+echo 'Install hacking WiFi tools'
 sudo bash Attacker/installTools.sh
 
+## Extract nzyme default logs (attacker)
+cd /root/WiFiChallenge/nzyme/
+7z x nzyme-logs.7z
+
 ## Enable docker
-sudo docker-compose -f docker-compose.yml build
-sudo docker-compose -f docker-compose-minimal.yml up -d
+cd /root/WiFiChallenge/
+sudo docker-compose -f docker-compose.yml up -d
+#sudo docker-compose -f docker-compose-minimal.yml up -d
 
 
 ## remove all non-essential programs in an Ubuntu 20 minimal ISO-based Vagrant VM
@@ -164,10 +172,10 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
 # Auto delete
-sed -i "s/bash \/etc\/configureUserubuntu.sh//g" /home/ubuntu/.bashrc
-' > /etc/configureUserubuntu.sh
+sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
+' > /etc/configureUseruser.sh
 
-echo 'bash /etc/configureUserubuntu.sh' >> /home/ubuntu/.bashrc
+echo 'bash /etc/configureUseruser.sh' >> /home/user/.bashrc
 
 
 # Enable SSH password login
@@ -178,9 +186,19 @@ grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config || echo "PasswordAuthe
 # Restart the SSH server to apply the changes
 sudo service ssh restart
 
+# Root acces GUI
+su -c 'xhost si:localuser:root' vagrant
+su vagrant -c 'xhost +SI:localuser:root'
+echo 'xhost si:localuser:root > /dev/null 2>&1' >> /home/vagrant/.bashrc
+
+su -c 'xhost si:localuser:root' user
+su user -c 'xhost +SI:localuser:root'
+echo 'xhost si:localuser:root > /dev/null 2>&1' >> /home/user/.bashrc
+export PATH=$PATH:/sbin
+
 # Make VM smallest posible
+rm -rf /root/tools/eaphammer/wordlists/rockyou.txt
 sudo apt-get -y autoremove
 sudo apt-get -y autoclean
 sudo apt-get -y clean
-sudo dd if=/dev/zero of=zerofile bs=1M
-sudo rm -rf /root/WiFiChallenge/zerofile
+sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf /root/WiFiChallenge/zerofile
