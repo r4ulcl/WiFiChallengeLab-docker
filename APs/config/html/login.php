@@ -5,7 +5,7 @@
 /* Define username and associated password array */$logins = array(
 'GLOBAL\GlobalAdmin' => 'SuperSuperSecure@!@',
 'CONTOSO\Administrator' => 'SuperSecure@!@',
-'CONTOSO\juan.tr' => 'Secret!',
+'CONTOSO\juan.tr' => 'bulldogs1234',
 'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
 'admin' => 'admin',
 'test1' => 'OYfDcUNQu9PCojb',
