@@ -96,6 +96,7 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_W -c /root/mgtClient/wpa_mschapv2_relayW.conf >> /root/logs/supplicantMSCHAP_relayW.log &
     wait $!
 done &
 

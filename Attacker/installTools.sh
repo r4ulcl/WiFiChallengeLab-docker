@@ -8,10 +8,11 @@ fi
 # Rockyou
 cd 
 curl https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -s -L | head -n 1000000 > ~/rockyou-top100000.txt
+#wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
+wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
 
 
 # Hacking tools
-
 FOLDER=`pwd`
 TOOLS=$FOLDER/tools
 mkdir $TOOLS
@@ -34,7 +35,20 @@ sudo apt-get install -y python3
 cd $TOOLS
 git clone https://github.com/blackarrowsec/EAP_buster
 
+# OpenSSL 3 for ubuntu
+sudo apt install build-essential checkinstall zlib1g-dev -y
+cd /usr/local/src/
+wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
+sudo tar -xvf openssl-3.0.2.tar.gz
+rm openssl-3.0.2.tar.gz
+cd openssl-3.0.2
+./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
+make
+make test
+make install
+
 #hcxtools
+cd $TOOLS
 git clone https://github.com/ZerBea/hcxtools.git
 cd hcxtools
 make 
@@ -49,9 +63,13 @@ git clone https://github.com/RaulCalvoLaorden/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
 
+#Docker best 
+docker pull raulcalvolaorden/wifi_db
+
+
 # pcapFilter.sh
 cd $TOOLS
-wget https://gist.githubusercontent.com/RaulCalvoLaorden/f3470f097d1cd21dbc5a238883e79fb2/raw/pcapFilter.sh
+wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/a22ac3095e197dc97745d36ece49bb455fc6d1ae/pcapFilter.sh
 chmod +x pcapFilter.sh
 
 #Eaphhammer
@@ -66,8 +84,9 @@ sudo update-rc.d apache2 disable
 sudo apt-get install build-essential libssl-dev libffi-dev python-dev -y
 sudo apt-get install python-openssl python3-openssl -y
 ./ubuntu-unattended-setup
-pip3 install flask flask_cors flask_socketio pywebcopy
+python3 -m pip install flask flask_cors flask_socketio pywebcopy
 apt-get install python-netifaces
+sudo python3 -m pip install --upgrade pyopenssl
 
 #hostapd-wpe
 cd $TOOLS
@@ -75,8 +94,10 @@ cd $TOOLS
 wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.10-wpe.patch
 wget https://w1.fi/releases/hostapd-2.10.tar.gz
 tar -zxf hostapd-2.10.tar.gz
+rm hostapd-2.10.tar.gz
 cd hostapd-2.10
 patch -p1 < ../hostapd-2.10-wpe.patch
+rm ../hostapd-2.10-wpe.patch
 cd hostapd
 
 make
