@@ -23,6 +23,7 @@ source /root/wlan_config_aps
 
 envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
 envsubst < /etc/dnsmasq.conf.tmp > /etc/dnsmasq.conf
+envsubst < /etc/opennds/opennds.conf.tmp > /etc/opennds/opennds.conf
 
 # Replace var in config AP files
 #OPN
@@ -72,7 +73,7 @@ macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3
 #macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
 macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
-#macchanger -r wlan27 >> /root/logs/macchanger.log # TODO
+macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan29 >> /root/logs/macchanger.log # TODO
 
@@ -94,8 +95,6 @@ mkdir /root/logs/ 2> /dev/nil
 ip addr add $IP_OPN.1/24 dev $WLAN_OPN
 hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
 
-opennds > /root/logs/opennds.log 2>&1
-
 # WEP hidden
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP
 hostapd_aps /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
@@ -103,19 +102,6 @@ hostapd_aps /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.lo
 # PSK
 ip addr add $IP_PSK.1/24 dev $WLAN_PSK
 hostapd_aps /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
-
-# PSK WPS
-ip addr add $IP_WPS.1/24 dev $WLAN_WPS
-hostapd_aps /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
-
-# PSK krack
-ip addr add $IP_KRACK.1/24 dev $WLAN_KRACK
-mv /root/krack/hostapd-2.6/hostapd/hostapd /root/krack/hostapd-2.6/hostapd/hostapd_ap
-/root/krack/hostapd-2.6/hostapd/hostapd_ap /root/psk/hostapd_krack.conf > /root/logs/hostapd_krack.log &
-
-# PSK PMKID
-ip addr add $IP_PMKID.1/24 dev $WLAN_PMKID
-/root/hostap/hostapd/hostapd /root/psk/hostapd_PMKID.conf > /root/logs/hostapd_PMKID.log &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
@@ -162,11 +148,13 @@ hostapd_aps /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log
 #Generate WEP traffic
 ping $IP_WEP.2 > /dev/null 2>&1 &
 
+# start captive portal open network
+opennds > /root/logs/opennds.log 2>&1
+
+
 #systemctl stop networking
 echo "ALL SET"
 
-
 /bin/bash
-
 
 wait
