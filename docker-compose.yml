@@ -1,6 +1,5 @@
-version: '3.4'
+version: '3.8'
 services:
-  #UNTESTED
   aps:
     build: ./APs/
     restart: unless-stopped
@@ -25,37 +24,62 @@ services:
     network_mode: host #NETNS
     privileged: true #NETNS
 
-#  nzyme:
-#    build: ./nzyme/
-#    restart: unless-stopped
-#    container_name: nzyme
-#    env_file: ./nzyme/.env
-#    volumes:
-#      - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
-#      - ./logsNzyme:/var/log/nzyme/
-#    #ports:
-#    #  - "22900:22900"
-#    depends_on:
-#      - nzyme_db
-#    environment:
-#      - DATABASE_URL=$DATABASE_URL
-#      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
-#      - EXTERNAL_URL=$EXTERNAL_URL
-#    network_mode: host #USB Antena
-#    privileged: true #USB Antena
-
-#  nzyme_db:
-#    image: postgres:latest
-#    restart: unless-stopped
-#    env_file: ./nzyme/.env
-#    environment:
-#      - POSTGRES_DB=$POSTGRES_DB
-#      - POSTGRES_USER=$POSTGRES_USER
-#      - POSTGRES_PASSWORD=$POSTGRES_PASS
-#    volumes:
-#      - ./nzyme/data:/var/lib/postgresql/data
-#    network_mode: host #USB Antena
-#    healthcheck:
-#      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
-#      interval: 10s
-#      start_period: 30s
+  nzyme:
+    build: ./nzyme/
+    restart: unless-stopped
+    env_file: ./nzyme/.env
+    container_name: nzyme
+    security_opt:
+      - no-new-privileges:true
+    env_file: .env
+    volumes:
+      - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
+      - ./nzyme/logs:/var/log/nzyme/
+    #ports:
+    #  - "22900:22900"
+    depends_on:
+      - db
+    environment:
+      - TZ=Europe/Berlin
+      - DATABASE_URL=$DATABASE_URL
+      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
+      - EXTERNAL_URL=$EXTERNAL_URL
+    network_mode: host #USB Antena
+    cap_add: # full access to wifi interface
+      - NET_ADMIN
+      - NET_RAW
+    deploy:
+        resources:
+            limits:
+              cpus: 0.50
+              memory: 512M
+            reservations:
+              cpus: 0.25
+              memory: 128M
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    env_file: ./nzyme/.env
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=Europe/Berlin
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASS
+    volumes:
+      - ./nzyme/data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
+      interval: 10s
+      start_period: 30s
+    deploy:
+        resources:
+            limits:
+              cpus: 0.50
+              memory: 512M
+            reservations:
+              cpus: 0.25
+              memory: 128M
