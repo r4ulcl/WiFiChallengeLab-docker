@@ -34,7 +34,9 @@ if ($_SESSION["Username"]  == "admin") {
 	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only HIDDEN
     		echo "FLAG: IkZ4ZeDqgfQ3eUU";
 	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.3.') !== false) { //only WPS
-    		echo "FLAG: pRH6IlFp2OF49x2";
+		echo "FLAG: pRH6IlFp2OF49x2";
+	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only WPS
+		echo "FLAG: W5ri9DXRJZCTBpFFxXBM";
 	} else {
 	    echo "No FLAG, try logging in with another user ;)";
 
@@ -78,7 +80,7 @@ if ($_SESSION["Username"]  == "free1") {
 
 if ($_SESSION["Username"]  == "free2") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN	
-		echo "FLAG: Bo8JJqByJ2b6yc4";
+		echo "FLAG: CNq6gDIqLfjROhN";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}

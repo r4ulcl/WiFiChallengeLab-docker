@@ -1,11 +1,13 @@
-interface=
+interface=$WLAN_OPN_HIDDEN
 driver=nl80211
 
 hw_mode=g
-channel=6
-ssid=wifi-guest
+channel=11
+ssid=wifi-free
 
 wpa=0
 
 #macaddr_acl=1
 #accept_mac_file=/root/open/acceptMac.txt
+
+ignore_broadcast_ssid=2
