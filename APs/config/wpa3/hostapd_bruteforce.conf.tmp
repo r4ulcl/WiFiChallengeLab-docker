@@ -341,7 +341,7 @@ auth_algs=3
 # 2 = clear SSID (ASCII 0), but keep the original length (this may be required
 #     with some clients that do not support empty SSID) and ignore probe
 #     requests for broadcast SSID
-ignore_broadcast_ssid=1
+ignore_broadcast_ssid=0
 
 # Do not reply to broadcast Probe Request frames from unassociated STA if there
 # is no room for additional stations (max_num_sta). This can be used to

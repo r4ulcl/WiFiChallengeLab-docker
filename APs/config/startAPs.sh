@@ -29,9 +29,6 @@ envsubst < /etc/opennds/opennds.conf.tmp > /etc/opennds/opennds.conf
 #OPN
 cd /root/open/
 envsubst_tmp
-#WEP
-cd /root/wep/
-envsubst_tmp
 #PSK
 cd /root/psk/
 envsubst_tmp
@@ -54,6 +51,7 @@ service apache2 start > /root/logs/apache2.log 2>&1 &
 
 #F0:9F:C2:71 ubiquiti
 macchanger -m $MAC_OPN $WLAN_OPN > /root/logs/macchanger.log # OPN
+macchanger -m $MAC_OPN_HIDDEN $WLAN_OPN_HIDDEN > /root/logs/macchanger.log # OPN
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # WEP
 macchanger -m $MAC_PSK $WLAN_PSK >> /root/logs/macchanger.log # PSK
 macchanger -m $MAC_WPS $WLAN_WPS >> /root/logs/macchanger.log # PSK WPS
@@ -95,9 +93,9 @@ mkdir /root/logs/ 2> /dev/nil
 ip addr add $IP_OPN.1/24 dev $WLAN_OPN
 hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
 
-# WEP hidden
-ip addr add $IP_WEP.1/24 dev $WLAN_WEP
-hostapd_aps /root/wep/hostapd_wep_hidden.conf > /root/logs/hostapd_wep_hidden.log &
+# Open hidden
+ip addr add $IP_OPN_HIDDEN.1/24 dev $WLAN_OPN_HIDDEN
+hostapd_aps /root/open/hostapd_open_hidden.conf > /root/logs/hostapd_open_hidden.log &
 
 # PSK
 ip addr add $IP_PSK.1/24 dev $WLAN_PSK

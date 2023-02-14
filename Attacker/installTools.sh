@@ -223,7 +223,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install wireshark-qt -y
 # wacker WPA3 brute force online
 cd $TOOLS
 git clone https://github.com/blunderbuss-wctf/wacker
-sudo apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev
+cd wacker
+sudo apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev net-tools
 cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
 git apply wpa_supplicant.patch
 cd wpa_supplicant-2.10/wpa_supplicant
