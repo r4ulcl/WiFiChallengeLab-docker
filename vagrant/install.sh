@@ -197,7 +197,7 @@ echo 'xhost si:localuser:root > /dev/null 2>&1' >> /home/user/.bashrc
 export PATH=$PATH:/sbin
 
 # Make VM smallest posible
-rm -rf /root/tools/eaphammer/wordlists/rockyou.txt
+rm -rf /root/tools/eaphammer/wordlists/rockyou.txt /root/tools/eaphammer/wordlists/rockyou.txt.tar.gz
 sudo apt-get -y autoremove
 sudo apt-get -y autoclean
 sudo apt-get -y clean
