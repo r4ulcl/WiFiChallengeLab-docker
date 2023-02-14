@@ -76,7 +76,7 @@ do
 	dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2>> /tmp/dhclien-wifichallenge
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
 	URL=`curl -Ls -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
-	curl -L -s "$URL" --interface $WLAN_TLS_PHISHING -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=GLOBAL\Manager&password=CorpoGlobal2022' -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null &
+	curl -L -s "$URL" --interface $WLAN_TLS_PHISHING -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=CORPO\god&password=123456789' -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null &
 	# Responder ""vuln""
 	smbmap -d 'CORPO' -u 'god' -p "123456789" -H $SERVER 2> /dev/nill
 

@@ -73,6 +73,8 @@ sudo bash Attacker/installTools.sh
 
 ## Extract nzyme default logs (attacker)
 cd /root/WiFiChallenge/nzyme/
+rm -r logs/ data/
+sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 ## Enable docker
