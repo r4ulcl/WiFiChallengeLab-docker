@@ -104,6 +104,12 @@ if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
     echo "FLAG: F4G6$%2f2g4hs";
     echo "<br><br>";
     echo "<br><br>";
+}
+
+if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder
+    echo "FLAG: F4G6$%2f2g4hs";
+    echo "<br><br>";
+    echo "<br><br>";
 		echo "<br><br>";
 		echo "AP CONFIG:";
 		echo "<br><br>";
@@ -120,6 +126,9 @@ if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
 		channel=6<br>";
 	    echo "Certificate Authority:  <a href=\"/secretCA/\"> http://", $_SERVER['SERVER_ADDR'], "/secretCA/ </a>";
 }
+
+
+
 
 echo "<br><br>";
 echo "<br><br>";

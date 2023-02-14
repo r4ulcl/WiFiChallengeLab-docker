@@ -7,6 +7,7 @@
 'CONTOSO\Administrator' => 'SuperSecure@!@',
 'CONTOSO\juan.tr' => 'bulldogs1234',
 'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
+'CORPO\god' => '123456789',
 'admin' => 'admin',
 'test1' => 'OYfDcUNQu9PCojb',
 'test2' => '2q60joygCBJQuFo',
@@ -95,18 +96,6 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
     exit;
   }
 
-  # Check IP from CONTOSOREG Relay
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
-    session_start(); /* Starts the session */
-    $Username = 'CONTOSOREG\luis.da';
-    $Password = 'u89gh68!6fcv56ed';
-    $_SESSION['UserData']['Username']=$Username;
-    /* Success: Set session variables USERNAME  */$_SESSION['Username']=$Username;
-    echo "Router Login";
-
-    header("location:index.php");
-    exit;
-  }
 ?>
 
 <form action="" method="post" name="Login_Form">
