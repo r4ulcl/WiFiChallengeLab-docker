@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 envsubst_tmp (){
     for F in ./*.tmp ; do
@@ -13,6 +13,29 @@ function retry {
     $1 && echo "success" || (echo "fail" && retry $1) 
 }
 
+
+function opnConnect {
+    WLAN=$1
+    IP=$2
+    IP_OPN1=192.168.10
+	echo "Starting $WLAN"
+	retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
+
+    sleep 10
+    curl --silent http://$IP_OPN1.1 -L
+
+
+	# Remove IP to avoid Ip conflict
+    echo start clean IP
+    dhclien-wifichallenge $WLAN -r
+    kill `ps aux | grep "dhclien-wifichallenge $WLAN" | grep -v grep | head -n 1 | awk '{print $2}'` # kill dhclient for this WLAN
+    
+    ip addr flush dev $WLAN
+    echo end clean IP
+
+    ifconfig $WLAN $IP/24 
+    echo "DONE $WLAN"
+}
 
 date
 
@@ -146,23 +169,11 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Clien
 sleep 10
 
 #OPN GET IP and accept captive portal
-wlanList="$WLAN_OPN1 $WLAN_OPN2 $WLAN_OPN3"
-echo 'Starting OPN clients'
-for WLAN in $wlanList; do
-	echo "Starting $WLAN"
-	retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
+opnConnect $WLAN_OPN1 $IP_OPN1.100 > /root/logs/OPNClients$WLAN_OPN1.log 2>&1 &
+opnConnect $WLAN_OPN2 $IP_OPN1.101 > /root/logs/OPNClients$WLAN_OPN2.log 2>&1 &
+opnConnect $WLAN_OPN3 $IP_OPN1.102 > /root/logs/OPNClients$WLAN_OPN3.log 2>&1 &
 
-	LOGIN=`curl --silent --interface $WLAN http://$IP_OPN1.1:2050/login`
-	# Get FAS
-	URL=`echo $LOGIN | grep fas | grep -oP "(?<=href=').*?(?=')"`
-	#LOGIN
-	CONFIRM=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1"`
-	#Get custom to confirm
-	CUSTOM=`echo "$CONFIRM" |  grep 'custom' | grep -oP '(?<=value=").*?(?=")'`
-	# Confirm
-	CONNECTED=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
-	echo "DONE $WLAN"	
-done & #Can take a while
+LAST2=$!
 
 sleep 5
 
@@ -175,3 +186,4 @@ sleep 10 && echo "ALL SET"
 /bin/bash
 
 wait $LAST
+wait $LAST2

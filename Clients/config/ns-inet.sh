@@ -63,7 +63,7 @@ ip netns add $NS
 
 #----------------------------WiFiChallenge---------------------------------------------------------
 
-echo "Waiting to APs (15 secs)"
+echo "Waiting for APs (15 secs)"
 sleep 15 # wait for AP docker
 
 # Add WiFi interfaces wlan 40-59

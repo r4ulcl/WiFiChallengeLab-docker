@@ -51,14 +51,16 @@ COPY config/ns-inet.sh /root/
 COPY config/startAPs.sh /root/
 
 #opennds
-RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.75.tar.gz \
-	; tar  -xf libmicrohttpd-0.9.75.tar.gz ; cd libmicrohttpd-0.9.75 \
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli  systemd
+
+RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz \
+	; tar  -xf libmicrohttpd-0.9.71.tar.gz ; cd libmicrohttpd-0.9.71 \
 	; ./configure --disable-https ; make ; sudo rm /usr/local/lib/libmicrohttpd* \
 	; sudo make install ; sudo rm /etc/ld.so.cache ; sudo ldconfig -v ; cd ..
 
 RUN cd ; wget wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
-       ; tar -xf v9.8.0 && cd openNDS-9.8.0 \
-       ; make && make install && rm -rf ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.75 ~/libmicrohttpd-0.9.75.tar.gz ~/v9.8.0
+       ; tar -xf v9.8.0 && cd openNDS-9.8.0 ; sudo touch /dev/log \
+       ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
 
 
 

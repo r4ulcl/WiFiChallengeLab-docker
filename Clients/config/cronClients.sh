@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#NOP vwifi-client 192.168.190.2 & # ADD to CRON
-
 #Load variables
 set -a
 source /root/wlan_config_clients
@@ -15,15 +13,12 @@ while :
 do
 	date
 
-	# Verify IP correct
-	#VAR=`ip -br -4 a sh | grep enp0s3 | awk '{print $3}'`
-	#if [[ ${VAR} != "192.168.190.16/24" ]] ; then
-	#	ip addr add 192.168.190.16/24 dev enp0s3
-	#fi
-
-	#26-45
+	#40-59 skip OPN
 	killall dhclien-wifichallenge 2> /dev/nill &
-	for N in `seq 40 59`; do
+	for N in `seq 40 46`; do
+		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+	done
+	for N in `seq 50 59`; do
 		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
 	done
 
@@ -33,8 +28,11 @@ do
 	sleep 20
 
 	killall dhclien-wifichallenge 2> /dev/nill &
-	for N in `seq 40 59`; do
-		dhclien-wifichallenge wlan$N 2> /dev/nill &
+	for N in `seq 40 46`; do
+		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+	done
+	for N in `seq 50 59`; do
+		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
 	done
 
 	sleep 10
@@ -81,33 +79,6 @@ do
 	curl -L -s "$URL" --interface $WLAN_TLS_PHISHING -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=GLOBAL\Manager&password=CorpoGlobal2022' -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null &
 	# Responder ""vuln""
 	smbmap -d 'CORPO' -u 'god' -p "123456789" -H $SERVER 2> /dev/nill
-
-	wlanList="$WLAN_OPN1 $WLAN_OPN2 $WLAN_OPN3"
-	echo 'Starting OPN clients'
-	for WLAN in $wlanList; do
-		# OPN Captive portal
-		#OPN GET IP and accept captive portal change mac random and connect again
-		echo "Radom MAC for $WLAN" 
-
-		ip link set $WLAN down 
-		macchanger -r $WLAN 
-		ip link set $WLAN up 
-		
-		echo "Starting $WLAN"
-		dhclien-wifichallenge $WLAN -r 2> /dev/nill
-		retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
-
-		LOGIN=`curl --silent --interface $WLAN http://$IP_OPN1.1:2050/login`
-		# Get FAS
-		URL=`echo $LOGIN | grep fas | grep -oP "(?<=href=').*?(?=')"`
-		#LOGIN
-		CONFIRM=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1"`
-		#Get custom to confirm
-		CUSTOM=`echo "$CONFIRM" |  grep 'custom' | grep -oP '(?<=value=").*?(?=")'`
-		# Confirm
-		CONNECTED=`curl --silent -interface $WLAN "${URL}&username=guest1&password=password1&custom=$CUSTOM&landing=yes"`
-		echo "DONE $WLAN"	
-	done & #Can take a while
 
    #curl "$URL" -X POST -H 'Content-Type: application/x-www-form-urlencoded' --data-raw 'username=user1&password=pass2' -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing
 
