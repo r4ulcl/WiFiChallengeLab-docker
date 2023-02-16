@@ -78,13 +78,17 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
   echo "<br><br>";
 }
 
-
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRISE
+  echo "<br><br>";
+  echo "Wifi free Login";
+  echo "<br><br>";
+}
 
 ?>
 
 <?php
   /* Check IP from GLOBAL */
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false){
     session_start(); /* Starts the session */
     $Username = 'GLOBAL\GlobalAdmin';
     $Password = 'SuperSuperSecure@!@';
@@ -97,7 +101,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
   }
 
   # Check IP from CONTOSOREG Relay
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false){
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
     session_start(); /* Starts the session */
     $Username = 'CONTOSOREG\luis.da';
     $Password = 'u89gh68!6fcv56ed';
@@ -108,8 +112,6 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
     header("location:index.php");
     exit;
   }
-?>
-
 ?>
 
 <form action="" method="post" name="Login_Form">

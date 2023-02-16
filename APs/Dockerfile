@@ -34,6 +34,8 @@ RUN cp /root/mgt/certs/ca.crt /var/www/html/secretCA/ca.crt.txt \
 	; cp /root/mgt/certs/ca.serial /var/www/html/secretCA/ca.serial.txt \
 	; cp /root/mgt/certs/server.crt /var/www/html/secretCA/server.crt.txt \
 	; cp /root/mgt/certs/server.key /var/www/html/secretCA/server.key.txt  \
+	; cp /root/mgt/certs/client.ext /var/www/html/secretCA/client.ext.txt  \
+	; cp /root/mgt/certs/client.conf /var/www/html/secretCA/client.conf.txt  \
 	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
 
 #WPS 
