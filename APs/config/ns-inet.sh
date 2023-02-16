@@ -70,13 +70,14 @@ ip netns add $NS
 #0-9 for the attacker
 #10-39 radios for AP
 #40-59 radios for Clients
+#60 for nzyme in attacker
 
 #if wlan < 20 (AP wifis) no executed 
 if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; then
    sudo modprobe mac80211_hwsim -r
 fi
 
-sudo modprobe mac80211_hwsim radios=60
+sudo modprobe mac80211_hwsim radios=61
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?
