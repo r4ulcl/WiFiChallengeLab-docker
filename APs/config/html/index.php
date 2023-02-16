@@ -12,7 +12,7 @@ echo "<br><br>";
 
 if ($_SESSION["Username"]  == "GLOBAL\GlobalAdmin") {
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only TLS	
-		echo "FLAG: WnIlomDsedsOj5I5AQzG0ZoMIhmJIJeejksyma64";
+		echo "flag{WnIlomDsedsOj5I5AQzG0ZoMIhmJIJeejksyma64}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -20,7 +20,7 @@ if ($_SESSION["Username"]  == "GLOBAL\GlobalAdmin") {
 
 if ($_SESSION["Username"]  == "CONTOSO\Administrator") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
-		echo "FLAG: aY62tP67g5hK4f";
+		echo "flag{aY62tP67g5hK4f}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -32,11 +32,11 @@ if ($_SESSION["Username"]  == "admin") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false) { //only MGT Relay	
 			echo "Hello";	
 	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only HIDDEN
-    		echo "FLAG: IkZ4ZeDqgfQ3eUU";
+    		echo "flag{IkZ4ZeDqgfQ3eUU}";
 	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.3.') !== false) { //only WPS
-		echo "FLAG: pRH6IlFp2OF49x2";
+		echo "flag{pRH6IlFp2OF49x2}";
 	} elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only WPS
-		echo "FLAG: W5ri9DXRJZCTBpFFxXBM";
+		echo "flag{W5ri9DXRJZCTBpFFxXBM}";
 	} else {
 	    echo "No FLAG, try logging in with another user ;)";
 
@@ -47,7 +47,7 @@ if ($_SESSION["Username"]  == "admin") {
 
 if ($_SESSION["Username"]  == "CONTOSO\juan.tr") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
-		echo "FLAG: TY62tPV7Vh1hK1o";
+		echo "flag{TY62tPV7Vh1hK1o}";
 		echo "<br><br>";
 	} else {
 		echo "Your Princess Is in Another Castle!";
@@ -56,7 +56,7 @@ if ($_SESSION["Username"]  == "CONTOSO\juan.tr") {
 
 if ($_SESSION["Username"]  == "test1") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.2.') !== false) { //only PSK	
-		echo "FLAG: uTJTGWAbpnxb6uO";
+		echo "flag{uTJTGWAbpnxb6uO}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -64,7 +64,7 @@ if ($_SESSION["Username"]  == "test1") {
 
 if ($_SESSION["Username"]  == "test2") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.2.') !== false) { //only PSK	
-		echo "FLAG: z39kTesr7hzgh9Y";
+		echo "flag{uTJTGWAbpnxb6uO}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -72,7 +72,7 @@ if ($_SESSION["Username"]  == "test2") {
 
 if ($_SESSION["Username"]  == "free1") {
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN	
-		echo "FLAG: CNq6gDIqLfjROhN";
+		echo "flag{CNq6gDIqLfjROhN}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -80,7 +80,7 @@ if ($_SESSION["Username"]  == "free1") {
 
 if ($_SESSION["Username"]  == "free2") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN	
-		echo "FLAG: CNq6gDIqLfjROhN";
+		echo "flag{CNq6gDIqLfjROhN}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -88,12 +88,12 @@ if ($_SESSION["Username"]  == "free2") {
 
 if ($_SESSION["Username"]  == "anon1") {
 	# NO AP LOGIN
-    echo "FLAG: XhAK0YVSIwjeBDf";
+    echo "flag{XhAK0YVSIwjeBDf}";
 }
 
 if ($_SESSION["Username"]  == "administrator") {
 	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only WEP	
-		echo "FLAG: Ke4kKmkrRc3dV0k";
+		echo "flag{Ke4kKmkrRc3dV0k}";
 	} else {
 		echo "Your Princess Is in Another Castle!";
 	}
@@ -101,13 +101,13 @@ if ($_SESSION["Username"]  == "administrator") {
 
 #relay user
 if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
-    echo "FLAG: F4G6$%2f2g4hs";
+    echo "flag{F4G6$%2f2g4hs}";
     echo "<br><br>";
     echo "<br><br>";
 }
 
 if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder
-    echo "FLAG: F4G6$%2f2g4hs";
+    echo "flag{3tKfK6UoFbvAv9AkBq3U}";
     echo "<br><br>";
     echo "<br><br>";
 		echo "<br><br>";

@@ -101,7 +101,7 @@ sudo apt-get clean
 sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-install  gnome-games-common libreoffice* empathy transmission-gtk cheese gnome-software-common gnome-software-plugin-flatpak gnome-software-plugin-snap gnome-terminal gnome-orca onboard simple-scan gnome-font-viewer gnome-calculator gnome-clocks gnome-screenshot gnome-system-log gnome-system-monitor gnome-documents gnome-music gnome-video-effects gnome-boxes gnome-dictionary gnome-photos gnome-weather gnome-maps gnome-logs gnome-clocks gnome-characters gnome-calendar aisleriot gnome-sudoku gnome-mines gnome-mahjongg thunderbird
 
 # First FLAG
-echo 'JPTEXm5yEaYouyIEFffEvPjil' | sudo tee /root/flag.txt
+echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
 
 
 #Fix password on wifi scan
@@ -187,6 +187,16 @@ sudo sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/
 grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config || echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config > /dev/null
 # Restart the SSH server to apply the changes
 sudo service ssh restart
+
+# default firefox page
+PROFILE_DIR=/home/user/.mozilla/firefox/*.default-*
+echo 'user_pref("browser.startup.homepage", "http://127.0.0.1:22900");' >> $PROFILE_DIR/prefs.js
+echo 'user_pref("browser.startup.page", 1);' >> $PROFILE_DIR/prefs.js
+
+PROFILE_DIR=/home/vagrant/.mozilla/firefox/*.default-*
+echo 'user_pref("browser.startup.homepage", "http://127.0.0.1:22900");' >> $PROFILE_DIR/prefs.js
+echo 'user_pref("browser.startup.page", 1);' >> $PROFILE_DIR/prefs.js
+
 
 # Root acces GUI
 su -c 'xhost si:localuser:root' vagrant
