@@ -38,6 +38,7 @@ services:
     #ports:
     #  - "22900:22900"
     depends_on:
+      - aps
       - db
     environment:
       - TZ=Europe/Berlin
@@ -59,8 +60,11 @@ services:
     image: postgres:14
     restart: unless-stopped
     env_file: ./nzyme/.env
+    container_name: nzyme-db
     security_opt:
       - no-new-privileges:true
+    depends_on:
+      - aps
     environment:
       - TZ=Europe/Berlin
       - POSTGRES_DB=$POSTGRES_DB

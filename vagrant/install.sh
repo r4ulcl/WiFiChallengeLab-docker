@@ -23,7 +23,7 @@ echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
 # Create a sudo user
 # Create the user
 sudo useradd -m -s /bin/bash user
-echo "user:pass" | sudo chpasswd
+echo "user:user" | sudo chpasswd
 # Add the user to the sudo group
 sudo usermod -aG sudo user
 # Configure sudo to not prompt for a password
@@ -60,8 +60,8 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 
 ## Go to WiFiChallengeFolder (git clone...)
-cp -r /media/WiFiChallenge /root/
-cd /root/WiFiChallenge
+cp -r /media/WiFiChallenge /var/
+cd /var/WiFiChallenge
 
 ## Install RDP server
 echo 'Install RDP server'
@@ -72,13 +72,13 @@ echo 'Install hacking WiFi tools'
 sudo bash Attacker/installTools.sh
 
 ## Extract nzyme default logs (attacker)
-cd /root/WiFiChallenge/nzyme/
+cd /var/WiFiChallenge/nzyme/
 rm -r logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 ## Enable docker
-cd /root/WiFiChallenge/
+cd /var/WiFiChallenge/
 sudo docker-compose -f docker-compose.yml up -d
 #sudo docker-compose -f docker-compose-minimal.yml up -d
 
@@ -140,7 +140,7 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 # Change icon theme to Adwaita
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
-sudo rm -rf /root/WiFiChallenge/zerofile 2> /dev/null
+sudo rm -rf /var/WiFiChallenge/zerofile 2> /dev/null
 
 # Auto delete
 sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
@@ -213,4 +213,4 @@ rm -rf /root/tools/eaphammer/wordlists/rockyou.txt /root/tools/eaphammer/wordlis
 sudo apt-get -y autoremove
 sudo apt-get -y autoclean
 sudo apt-get -y clean
-sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf /root/WiFiChallenge/zerofile
+sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf /var/WiFiChallenge/zerofile

@@ -28,14 +28,14 @@ COPY config/interfaces /etc/network/interfaces.tmp
 
 #Copy HTML files
 COPY config/html /var/www/html/
-RUN mkdir /var/www/html/secretCA/
-RUN cp /root/mgt/certs/ca.crt /var/www/html/secretCA/ca.crt.txt \
-	; cp /root/mgt/certs/ca.key /var/www/html/secretCA/ca.key.txt \
-	; cp /root/mgt/certs/ca.serial /var/www/html/secretCA/ca.serial.txt \
-	; cp /root/mgt/certs/server.crt /var/www/html/secretCA/server.crt.txt \
-	; cp /root/mgt/certs/server.key /var/www/html/secretCA/server.key.txt  \
-	; cp /root/mgt/certs/client.ext /var/www/html/secretCA/client.ext.txt  \
-	; cp /root/mgt/certs/client.conf /var/www/html/secretCA/client.conf.txt  \
+RUN mkdir /var/www/html/.internalCA/
+RUN cp /root/mgt/certs/ca.crt /var/www/html/.internalCA/ca.crt.txt \
+	; cp /root/mgt/certs/ca.key /var/www/html/.internalCA/ca.key.txt \
+	; cp /root/mgt/certs/ca.serial /var/www/html/.internalCA/ca.serial.txt \
+	; cp /root/mgt/certs/server.crt /var/www/html/.internalCA/server.crt.txt \
+	; cp /root/mgt/certs/server.key /var/www/html/.internalCA/server.key.txt  \
+	; cp /root/mgt/certs/client.ext /var/www/html/.internalCA/client.ext.txt  \
+	; cp /root/mgt/certs/client.conf /var/www/html/.internalCA/client.conf.txt  \
 	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
 
 #WPS 

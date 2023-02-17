@@ -124,7 +124,7 @@ if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder
 		# 802.11 Options<br>
 		ssid=wifi-corp<br>
 		channel=6<br>";
-	    echo "Certificate Authority:  <a href=\"/secretCA/\"> http://", $_SERVER['SERVER_ADDR'], "/secretCA/ </a>";
+	    echo "Certificate Authority:  <a href=\"/.internalCA/\"> http://", $_SERVER['SERVER_ADDR'], "/.internalCA/ </a>";
 }
 
 
