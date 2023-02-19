@@ -102,15 +102,12 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRIS
 
   # Check IP from CONTOSOREG Relay
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false){
-    session_start(); /* Starts the session */
-    $Username = 'CONTOSOREG\luis.da';
-    $Password = 'u89gh68!6fcv56ed';
-    $_SESSION['UserData']['Username']=$Username;
-    /* Success: Set session variables USERNAME  */$_SESSION['Username']=$Username;
-    echo "Router Login";
-
-    header("location:index.php");
-    exit;
+    #relay user
+    echo "<br><br>";
+    echo "<br><br>";
+    echo "flag{F4G6$%2f2g4hs}";
+    echo "<br><br>";
+    echo "<br><br>";
   }
 ?>
 
