@@ -1,22 +1,44 @@
-# WiFiChallenge Lab 2.0 Vagrant
+# Create WiFiChallenge Lab 2.0 using Vagrant
 
 ## For VirtualBox
 
-To create and start the VM:
-```
+Create and start the VM (about 1 hour 40 minutes):
+
+```bash
 vagrant up virtualbox_vm
 ```
 
+Connect the VM
+
+```bash
+vagrant ssh virtualbox_vm
+```
+
+Or RDP to IP 192.168.56.10 and port 3389 (using [remmina](https://remmina.org/) or other RDP client)
 
 
-
-## For VMWare
-
-TODO
-
-
-## Compress after install to export OVA
+### Compress after install to export OVA
 
 ```
 VBoxManage modifyhd --compact ubuntu-focal-20.04-cloudimg.vmdk
+```
+
+
+## For VMWare
+Create and start the VM (about 1 hour 40 minutes)::
+
+``` bash
+vagrant up vmware_vm 
+```
+
+Connect the VM
+``` bash
+vagrant ssh vmware_vm 
+```
+
+Or RDP to IP 192.168.59.10 and port 3389 (using [remmina](https://remmina.org/) or other RDP client)
+
+### Compress after install to export OVA
+
+```
 ```

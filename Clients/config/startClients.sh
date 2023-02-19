@@ -67,6 +67,7 @@ macchanger -m $MAC_PSK_NOAP2 $WLAN_PSK_NOAP2 >> /root/logs/macchanger.log
 macchanger -m $MAC_OPN1 $WLAN_OPN1 >> /root/logs/macchanger.log
 macchanger -m $MAC_OPN2 $WLAN_OPN2 >> /root/logs/macchanger.log
 macchanger -m $MAC_OPN3 $WLAN_OPN3 >> /root/logs/macchanger.log
+macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log
 
 
 

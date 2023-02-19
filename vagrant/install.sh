@@ -23,7 +23,7 @@ echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
 # Create a sudo user
 # Create the user
 sudo useradd -m -s /bin/bash user
-echo "user:user" | sudo chpasswd
+echo "user:pass" | sudo chpasswd
 # Add the user to the sudo group
 sudo usermod -aG sudo user
 # Configure sudo to not prompt for a password
@@ -92,7 +92,7 @@ sudo apt-get --yes purge aisleriot gnome-sudoku mahjongg ace-of-penguins gnomine
 sudo apt-get --yes purge libreoffice-core libreoffice-calc libreoffice-draw libreoffice-impress libreoffice-math libreoffice-writer
 sudo apt-get --yes purge thunderbird
 # Remove transmission and cheese
-sudo apt-get --yes purge cheese transmission-*
+sudo apt-get --yes purge cheese transmission-* gnome-mahjongg
 # autoremove any dependencies that are no longer needed
 sudo apt-get --yes autoremove
 # clean up the package cache
@@ -102,6 +102,10 @@ sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-inst
 
 # First FLAG
 echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
+
+echo '#!/bin/bash
+cd /var/WiFiChallenge
+docker-compose restart' | sudo tee /root/restartWiFi.sh
 
 
 #Fix password on wifi scan

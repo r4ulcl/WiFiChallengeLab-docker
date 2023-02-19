@@ -49,7 +49,8 @@ make install
 
 #hcxtools
 cd $TOOLS
-git clone https://github.com/ZerBea/hcxtools.git
+#git clone https://github.com/ZerBea/hcxtools.git
+git clone https://salsa.debian.org/pkg-security-team/hcxtools #to ubuntu 20
 cd hcxtools
 make 
 sudo make install
@@ -62,10 +63,6 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
 git clone https://github.com/RaulCalvoLaorden/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
-
-#Docker best 
-docker pull raulcalvolaorden/wifi_db
-
 
 # pcapFilter.sh
 cd $TOOLS
@@ -87,6 +84,17 @@ sudo apt-get install python-openssl python3-openssl -y
 python3 -m pip install flask flask_cors flask_socketio pywebcopy
 apt-get install python-netifaces
 sudo python3 -m pip install --upgrade pyopenssl
+
+
+# Fix error in Responder 02/2023
+tail --lines=+2 /root/tools/eaphammer/local/Responder/Responder.conf > /root/tools/eaphammer/local/Responder/Responder.conf.tmp 
+echo '[Responder Core]
+snmp=off
+winrm=off
+dcerpc=off
+rdp=off 
+' > /root/tools/eaphammer/local/Responder/Responder.conf
+cat /root/tools/eaphammer/local/Responder/Responder.conf.tmp >> /root/tools/eaphammer/local/Responder/Responder.conf
 
 #hostapd-wpe
 cd $TOOLS
