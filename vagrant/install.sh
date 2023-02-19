@@ -23,7 +23,7 @@ echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
 # Create a sudo user
 # Create the user
 sudo useradd -m -s /bin/bash user
-echo "user:pass" | sudo chpasswd
+echo "user:user" | sudo chpasswd
 # Add the user to the sudo group
 sudo usermod -aG sudo user
 # Configure sudo to not prompt for a password

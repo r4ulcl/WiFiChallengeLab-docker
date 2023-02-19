@@ -72,9 +72,7 @@ macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log
 
 
 #TODO
-macchanger -r wlan52 >> /root/logs/macchanger.log
 macchanger -r wlan53 >> /root/logs/macchanger.log
-macchanger -r wlan54 >> /root/logs/macchanger.log
 macchanger -r wlan55 >> /root/logs/macchanger.log
 macchanger -r wlan56 >> /root/logs/macchanger.log
 macchanger -r wlan57 >> /root/logs/macchanger.log
