@@ -64,7 +64,8 @@ RUN cd ; wget wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
        ; tar -xf v9.8.0 && cd openNDS-9.8.0 ; sudo touch /dev/log \
        ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
 
-
+# autoremove any dependencies that are no longer needed
+RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 
 COPY config/opennds.conf.tmp /etc/opennds/opennds.conf.tmp
 COPY config/theme_user-email-login-basic.sh /usr/lib/opennds/

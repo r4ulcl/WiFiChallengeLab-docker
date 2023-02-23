@@ -5,6 +5,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchang
 RUN apt-get install -y inetutils-ping isc-dhcp-client
 
 RUN apt-get install -y smbmap
+
+# autoremove any dependencies that are no longer needed
+RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
+
 #RUN date
 
 #COPY var file

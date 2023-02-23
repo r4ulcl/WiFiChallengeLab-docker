@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
     #virtualbox_vm.vm.box = "ubuntu/focal64"
     virtualbox_vm.vm.box = "generic/ubuntu2004"
     virtualbox_vm.vm.define "WiFiChallengeLab vbox"
-    virtualbox_vm.vm.network "private_network", ip: "192.168.56.10"
+    #virtualbox_vm.vm.network "private_network", ip: "192.168.56.10"
     virtualbox_vm.vm.hostname  = "WiFiChallengeLab"
     virtualbox_vm.vm.provider "virtualbox" do |vb|
       #vb.memory = "2048"
@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
       v.linked_clone = false
       v.clone_directory = "/mnt/work/VMWare/"
     end
-    vmware_vm.vm.network "private_network", ip: "192.168.57.10"
+    #vmware_vm.vm.network "private_network", ip: "192.168.57.10"
     vmware_vm.vm.hostname  = "WiFiChallengeLab"
     vmware_vm.vm.provider "vmware_desktop" do |vb|
       #vb.memory = "2048"

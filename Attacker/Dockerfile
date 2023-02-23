@@ -52,6 +52,8 @@ RUN cd /root/tools && git clone https://github.com/Wh1t3Rh1n0/air-hammer && cd a
 	&& curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py \
 	&& python2 get-pip.py && pip2 install wpa_supplicant && pip2 install service_identity
 
+# autoremove any dependencies that are no longer needed
+RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 
 #FROM kalilinux/kali-rolling
 #COPY --from=builder 

@@ -62,6 +62,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 ## Go to WiFiChallengeFolder (git clone...)
 cp -r /media/WiFiChallenge /var/
 cd /var/WiFiChallenge
+rm -r /var/WiFiChallenge/.git
 
 ## Install RDP server
 echo 'Install RDP server'
@@ -90,7 +91,7 @@ sudo apt-get --yes remove --purge `dpkg --get-selections | grep -v "^lib" | grep
 sudo apt-get --yes purge aisleriot gnome-sudoku mahjongg ace-of-penguins gnomine gbrainy gnome-mines
 # Remove libreoffice
 sudo apt-get --yes purge libreoffice-core libreoffice-calc libreoffice-draw libreoffice-impress libreoffice-math libreoffice-writer
-sudo apt-get --yes purge thunderbird
+sudo apt-get --yes purge thunderbird snapd
 # Remove transmission and cheese
 sudo apt-get --yes purge cheese transmission-* gnome-mahjongg
 # autoremove any dependencies that are no longer needed
@@ -105,7 +106,9 @@ echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
 
 echo '#!/bin/bash
 cd /var/WiFiChallenge
-docker-compose restart' | sudo tee /root/restartWiFi.sh
+
+docker-compose restart aps
+docker-compose restart clients' | sudo tee /root/restartWiFi.sh
 
 
 #Fix password on wifi scan
@@ -120,6 +123,12 @@ echo "The system policy has been updated and the network manager has been restar
 sudo mkdir /opt/background/
 sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 
+echo '#Script to set nzyme interface in monitor mode always
+sudo ip link set wlan60 down 
+sudo iw wlan60 set type monitor
+sudo ip link set wlan60 up' > /var/aux.sh
+chmod +x /var/aux.sh
+
 # Configure GUI when user open terminal first time, then delete
 echo '
 # Enable dock
@@ -128,8 +137,11 @@ gnome-extensions enable ubuntu-appindicators@ubuntu.com
 gnome-extensions enable desktop-icons@csoriano
 
 # Set background
-
 gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
+
+# Cron to monitor mode to nzyme
+(crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
+
 
 
 # Dark theme
@@ -161,8 +173,10 @@ gnome-extensions enable ubuntu-appindicators@ubuntu.com
 gnome-extensions enable desktop-icons@csoriano
 
 # Set background
-
 gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
+
+# Cron to monitor mode to nzyme
+(crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
 
 
 # Dark theme
@@ -217,4 +231,7 @@ rm -rf /root/tools/eaphammer/wordlists/rockyou.txt /root/tools/eaphammer/wordlis
 sudo apt-get -y autoremove
 sudo apt-get -y autoclean
 sudo apt-get -y clean
+
+docker system prune -a -f
+
 sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf /var/WiFiChallenge/zerofile

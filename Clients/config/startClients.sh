@@ -57,6 +57,7 @@ macchanger -m $MAC_MGT_GTC $WLAN_MGT_GTC >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS $WLAN_TLS >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS_PHISHING $WLAN_TLS_PHISHING >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_RELAY_W $WLAN_MGT_RELAY_W >> /root/logs/macchanger.log
 
 macchanger -m $MAC_WPA_PSK $WLAN_WPA_PSK >> /root/logs/macchanger.log
 macchanger -m $MAC_WPA_PSK2 $WLAN_WPA_PSK2 >> /root/logs/macchanger.log
