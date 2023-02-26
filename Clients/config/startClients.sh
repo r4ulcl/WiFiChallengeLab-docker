@@ -57,7 +57,10 @@ macchanger -m $MAC_MGT_GTC $WLAN_MGT_GTC >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS $WLAN_TLS >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS_PHISHING $WLAN_TLS_PHISHING >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY_W $WLAN_MGT_RELAY_W >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_RELAY_TABLETS_W $WLAN_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
+
+
 
 macchanger -m $MAC_WPA_PSK $WLAN_WPA_PSK >> /root/logs/macchanger.log
 macchanger -m $MAC_WPA_PSK2 $WLAN_WPA_PSK2 >> /root/logs/macchanger.log
@@ -119,7 +122,8 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_W -c /root/mgtClient/wpa_mschapv2_relayW.conf >> /root/logs/supplicantMSCHAP_relayW.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
     wait $!
 done &
 

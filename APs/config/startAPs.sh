@@ -60,6 +60,8 @@ macchanger -m $MAC_KRACK $WLAN_KRACK >> /root/logs/macchanger.log # PSK VULN KRA
 macchanger -m $MAC_MGT $WLAN_MGT >> /root/logs/macchanger.log # MGT
 macchanger -m $MAC_MGT2 $WLAN_MGT2 >> /root/logs/macchanger.log # MGT 2
 macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY >> /root/logs/macchanger.log # MGT Relay
+macchanger -m $MAC_MGTRELAY_TABLETS $WLAN_MGTRELAY_TABLETS >> /root/logs/macchanger.log # MGT Relay tablets
+
 macchanger -m $MAC_MGTTLS $WLAN_MGTTLS >> /root/logs/macchanger.log # MGT TLS
 
 macchanger -r $WLAN_OTHER0  >> /root/logs/macchanger.log # Other 0
@@ -110,6 +112,10 @@ hostapd_aps /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log &
 # MGT Relay
 ip addr add $IP_MGTRELAY.1/24 dev $WLAN_MGTRELAY
 hostapd_aps /root/mgt/hostapd_wpe_relay.conf > /root/logs/hostapd_wpe_relay.log &
+
+# MGT Relay tablets
+ip addr add $IP_MGTRELAY_TABLETS.1/24 dev $WLAN_MGTRELAY_TABLETS
+hostapd_aps /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_relay_tablets.log &
 
 # MGT TLS
 ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
