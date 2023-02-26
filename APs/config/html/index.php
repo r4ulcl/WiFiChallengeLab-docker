@@ -106,10 +106,11 @@ if ($_SESSION["Username"]  == "CONTOSOREG\luis.da") { # RELAY
     echo "<br><br>";
 }
 
-if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder
-    echo "flag{3tKfK6UoFbvAv9AkBq3U}";
-    echo "<br><br>";
-    echo "<br><br>";
+if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder in regional network
+	if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only WEP	
+		echo "flag{3tKfK6UoFbvAv9AkBq3U}";
+		echo "<br><br>";
+		echo "<br><br>";
 		echo "<br><br>";
 		echo "AP CONFIG:";
 		echo "<br><br>";
@@ -125,6 +126,9 @@ if ($_SESSION["Username"]  == "CORPO\god") { # RELAY creds stolen in responder
 		ssid=wifi-corp<br>
 		channel=6<br>";
 	    echo "Certificate Authority:  <a href=\"/.internalCA/\"> http://", $_SERVER['SERVER_ADDR'], "/.internalCA/ </a>";
+	} else {
+		echo "Your Princess Is in Another Castle!";
+	}
 }
 
 

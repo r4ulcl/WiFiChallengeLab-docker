@@ -60,7 +60,7 @@ macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY_TABLETS_W $WLAN_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
 
-
+macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log
 
 macchanger -m $MAC_WPA_PSK $WLAN_WPA_PSK >> /root/logs/macchanger.log
 macchanger -m $MAC_WPA_PSK2 $WLAN_WPA_PSK2 >> /root/logs/macchanger.log
@@ -76,8 +76,6 @@ macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log
 
 
 #TODO
-macchanger -r wlan53 >> /root/logs/macchanger.log
-macchanger -r wlan55 >> /root/logs/macchanger.log
 macchanger -r wlan56 >> /root/logs/macchanger.log
 macchanger -r wlan57 >> /root/logs/macchanger.log
 macchanger -r wlan58 >> /root/logs/macchanger.log

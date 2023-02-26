@@ -109,6 +109,16 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRIS
     echo "<br><br>";
     echo "<br><br>";
   }
+
+  # Check IP from CONTOSOREG Tablets Relay
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false){
+    #relay user
+    echo "<br><br>";
+    echo "<br><br>";
+    echo "flag{c3B8EBA8iXfMZLXmWe}";
+    echo "<br><br>";
+    echo "<br><br>";
+  }
 ?>
 
 <form action="" method="post" name="Login_Form">
