@@ -72,6 +72,12 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) { //only MGT Relay
   echo "<br><br>";
 }
 
+if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) { //only MGT Relay
+  echo "<br><br>";
+  echo "Regional Tablets Router Login";
+  echo "<br><br>";
+}
+
 if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only ENTERPRISE
   echo "<br><br>";
   echo "Global Router Login";
@@ -83,6 +89,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRIS
   echo "Wifi free Login";
   echo "<br><br>";
 }
+
 
 ?>
 

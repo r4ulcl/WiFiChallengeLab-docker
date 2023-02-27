@@ -107,8 +107,8 @@ echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
 echo '#!/bin/bash
 cd /var/WiFiChallenge
 
-docker-compose restart aps
-docker-compose restart clients' | sudo tee /root/restartWiFi.sh
+sudo docker-compose restart aps
+sudo docker-compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 
 #Fix password on wifi scan
