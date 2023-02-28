@@ -36,7 +36,7 @@ cd $TOOLS
 git clone https://github.com/blackarrowsec/EAP_buster
 
 # OpenSSL 3 for ubuntu
-sudo apt install build-essential checkinstall zlib1g-dev -y
+sudo apt-get install build-essential checkinstall zlib1g-dev -y
 cd /usr/local/src/
 wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
 sudo tar -xvf openssl-3.0.2.tar.gz
@@ -62,7 +62,7 @@ chmod +x pcapFilter.sh
 
 #Eaphhammer
 cd $TOOLS
-git clone https://github.com/s0lst1c3/eaphammer.git
+git clone https://github.com/r4ulcl/eaphammer.git
 cd eaphammer
 for L in `cat kali-dependencies.txt` ; do echo $L; apt-get install $L -y ;done
 sudo apt-get install dsniff apache2 -y

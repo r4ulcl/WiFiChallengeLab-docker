@@ -7,7 +7,7 @@
 'CONTOSO\Administrator' => 'SuperSecure@!@',
 'CONTOSO\juan.tr' => 'bulldogs1234',
 'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
-'CORPO\god' => '123456789',
+'CORPO\god' => 'tommy1',
 'admin' => 'admin',
 'test1' => 'OYfDcUNQu9PCojb',
 'test2' => '2q60joygCBJQuFo',

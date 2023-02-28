@@ -123,14 +123,24 @@ echo "The system policy has been updated and the network manager has been restar
 sudo mkdir /opt/background/
 sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 
-echo '#Script to set nzyme interface in monitor mode always
+echo '#!/bin/bash
+#Script to set nzyme interface in monitor mode always
 sudo ip link set wlan60 down 
 sudo iw wlan60 set type monitor
 sudo ip link set wlan60 up' > /var/aux.sh
 chmod +x /var/aux.sh
 
+echo '#!/bin/bash
+#Script update wifi_db on reboot
+git --git-dir=/root/tools/wifi_db/.git pull' > /var/update_wifi_db.sh
+chmod +x /var/update_wifi_db.sh
+
+# Root crontab
+(crontab -l ; echo "@reboot /var/update_wifi_db.sh > /tmp/update_wifi_db.log") | crontab -
+
+
 # Configure GUI when user open terminal first time, then delete
-echo '
+echo '#!/bin/bash
 # Enable dock
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
@@ -234,4 +244,4 @@ sudo apt-get -y clean
 
 docker system prune -a -f
 
-sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf /var/WiFiChallenge/zerofile
+sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf zerofile

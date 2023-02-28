@@ -1,7 +1,4 @@
 <?php
-echo "<br><br>";
-echo "<br><br>";
-echo "<br><br>";
 if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN
     echo "flag{jg67f7sad87g387g}";
 } elseif  (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only HIDDEN
@@ -16,9 +13,4 @@ if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN
     echo "Sorry, No FLAG here";
 
 }
-echo "<br><br>";
-echo "<br><br>";
-echo "<br><br>";
 ?>
-
-Hello
