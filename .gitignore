@@ -1,3 +1,4 @@
 logsAP/*
 logsClient/*
 vagrant/.vagrant/*
+vagrant/date.log
