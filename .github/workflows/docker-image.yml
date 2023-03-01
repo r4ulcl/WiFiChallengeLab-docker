@@ -32,7 +32,7 @@ jobs:
           context: ./APs
           platforms: linux/amd64
           push: true
-          tags: r4ulcl/WiFiChallengeLab-APs:latest,r4ulcl/WiFiChallengeLab-APs:main
+          tags: r4ulcl/wifichallengelab-aps:latest,r4ulcl/wifichallengelab-aps:main
           
       - name: Build and push
         id: docker_build_clients
@@ -41,4 +41,4 @@ jobs:
           context: ./Clients
           platforms: linux/amd64
           push: true
-          tags: r4ulcl/WiFiChallengeLab-Clients:latest,r4ulcl/WiFiChallengeLab-Clients:main
+          tags: r4ulcl/wifichallengelab-clients:latest,r4ulcl/wifichallengelab-clients:main
