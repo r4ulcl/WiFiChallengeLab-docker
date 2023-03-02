@@ -5,7 +5,7 @@ services:
     #build: ./APs/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-APs
-    env_file: ./APs/.env
+    #env_file: ./APs/.env
     volumes:
       - /lib/modules:/lib/modules
       - ./logsAP:/root/logs/
@@ -17,7 +17,7 @@ services:
     #build: ./Clients/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-Clients
-    env_file: ./Clients/.env
+    #env_file: ./Clients/.env
     volumes:
       - /lib/modules:/lib/modules
       - ./logsClient:/root/logs/
@@ -27,13 +27,14 @@ services:
     privileged: true #NETNS
 
   nzyme:
+    #image: r4ulcl/wifichallengelab-nzyme:latest
     build: ./nzyme/
     restart: unless-stopped
-    env_file: ./nzyme/.env
-    container_name: nzyme
+    #env_file: ./nzyme/.env
+    env_file: .env
+    container_name: WiFiChallengeLab-nzyme
     security_opt:
       - no-new-privileges:true
-    env_file: .env
     volumes:
       - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
       - ./nzyme/logs:/var/log/nzyme/
@@ -61,8 +62,9 @@ services:
   db:
     image: postgres:14
     restart: unless-stopped
-    env_file: ./nzyme/.env
-    container_name: nzyme-db
+    #env_file: ./nzyme/.env
+    env_file: .env
+    container_name: WiFiChallengeLab-nzyme-db
     security_opt:
       - no-new-privileges:true
     depends_on:
@@ -91,7 +93,7 @@ services:
   # To keep the Dockers updated
   watchtower:
     image: containrrr/watchtower
-    container_name: watchtower
+    container_name: WiFiChallengeLab-watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 10 WiFiChallengeLab-Clients WiFiChallengeLab-APs
