@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#HALT=true
-HALT=false
+HALT=true
+#HALT=false
 
 OPTION=$1
 
@@ -31,7 +31,6 @@ elif [ $OPTION == "virtualbox" ]; then
     if [ "$HALT" = true ] ; then
         vagrant halt virtualbox_vm 
     fi
-
 else
     echo "Unknown option, only VMware or VirtualBox"
     exit 1

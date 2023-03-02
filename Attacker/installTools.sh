@@ -51,7 +51,7 @@ make install
 cd $TOOLS
 sudo apt-get install python3-pip sqlitebrowser -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
-git clone https://github.com/RaulCalvoLaorden/wifi_db
+git clone https://github.com/r4ulcl/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
 

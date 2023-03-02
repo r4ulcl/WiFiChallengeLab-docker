@@ -12,9 +12,9 @@ RUN cd /root/tools && git clone https://github.com/blackarrowsec/EAP_buster
 
 RUN cd /root/tools &&  apt-get install python3-pip -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install tshark -y \
-    && git clone https://github.com/RaulCalvoLaorden/wifi_db \
+    && git clone https://github.com/r4ulcl/wifi_db \
     && cd wifi_db && pip3 install -r requirements.txt \
-    && wget https://gist.githubusercontent.com/RaulCalvoLaorden/f3470f097d1cd21dbc5a238883e79fb2/raw/pcapFilter.sh
+    && wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/pcapFilter.sh
 
 RUN cd /root/tools && git clone https://github.com/Snizz/crEAP
 

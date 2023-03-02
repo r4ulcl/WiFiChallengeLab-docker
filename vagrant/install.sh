@@ -127,6 +127,28 @@ echo "The system policy has been updated and the network manager has been restar
 sudo mkdir /opt/background/
 sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 
+# nzyme alerts
+sudo apt-get install -y jq
+# nzyme icon for alerts
+sudo wget https://v1.nzyme.org/img/favicon.ico -O /opt/background/nzyme.ico
+
+echo '#!/bin/bash
+# Loop
+GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT"
+ALERT1=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+while true ; do
+  ALERT2=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+  if [ "$ALERT1" != "$ALERT2" ] ; then
+    ALERT1=$ALERT2
+    notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$ALERT2"
+  fi
+  sleep 0.1
+done
+' > /var/nzyme-alerts.sh
+
+sudo chown user:user /var/nzyme-alerts.sh
+sudo chmod +x /var/nzyme-alerts.sh
+
 echo '#!/bin/bash
 #Script to set nzyme interface in monitor mode always
 sudo ip link set wlan60 down 
@@ -159,8 +181,10 @@ gnome-extensions enable desktop-icons@csoriano
 gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
 
 # Cron to monitor mode to nzyme
-(crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
+(crontab -l ; echo "* * * * * bash /var/aux.sh") | crontab -
 
+# Cron to Nzyme alert 
+(crontab -l ; echo "@reboot bash /var/nzyme-alerts.sh") | crontab -
 
 
 # Dark theme
@@ -197,6 +221,8 @@ gsettings set org.gnome.desktop.background picture-uri file:////opt/background/W
 # Cron to monitor mode to nzyme
 (crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
 
+# Cron to Nzyme alert 
+(crontab -l ; echo "@reboot bash /var/nzyme-alerts.sh") | crontab -
 
 # Dark theme
 # Check if gnome-tweaks is installed
@@ -252,5 +278,8 @@ sudo apt-get -y autoclean
 sudo apt-get -y clean
 
 docker system prune -a -f
+
+# Remove fstab info in VBox
+sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
 sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf zerofile
