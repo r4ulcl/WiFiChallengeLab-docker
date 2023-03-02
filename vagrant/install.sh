@@ -133,8 +133,27 @@ sudo apt-get install -y jq
 sudo wget https://v1.nzyme.org/img/favicon.ico -O /opt/background/nzyme.ico
 
 echo '#!/bin/bash
+
+#check if running
+PID_FILE=/var/run/nzyme-alerts.pid
+
+if [ -e "${PID_FILE}" ]; then
+    PID=$(cat "${PID_FILE}")
+    if ps -p "${PID}" > /dev/null; then
+        echo "Error: Script is already running with PID ${PID}."
+        exit 1
+    else
+        echo "Warning: PID file exists but process is not running. Deleting PID file."
+        rm "${PID_FILE}"
+    fi
+fi
+
+# Register a signal trap to remove the PID file if the script is terminated
+trap "rm ${PID_FILE}; exit 0" SIGINT SIGTERM SIGHUP
+
+echo $$ > "${PID_FILE}"
 # Loop
-GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT"
+GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
 ALERT1=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
 while true ; do
   ALERT2=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
@@ -148,6 +167,10 @@ done
 
 sudo chown user:user /var/nzyme-alerts.sh
 sudo chmod +x /var/nzyme-alerts.sh
+
+echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts.log 2>&1 &' >> /home/user/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts.log 2>&1 &' >> /home/vagrant/.bashrc
+
 
 echo '#!/bin/bash
 #Script to set nzyme interface in monitor mode always
@@ -183,9 +206,6 @@ gsettings set org.gnome.desktop.background picture-uri file:////opt/background/W
 # Cron to monitor mode to nzyme
 (crontab -l ; echo "* * * * * bash /var/aux.sh") | crontab -
 
-# Cron to Nzyme alert 
-(crontab -l ; echo "@reboot bash /var/nzyme-alerts.sh") | crontab -
-
 
 # Dark theme
 # Check if gnome-tweaks is installed
@@ -220,9 +240,6 @@ gsettings set org.gnome.desktop.background picture-uri file:////opt/background/W
 
 # Cron to monitor mode to nzyme
 (crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
-
-# Cron to Nzyme alert 
-(crontab -l ; echo "@reboot bash /var/nzyme-alerts.sh") | crontab -
 
 # Dark theme
 # Check if gnome-tweaks is installed

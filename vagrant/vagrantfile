@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
       #vb.cpus = 2
       vb.memory = "8192"
       vb.cpus = 8
-      vb.name = "WiFiChallengeLab 2.0"
+      vb.name = "WiFiChallenge Lab v2.0"
     end
     virtualbox_vm.vm.provision :shell, path: "./install.sh"
     virtualbox_vm.vm.synced_folder "../", "/media/WiFiChallenge"

@@ -28,7 +28,7 @@ gatewayfqdn disable
 
 #Timeout infinite
 sessiontimeout 0
-authidletimeout 6000
+authidletimeout 0
 
 # https://opennds.readthedocs.io/en/stable/config.html#set-security-level-fas-secure-enabled
 # Insecure
@@ -89,8 +89,8 @@ FirewallRuleSet users-to-router {
  # comment these out.
    FirewallRule allow tcp port 22
    FirewallRule allow tcp port 80
-   FirewallRule allow tcp port 443
-   FirewallRule allow tcp port 2050
+   #FirewallRule allow tcp port 443
+   #FirewallRule allow tcp port 2050
 }
 
 trustedmaclist 80:18:44:BF:72:47,B0:72:BF:B0:78:48,B0:72:BF:44:B0:49
