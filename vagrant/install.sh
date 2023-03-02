@@ -59,6 +59,10 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
+# Fix DNS error Docker
+sudo apt-get install bridge-utils -y
+sudo service docker restart
+
 ## Go to WiFiChallengeFolder (git clone...)
 cp -r /media/WiFiChallenge /var/
 cd /var/WiFiChallenge
@@ -132,11 +136,16 @@ chmod +x /var/aux.sh
 
 echo '#!/bin/bash
 #Script update wifi_db on reboot
-git --git-dir=/root/tools/wifi_db/.git pull' > /var/update_wifi_db.sh
+git --git-dir=/root/tools/wifi_db/.git pull
+
+cd /var/WiFiChallenge/
+
+
+' > /var/update_wifi_lab.sh
 chmod +x /var/update_wifi_db.sh
 
 # Root crontab
-(crontab -l ; echo "@reboot /var/update_wifi_db.sh > /tmp/update_wifi_db.log") | crontab -
+(crontab -l ; echo "@reboot /var/update_wifi_lab.sh > /tmp/update_wifi_lab.log") | crontab -
 
 
 # Configure GUI when user open terminal first time, then delete

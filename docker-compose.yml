@@ -1,7 +1,8 @@
 version: '3.8'
 services:
   aps:
-    build: ./APs/
+    image: r4ulcl/wifichallengelab-aps:latest
+    #build: ./APs/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-APs
     env_file: ./APs/.env
@@ -12,7 +13,8 @@ services:
     privileged: true #NETNS
 
   clients:
-    build: ./Clients/
+    image: r4ulcl/wifichallengelab-clients:latest
+    #build: ./Clients/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-Clients
     env_file: ./Clients/.env
@@ -85,3 +87,11 @@ services:
               memory: 512M
             reservations:
               memory: 128M
+
+  # To keep the Dockers updated
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 10 WiFiChallengeLab-Clients WiFiChallengeLab-APs
