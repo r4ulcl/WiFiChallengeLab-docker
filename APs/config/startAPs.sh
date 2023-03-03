@@ -84,8 +84,6 @@ mkdir /root/logs/ 2> /dev/nil
 bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 
 
-dnsmasq
-
 
 mkdir /root/logs/ 2> /dev/nil
 

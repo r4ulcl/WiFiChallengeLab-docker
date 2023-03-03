@@ -231,6 +231,28 @@ sudo make install
 cd ..
 
 
+# wifiphisher
+cd $TOOLS
+git clone https://github.com/wifiphisher/extra-phishing-pages
+
+git clone https://github.com/wifiphisher/wifiphisher.git # Download the latest revision
+cd wifiphisher # Switch to tool's directory
+sudo python3 setup.py install # Install any dependencies
+
+# wifite2
+cd $TOOLS
+git clone https://github.com/derv82/wifite2.git
+cd wifite2
+sudo python3 setup.py install
+
+# Fluxion
+cd $TOOLS
+
+git clone https://www.github.com/FluxionNetwork/fluxion.git
+cd fluxion 
+./fluxion.sh
+
+
 #Enable ssh (if dont use vagrant)
 #apt-get install -y ssh
 #echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
