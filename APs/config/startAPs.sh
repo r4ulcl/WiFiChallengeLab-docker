@@ -94,6 +94,8 @@ mkdir /root/logs/ 2> /dev/nil
 # Open
 ip addr add $IP_OPN.1/24 dev $WLAN_OPN
 hostapd_aps /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
+# opennds
+opennds > /root/logs/opennds.log 2>&1
 
 # Open hidden
 ip addr add $IP_OPN_HIDDEN.1/24 dev $WLAN_OPN_HIDDEN

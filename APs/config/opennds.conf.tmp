@@ -24,17 +24,7 @@
 #
 GatewayInterface $WLAN_OPN
 gatewayfqdn disable
-
-
-#Timeout infinite
-sessiontimeout 0
-authidletimeout 0
-
-# https://opennds.readthedocs.io/en/stable/config.html#set-security-level-fas-secure-enabled
-# Insecure
-# fas_secure_enabled '1'
-
-
+gatewayport 8080
 
 
 # Login Option
@@ -64,18 +54,12 @@ themespec_path /usr/lib/opennds/theme_user-email-login-basic.sh
 # FirewallRuleSet: authenticated-users
 #
 # Control access for users after authentication.
-# For happy customers allow all
 FirewallRuleSet authenticated-users {
-  FirewallRule allow all
+#  FirewallRule passthrough all
 }
 
 FirewallRuleSet preauthenticated-users {
 }
-
-# Autonomous Walled Garden configuration using a list of FQDNs and Ports.
-# Example To add Paypal to the Walled Garden:
-# walledgarden_fqdn_list paypal.com paypalobjects.com'
-# walledgarden_port_list 443
 
 # FirewallRuleSet: users-to-router
 # Control access to the router itself from the GatewayInterface.
@@ -89,8 +73,7 @@ FirewallRuleSet users-to-router {
  # comment these out.
    FirewallRule allow tcp port 22
    FirewallRule allow tcp port 80
-   #FirewallRule allow tcp port 443
-   #FirewallRule allow tcp port 2050
+   FirewallRule allow tcp port 443
 }
 
 trustedmaclist 80:18:44:BF:72:47,B0:72:BF:B0:78:48,B0:72:BF:44:B0:49
