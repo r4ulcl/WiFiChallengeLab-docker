@@ -153,8 +153,8 @@ hostapd_aps /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log
 ping $IP_WEP.2 > /dev/null 2>&1 &
 
 # start captive portal open network
-opennds > /root/logs/opennds.log 2>&1
-
+sudo systemctl enable dnsmasq
+service dnsmasq start
 
 #systemctl stop networking
 echo "ALL SET"

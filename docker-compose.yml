@@ -37,7 +37,7 @@ services:
       - no-new-privileges:true
     volumes:
       - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
-      - ./nzyme/logs:/var/log/nzyme/
+      - ./logsNzyme:/var/log/nzyme/
     #ports:
     #  - "22900:22900"
     depends_on:
