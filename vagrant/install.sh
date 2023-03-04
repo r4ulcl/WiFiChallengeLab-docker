@@ -66,7 +66,14 @@ sudo service docker restart
 ## Go to WiFiChallengeFolder (git clone...)
 cp -r /media/WiFiChallenge /var/
 cd /var/WiFiChallenge
-rm -r /var/WiFiChallenge/.git
+shred -vzn 3 /var/WiFiChallenge/.git
+# No need
+shred -vzn 3 /var/WiFiChallenge/APs
+shred -vzn 3 /var/WiFiChallenge/Clients
+
+find /var/WiFiChallenge/APs -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallenge/Clients -type f -exec shred -zvu -n 5 {} \;
+rm -r /var/WiFiChallenge/Clients /var/WiFiChallenge/APs
 
 ## Install RDP server
 echo 'Install RDP server'
@@ -114,6 +121,13 @@ cd /var/WiFiChallenge
 sudo docker-compose restart aps
 sudo docker-compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
+echo '#!/bin/bash
+#Update images from AP and clients
+cd /var/WiFiChallenge
+sudo docker-compose pull
+sudo docker-compose up --detach
+' | sudo tee /root/restartWiFi.sh  /home/user/updateWiFiChallengeLab.sh
+
 
 #Fix password on wifi scan
 # Change the configuration file
@@ -154,9 +168,9 @@ trap "rm ${PID_FILE}; exit 0" SIGINT SIGTERM SIGHUP
 echo $$ > "${PID_FILE}"
 # Loop
 GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
-ALERT1=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+ALERT1=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
 while true ; do
-  ALERT2=`cat /var/WiFiChallenge/nzyme/logs/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+  ALERT2=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
   if [ "$ALERT1" != "$ALERT2" ] ; then
     ALERT1=$ALERT2
     notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$ALERT2"
@@ -168,8 +182,8 @@ done
 sudo chown user:user /var/nzyme-alerts.sh
 sudo chmod +x /var/nzyme-alerts.sh
 
-echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts.log 2>&1 &' >> /home/user/.bashrc
-echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts.log 2>&1 &' >> /home/vagrant/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts-user.log 2>&1 &' >> /home/user/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts-vagrant.log 2>&1 &' >> /home/vagrant/.bashrc
 
 
 echo '#!/bin/bash
@@ -229,7 +243,7 @@ echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
 
 
 # Configure GUI when user open terminal first time, then delete in ubuntu user
-echo '
+sudo tee /etc/configureUseruser.sh > /dev/null <<EOF
 # Enable dock
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
@@ -255,7 +269,13 @@ gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
 # Auto delete
 sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
-' > /etc/configureUseruser.sh
+
+# Add Terminal to favorites
+gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'org.gnome.Terminal.desktop']"
+gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop']"
+
+EOF
+#' > 
 
 echo 'bash /etc/configureUseruser.sh' >> /home/user/.bashrc
 
@@ -268,14 +288,27 @@ grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config || echo "PasswordAuthe
 # Restart the SSH server to apply the changes
 sudo service ssh restart
 
-# default firefox page
-PROFILE_DIR=/home/user/.mozilla/firefox/*.default-*
-echo 'user_pref("browser.startup.homepage", "http://127.0.0.1:22900");' >> $PROFILE_DIR/prefs.js
-echo 'user_pref("browser.startup.page", 1);' >> $PROFILE_DIR/prefs.js
+firefox_dir="/usr/lib/firefox"
 
-PROFILE_DIR=/home/vagrant/.mozilla/firefox/*.default-*
-echo 'user_pref("browser.startup.homepage", "http://127.0.0.1:22900");' >> $PROFILE_DIR/prefs.js
-echo 'user_pref("browser.startup.page", 1);' >> $PROFILE_DIR/prefs.js
+# Create a new file in the Firefox installation directory
+sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
+{
+    "policies": {
+        "Homepage": {
+            "URL": "http://127.0.0.3:22900"
+        },
+        "Auth": {
+            "Login": {
+                "nzyme - WiFi Defense System": {
+                    "username": "admin",
+                    "password": "admin"
+                }
+            }
+        }
+    }
+}
+EOF
+
 
 
 # Root acces GUI
