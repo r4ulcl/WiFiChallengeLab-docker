@@ -9,3 +9,5 @@ wpa=0
 
 #macaddr_acl=1
 #accept_mac_file=/root/open/acceptMac.txt
+
+ap_isolate=1

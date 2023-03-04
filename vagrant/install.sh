@@ -126,7 +126,7 @@ echo '#!/bin/bash
 cd /var/WiFiChallenge
 sudo docker-compose pull
 sudo docker-compose up --detach
-' | sudo tee /root/restartWiFi.sh  /home/user/updateWiFiChallengeLab.sh
+' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 
 
 #Fix password on wifi scan
@@ -295,7 +295,7 @@ sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
 {
     "policies": {
         "Homepage": {
-            "URL": "http://127.0.0.3:22900"
+            "URL": "http://127.0.0.1:22900"
         },
         "Auth": {
             "Login": {

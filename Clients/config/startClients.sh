@@ -118,7 +118,7 @@ done &
 # MGT Reg .6
 while :
 do
-    TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
@@ -128,7 +128,7 @@ done &
 # MGT client TLS .7
 while :
 do
-    TIMEOUT=$(( ( RANDOM % 150 )  + 300 ))
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
     wait $!
 done &
@@ -144,7 +144,7 @@ done &
 # MGT Legacy MD5 .17
 while :
 do
-    TIMEOUT=$(( ( RANDOM % 150 )  + 100 ))
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_LEGACY -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
     wait $!
 done &
