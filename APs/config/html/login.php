@@ -112,7 +112,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRIS
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{F4G6$%2f2g4hs}";
+    echo "flag{NBLvyxgwckKnyGup6HNj}";
     echo "<br><br>";
     echo "<br><br>";
   }
@@ -122,7 +122,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only ENTERPRIS
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{c3B8EBA8iXfMZLXmWe}";
+    echo "flag{gsnyT98GxngXgMPJEIKw}";
     echo "<br><br>";
     echo "<br><br>";
   }

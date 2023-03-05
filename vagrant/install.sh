@@ -120,6 +120,7 @@ cd /var/WiFiChallenge
 
 sudo docker-compose restart aps
 sudo docker-compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
+chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 echo '#!/bin/bash
 #Update images from AP and clients
@@ -127,6 +128,7 @@ cd /var/WiFiChallenge
 sudo docker-compose pull
 sudo docker-compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
+chmod +x /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 
 
 #Fix password on wifi scan
