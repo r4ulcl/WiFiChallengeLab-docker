@@ -12,5 +12,5 @@ echo "<br><br>";
 
 ?>
 
-Congratulation! You have logged into password protected page. <a href="index.php">Click here</a> to go to index.php to get the flag.
+Congratulation! You have logged into password protected page. <a href="index.php">Click here</a> to go to index.php to get the flag. 
 
