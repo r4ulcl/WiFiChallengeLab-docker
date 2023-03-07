@@ -43,7 +43,12 @@ Or RDP to IP 192.168.59.10 and port 3389 (using [remmina](https://remmina.org/) 
 ```
 ```
 
-## After cerate VM
+## After create VM
 
 - SSH as user and as vagrant to configure GUI 
 - Remove /etc/fstab share folder if used
+
+### in vmware
+```
+sudo apt-get install open-vm-tools-desktop -y
+```

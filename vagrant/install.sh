@@ -273,8 +273,11 @@ gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
 
 # Add Terminal to favorites
-gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'org.gnome.Terminal.desktop']"
-gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop']"
+gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop']" "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'org.gnome.Terminal.desktop']"
+
+# Remove fstab info in VBox
+sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
+
 
 EOF
 #' > 
@@ -312,6 +315,18 @@ sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
 EOF
 
 
+# Disable systemd-resolved
+sudo sed -i 's/^DNSStubListener=yes/DNSStubListener=no/g' /etc/systemd/resolved.conf
+sudo systemctl stop systemd-resolved.service
+sudo systemctl disable systemd-resolved.service
+# Configure DNS servers
+sudo rm /etc/resolv.conf
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf >/dev/null
+echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf >/dev/null
+# Restart networking service
+sudo systemctl restart networking.service
+
+
 
 # Root acces GUI
 su -c 'xhost si:localuser:root' vagrant
@@ -331,7 +346,5 @@ sudo apt-get -y clean
 
 docker system prune -a -f
 
-# Remove fstab info in VBox
-sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
 sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf zerofile
