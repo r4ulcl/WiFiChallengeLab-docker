@@ -273,7 +273,7 @@ gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
 
 # Add Terminal to favorites
-gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop']" "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'org.gnome.Terminal.desktop']"
+gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop', 'org.gnome.Terminal.desktop']"
 
 # Remove fstab info in VBox
 sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
