@@ -326,6 +326,20 @@ echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf >/dev/null
 # Restart networking service
 sudo systemctl restart networking.service
 
+# Install guest additions
+# Check if system is running on VMware
+if [[ $(dmidecode | grep -i vmware) ]]; then
+    echo "Installing open-vm-tools-desktop for VMware"
+    sudo apt-get update
+    sudo apt-get install -y open-vm-tools-desktop
+# Check if system is running on VirtualBox
+elif [[ $(dmidecode | grep -i virtualbox) ]]; then
+    echo "Installing VirtualBox Guest Additions for VirtualBox"
+    sudo apt-get update
+    sudo apt-get install -y virtualbox-guest-additions-iso
+else
+    echo "This script only supports VMware and VirtualBox virtual machines."
+fi
 
 
 # Root acces GUI

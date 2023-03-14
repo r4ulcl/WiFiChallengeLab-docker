@@ -23,7 +23,9 @@ mkdir $TOOLS
 #' >> /etc/apt/sources.list.d/kali.list
 #gpg --keyserver hkp://keys.gnupg.net --recv-key ED444FF07D8D0BF6
 #gpg -a --export ED444FF07D8D0BF6 | sudo apt-key add -
-#sudo apt update
+
+sudo apt-get update
+sudo apt-get upgrade -y
 
 sudo apt-get install nmap -y
 
