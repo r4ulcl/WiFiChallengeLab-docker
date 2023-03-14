@@ -2,7 +2,7 @@
 
 ## For VirtualBox
 
-Create and start the VM (about 1 hour 40 minutes):
+Create and start the VM (about 1 hour 30 minutes):
 
 ```bash
 vagrant up virtualbox_vm
@@ -25,7 +25,7 @@ VBoxManage modifyhd --compact ubuntu-focal-20.04-cloudimg.vmdk
 
 
 ## For VMWare
-Create and start the VM (about 1 hour 40 minutes)::
+Create and start the VM (about 1 hour 30 minutes)::
 
 ``` bash
 vagrant up vmware_vm 
@@ -47,8 +47,3 @@ Or RDP to IP 192.168.59.10 and port 3389 (using [remmina](https://remmina.org/) 
 
 - SSH as user and as vagrant to configure GUI 
 - Remove /etc/fstab share folder if used
-
-### in vmware
-```
-sudo apt-get install open-vm-tools-desktop -y
-```
