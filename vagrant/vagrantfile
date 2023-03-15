@@ -13,10 +13,10 @@ Vagrant.configure("2") do |config|
     #virtualbox_vm.vm.network "private_network", ip: "192.168.56.10"
     virtualbox_vm.vm.hostname  = "WiFiChallengeLab"
     virtualbox_vm.vm.provider "virtualbox" do |vb|
-      #vb.memory = "2048"
-      #vb.cpus = 2
-      vb.memory = "8192"
-      vb.cpus = 8
+      vb.memory = "2048"
+      vb.cpus = 2
+      #vb.memory = "8192"
+      #vb.cpus = 8
       vb.name = "WiFiChallenge Lab v2.0"
     end
     virtualbox_vm.vm.provision :shell, path: "./install.sh"
@@ -34,10 +34,10 @@ Vagrant.configure("2") do |config|
     #vmware_vm.vm.network "private_network", ip: "192.168.57.10"
     vmware_vm.vm.hostname  = "WiFiChallengeLab"
     vmware_vm.vm.provider "vmware_desktop" do |vb|
-      #vb.memory = "2048"
-      #vb.cpus = 2
-      vb.memory = "8192"
-      vb.cpus = 8
+      vb.memory = "2048"
+      vb.cpus = 2
+      #vb.memory = "8192"
+      #vb.cpus = 8
     end
     vmware_vm.vm.provision :shell, path: "./install.sh"
     vmware_vm.vm.synced_folder "../", "/media/WiFiChallenge"
