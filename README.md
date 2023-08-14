@@ -29,8 +29,8 @@ The principal changes from version 1.0.5 to 2.0 are the following.
 
 Download the VM for VMWare or VirtualBox:
 
-- From releases
-- From Google Drive
+- [GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
+- [Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
 ### Docker inside a Linux host
 
