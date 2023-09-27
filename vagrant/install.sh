@@ -195,20 +195,6 @@ sudo iw wlan60 set type monitor
 sudo ip link set wlan60 up' > /var/aux.sh
 chmod +x /var/aux.sh
 
-echo '#!/bin/bash
-#Script update wifi_db on reboot
-git --git-dir=/root/tools/wifi_db/.git pull
-
-cd /var/WiFiChallenge/
-
-
-' > /var/update_wifi_lab.sh
-chmod +x /var/update_wifi_db.sh
-
-# Root crontab
-(crontab -l ; echo "@reboot /var/update_wifi_lab.sh > /tmp/update_wifi_lab.log") | crontab -
-
-
 # Configure GUI when user open terminal first time, then delete
 echo '#!/bin/bash
 # Enable dock
