@@ -91,6 +91,8 @@ patch -p1 < ../hostapd-2.10-wpe.patch
 rm ../hostapd-2.10-wpe.patch
 cd hostapd
 
+sudo apt install libsqlite3-dev -y
+
 make
 make install
 make wpe
