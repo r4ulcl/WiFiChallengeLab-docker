@@ -1,0 +1,16 @@
+interface=$WLAN_WEP
+driver=nl80211
+#ignore_broadcast_ssid=2
+
+hw_mode=g
+channel=1
+ssid=wifi-old
+#wpa=2
+#wpa_key_mgmt=WPA-PSK
+#wpa_pairwise=CCMP TKIP
+#wpa_passphrase=adminadmin
+
+
+auth_algs=1
+wep_default_key=0
+wep_key0=11bb33cd55

@@ -38,6 +38,9 @@ envsubst_tmp
 #MGT
 cd /root/mgt/
 envsubst_tmp
+#WEP
+cd /root/wep/
+envsubst_tmp
 
 cd
 
@@ -75,7 +78,7 @@ macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
-#macchanger -r wlan29 >> /root/logs/macchanger.log # TODO
+macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
 
 
 mkdir /root/logs/ 2> /dev/nil
@@ -145,6 +148,9 @@ hostapd_aps /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.l
 ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
 hostapd_aps /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
 
+ip addr add $IP_WEP.1/24 dev $WLAN_WEP
+hostapd_aps /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log &
+
 #ip addr del $IP_190.15/24 dev enp0s3
 
 #bash /root/checkVWIFI.sh > /root/logs/checkVWIFI.log &
@@ -158,6 +164,9 @@ service dnsmasq start
 
 #systemctl stop networking
 echo "ALL SET"
+
+#Generate WEP traffic
+ping $IP_WEP.2 > /dev/null 2>&1
 
 /bin/bash
 

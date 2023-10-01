@@ -20,6 +20,7 @@ COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/
 COPY config/wpa3Client/ /root/wpa3Client/
+COPY config/wepClient /root/wepClient
 
 #Copy connectINET.sh
 COPY config/connectINET.sh /root/

@@ -9,6 +9,7 @@ COPY config/open/ /root/open/
 COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
+COPY config/wep/ /root/wep/
 COPY config/certs/ /root/mgt/certs/
 
 #COPY var file
