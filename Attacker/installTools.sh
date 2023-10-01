@@ -82,6 +82,7 @@ sudo python3 -m pip install --upgrade pyopenssl
 #hostapd-wpe
 cd $TOOLS
 # https://github.com/aircrack-ng/aircrack-ng/tree/master/patches/wpe/hostapd-wpe
+sudo apt install libsqlite3-dev -y
 wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.10-wpe.patch
 wget https://w1.fi/releases/hostapd-2.10.tar.gz
 tar -zxf hostapd-2.10.tar.gz

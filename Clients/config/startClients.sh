@@ -72,6 +72,7 @@ macchanger -m $MAC_OPN1 $WLAN_OPN1 >> /root/logs/macchanger.log
 macchanger -m $MAC_OPN2 $WLAN_OPN2 >> /root/logs/macchanger.log
 macchanger -m $MAC_OPN3 $WLAN_OPN3 >> /root/logs/macchanger.log
 macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log
+macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log
 
 
 
@@ -166,6 +167,9 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN3 -c /root/openClient/ope
 
 # WPA3 .52
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Client/downgrade_psk.conf > /root/logs/supplicantWPA3Downgrade.log &
+
+# WEP
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WEP -c /root/wepClient/wep.conf > /root/logs/supplicantWEP.log &
 
 
 sleep 10

@@ -104,6 +104,15 @@ do
 	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill
 done &
 
+# WEP traffic
+while :
+do
+	#Infine traffic WEP
+	dhclien-wifichallenge $WLAN_WEP -v
+	ping $IP_WEP.1 -s 1000 -f & 
+	ping $IP_WEP.1 -s 1000 -f
+done &
+
 # Infinite wait
 LAST=$!
 wait $LAST

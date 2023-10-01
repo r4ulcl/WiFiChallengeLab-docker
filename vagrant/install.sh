@@ -323,6 +323,7 @@ elif [[ $(dmidecode | grep -i virtualbox) ]]; then
     echo "Installing VirtualBox Guest Additions for VirtualBox"
     sudo apt-get update
     sudo apt-get install -y virtualbox-guest-additions-iso
+    sudo apt-get install -y virtualbox-guest-x11 
 else
     echo "This script only supports VMware and VirtualBox virtual machines."
 fi
