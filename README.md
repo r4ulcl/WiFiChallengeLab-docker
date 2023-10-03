@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="B-WifiChallengeLab-LOGO.svg">
+  <img src="images/B-WifiChallengeLab-LOGO.png">
 </p>
 
 <p align="center">
