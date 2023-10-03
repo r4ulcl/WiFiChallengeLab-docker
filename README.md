@@ -1,23 +1,48 @@
+<p align="center">
+  <img src="B-WifiChallengeLab-LOGO.svg">
+</p>
+
+<p align="center">
+   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/releases">
+    <img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker" alt="GitHub releases">
+  </a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers">
+    <img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network">
+    <img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub forks">
+  </a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues">
+    <img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub issues">
+  </a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub license">
+  </a>
+</p>
+
+
 # WiFiChallengeLab-docker
 
+
+
+
 [![Docker Image APs](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-aps) [![Docker Image Clients](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-clients)
+
 
 Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Ubuntu virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks. 
 
 ## Changelog from version v1.0
 
-The principal changes from version 1.0.5 to 2.0 are the following. 
+The principal changes from version 1.0.5 to 2.0.3 are the following. 
 - Remove Nested VMs. Replaced with Docker
 - Add new attacks and modify the existent to make them more real
     - WPA3 bruteforce and downgrade
     - MGT Multiples APs
     - Real captive portal evasion (instead of just MAC filtering)
     - Phishing client with fake website.
-- Remove really old attacks not realistic and too basic... like:
-    - wep
-    - wps pin
-- Use Ubuntu as SO instead of debian
-- Use vagrant to create the VM to be easy to replicate 
+- Eliminating the WPS pin attack as it is outdated, unrealistic, and overly simplistic.
+- Use Ubuntu as SO instead of Debian
+- Use vagrant to create the VM to be easy to replicate
 - More Virtual WiFi adapters
     - More APs
     - More clients
