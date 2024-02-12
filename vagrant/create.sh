@@ -7,7 +7,7 @@ HALT=true
 OPTION=$1
 
 if [ -z "${OPTION}" ]; then
-    echo "Unknown option, only VMware or VirtualBox"
+    echo "Unknown option, only vmware, virtualbox or both"
     exit 1
 fi
 

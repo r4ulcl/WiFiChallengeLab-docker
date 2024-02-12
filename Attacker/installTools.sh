@@ -5,12 +5,13 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+sudo apt-get install curl git -y
+
 # Rockyou
 cd 
 curl https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -s -L | head -n 1000000 > ~/rockyou-top100000.txt
 #wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
 wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
-
 
 # Hacking tools
 FOLDER=`pwd`
@@ -40,10 +41,11 @@ git clone https://github.com/blackarrowsec/EAP_buster
 # OpenSSL 3 for ubuntu
 sudo apt-get install build-essential checkinstall zlib1g-dev -y
 cd /usr/local/src/
-wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
-sudo tar -xvf openssl-3.0.2.tar.gz
-rm openssl-3.0.2.tar.gz
-cd openssl-3.0.2
+VERSION='openssl-3.2.1'
+wget https://www.openssl.org/source/$VERSION.tar.gz
+tar -xvf $VERSION.tar.gz > /dev/null
+rm $VERSION.tar.gz
+cd $VERSION
 ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
 make
 make test
@@ -53,6 +55,14 @@ make install
 cd $TOOLS
 sudo apt-get install python3-pip sqlitebrowser -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
+sudo apt install pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc -y
+
+git clone https://github.com/ZerBea/hcxtools.git
+cd hcxtools
+make 
+sudo make install
+cd ..
+
 git clone https://github.com/r4ulcl/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
@@ -64,7 +74,7 @@ chmod +x pcapFilter.sh
 
 #Eaphhammer
 cd $TOOLS
-git clone https://github.com/r4ulcl/eaphammer.git
+git clone https://github.com/s0lst1c3/eaphammer.git
 cd eaphammer
 for L in `cat kali-dependencies.txt` ; do echo $L; apt-get install $L -y ;done
 sudo apt-get install dsniff apache2 -y
@@ -105,8 +115,20 @@ make install
 #aircrack
 apt-get install aircrack-ng -y
 
-apt-get install hashcat -y
+# hashcat
+#apt-get install hashcat -y
+sudo apt purge hashcat
 
+wget https://hashcat.net/files/hashcat-6.0.0.7z
+sudo p7zip -d hashcat-*
+cd hashcat-6.0.0/
+
+sudo cp hashcat.bin /usr/bin/
+sudo ln -s /usr/bin/hashcat.bin /usr/bin/hashcat
+sudo cp -Rv OpenCL/ /usr/bin/
+sudo cp -Rv modules/ /usr/bin/
+sudo cp hashcat.hcstat2 /usr/bin/
+sudo cp hashcat.hctune /usr/bin/
 
 # Creap
 cd $TOOLS

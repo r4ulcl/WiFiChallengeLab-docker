@@ -54,11 +54,6 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-## Install docker-compose
-#sudo apt-get install -y docker-compose
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
 # Fix DNS error Docker
 sudo apt-get install bridge-utils -y
 sudo service docker restart
@@ -91,8 +86,8 @@ sudo apt-get install -y p7zip-full
 
 ## Enable docker
 cd /var/WiFiChallenge/
-sudo docker-compose -f docker-compose.yml up -d
-#sudo docker-compose -f docker-compose-minimal.yml up -d
+sudo docker compose -f docker-compose.yml up -d
+#sudo docker compose -f docker-compose-minimal.yml up -d
 
 
 ## remove all non-essential programs in an Ubuntu 20 minimal ISO-based Vagrant VM
@@ -118,15 +113,15 @@ echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
 echo '#!/bin/bash
 cd /var/WiFiChallenge
 
-sudo docker-compose restart aps
-sudo docker-compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
+sudo docker compose restart aps
+sudo docker compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
 chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 echo '#!/bin/bash
 #Update images from AP and clients
 cd /var/WiFiChallenge
-sudo docker-compose pull
-sudo docker-compose up --detach
+sudo docker compose pull
+sudo docker compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 chmod +x /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 
