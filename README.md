@@ -7,16 +7,16 @@
     <img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker" alt="GitHub releases">
   </a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers">
-    <img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub stars">
+    <img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub stars">
   </a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network">
-    <img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub forks">
+    <img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub forks">
   </a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues">
-    <img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub issues">
+    <img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub issues">
   </a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg" alt="GitHub license">
+    <img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub license">
   </a>
 </p>
 
@@ -24,12 +24,19 @@
 # WiFiChallengeLab-docker
 
 
-
-
 [![Docker Image APs](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-aps) [![Docker Image Clients](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-clients)
 
 
 Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Ubuntu virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks. 
+
+
+## CTFd Lab
+
+For direct access to download the VM and complete the challenges go to the CTFd web site: 
+
+[WiFiChallenge Lab v2.0](https://wifichallengelab.com/)
+
+
 
 ## Changelog from version v1.0
 
