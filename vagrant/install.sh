@@ -141,7 +141,7 @@ sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 # nzyme alerts
 sudo apt-get install -y jq
 # nzyme icon for alerts
-sudo wget https://v1.nzyme.org/img/favicon.ico -O /opt/background/nzyme.ico
+sudo wget https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
 
 echo '#!/bin/bash
 
