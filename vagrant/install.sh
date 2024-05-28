@@ -6,20 +6,6 @@ sudo apt-get update
 ## Install drivers modprobe 
 sudo apt-get install -y linux-generic
 
-# Add SWAP file
-# Set the size of the swap file in bytes
-swap_size=4G
-# Create a new file to be used as a swap file
-sudo fallocate -l $swap_size /swapfile
-# Set the correct permissions on the file
-sudo chmod 600 /swapfile
-# Format the file as a swap file
-sudo mkswap /swapfile
-# Enable the swap file
-sudo swapon /swapfile
-# Make the change permanent by adding the following line to /etc/fstab
-echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
-
 # Create a sudo user
 # Create the user
 sudo useradd -m -s /bin/bash user
@@ -342,5 +328,6 @@ sudo apt-get -y clean
 
 docker system prune -a -f
 
-
-sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf zerofile
+echo "Starting dd, this may take a while"
+sudo dd if=/dev/zero of=/tmp/zerofile bs=1M ; sudo rm -rf /tmp/zerofile
+sudo rm -rf /tmp/zerofile
