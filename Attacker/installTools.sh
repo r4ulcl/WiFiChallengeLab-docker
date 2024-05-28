@@ -76,6 +76,7 @@ chmod +x pcapFilter.sh
 cd $TOOLS
 git clone https://github.com/s0lst1c3/eaphammer.git
 cd eaphammer
+apt-get remove -y python3-pyee
 for L in `cat kali-dependencies.txt` ; do echo $L; apt-get install $L -y ;done
 sudo apt-get install dsniff apache2 -y
 sudo systemctl stop apache2
@@ -116,11 +117,12 @@ make install
 apt-get install aircrack-ng -y
 
 # hashcat
-#apt-get install hashcat -y
+cd $TOOLS
+apt-get install hashcat -y
 sudo apt purge hashcat
 
 wget https://hashcat.net/files/hashcat-6.0.0.7z
-sudo p7zip -d hashcat-*
+sudo p7zip -d hashcat-6.0.0.7z
 cd hashcat-6.0.0/
 
 sudo cp hashcat.bin /usr/bin/
