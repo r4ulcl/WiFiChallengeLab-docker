@@ -54,6 +54,8 @@ shred -vzn 3 /var/WiFiChallenge/Clients
 
 find /var/WiFiChallenge/APs -type f -exec shred -zvu -n 5 {} \;
 find /var/WiFiChallenge/Clients -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallenge/vagrant -type f -exec shred -zvu -n 5 {} \;
+
 rm -r /var/WiFiChallenge/Clients /var/WiFiChallenge/APs
 
 ## Install RDP server

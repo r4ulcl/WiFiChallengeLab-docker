@@ -72,6 +72,10 @@ cd $TOOLS
 wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/6759cb1117569d5a2cb4c5166be76c717c3673e0/pcapFilter.sh
 chmod +x pcapFilter.sh
 
+# UnicastDeauth
+git clone 'https://github.com/mamatb/UnicastDeauth.git'
+pip install -r './UnicastDeauth/requirements.txt'
+
 #Eaphhammer
 cd $TOOLS
 git clone https://github.com/s0lst1c3/eaphammer.git
