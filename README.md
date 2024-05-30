@@ -64,7 +64,7 @@ Download the VM for VMWare or VirtualBox:
 - [GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
 - [Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
-### Docker inside a Linux host
+### Docker inside a Linux host or a custom VM
 
 Download the repository and start the docker with the APs, the clients and nzyme for alerts. 
 
@@ -74,13 +74,16 @@ cd WiFiChallengeLab-docker
 docker-compose up -d --file docker-compose.yml
 ```
 
+#### Optionally: Install Wi-Fi tools
+
+Go to the folder where the tools will be installed and execute `Attacker/installTools.sh`
+
 ### Create your own VM using vagrant
 
 #### Requirements
 
-- A Linux host with at least 4 CPU cores and 4 GB of RAM.
-- docker
-- docker-compose
+- A host with at least 4 CPU cores and 4 GB of RAM.
+- vagrant
 
 #### Create the VM with vagrant
 
