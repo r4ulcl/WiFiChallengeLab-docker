@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   aps:
     image: r4ulcl/wifichallengelab-aps:latest
