@@ -97,6 +97,15 @@ if (isset($_POST['Submit'])) {
     echo "<br><br>";
   }
 
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) {
+    #relay user
+    echo "<br><br>";
+    echo "<br><br>";
+    echo "flag{iAYcxpe6N2A98zhglx6E}";
+    echo "<br><br>";
+    echo "<br><br>";
+  }
+
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
     echo "<br><br>";
     echo "Hello Global Admin:";

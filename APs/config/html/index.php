@@ -41,7 +41,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 
 		if (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false) { //only MGT Relay	
 			echo "Hello";
-		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only HIDDEN
+		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only wep
 			echo "flag{iAYcxpe6N2A98zhglx6E}";
 		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.3.') !== false) { //only WPS
 			echo "flag{KD5TaejRFIDgIQwjgUfB}";
@@ -102,7 +102,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 
 	if ($_SESSION["Username"] == "administrator") {
 		if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only WEP	
-			echo "flag{g9Ywbxflpye7P0sVAgRQ}";
+			echo "flag{iAYcxpe6N2A98zhglx6E}";
 		} else {
 			echo "Your Princess Is in Another Castle!";
 		}
