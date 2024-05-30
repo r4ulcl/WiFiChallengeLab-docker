@@ -113,6 +113,19 @@ sudo docker compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 chmod +x /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 
+# Fix "Your kernel does not support swap limit capabilities or the cgroup is not mounted. Memory limited without swap."
+
+grub_file="/etc/default/grub"
+params="cgroup_enable=memory swapaccount=1"
+
+# Check if the parameters are already present
+if grep -q "$params" "$grub_file"; then
+    echo "Parameters already present in GRUB_CMDLINE_LINUX."
+else
+  # Add the parameters to GRUB_CMDLINE_LINUX
+  sudo sed -i "/^GRUB_CMDLINE_LINUX=/ s/\"$/ $params\"/" "$grub_file"
+fi
+sudo update-grub
 
 #Fix password on wifi scan
 # Change the configuration file
