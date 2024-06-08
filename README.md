@@ -55,7 +55,7 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
     - More clients
 - Monitorization and detection using nzyme WIDS.
 
-## Install
+## Using WiFiChallenge Lab
 
 ### Using the VM
 
@@ -84,6 +84,7 @@ Go to the folder where the tools will be installed and execute `Attacker/install
 
 - A host with at least 4 CPU cores and 4 GB of RAM.
 - vagrant
+- VirtualBox, VMware or Hyper-V
 
 #### Create the VM with vagrant
 
@@ -105,9 +106,14 @@ If you want a VMWare VM:
 vagrant up vmware_vm 
 ```
 
-And for a VirtualBox VM:
+For a VirtualBox VM:
 ``` bash
 vagrant up virtualbox_vm 
+```
+
+And for a Hyper-v VM, in a admin console:
+``` bash
+vagrant up hyper-v_vm --provider=hyperv
 ```
 
 ## Usage
