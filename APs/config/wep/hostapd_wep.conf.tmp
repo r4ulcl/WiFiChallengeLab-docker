@@ -3,7 +3,7 @@ driver=nl80211
 #ignore_broadcast_ssid=2
 
 hw_mode=g
-channel=1
+channel=3
 ssid=wifi-old
 #wpa=2
 #wpa_key_mgmt=WPA-PSK
