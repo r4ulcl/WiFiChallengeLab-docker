@@ -144,8 +144,8 @@ apt-get install arp-scan -y
 
 
 #airgeddon
-sudo apt-get install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd-y
-sudo apt-get install asleap bettercap ettercap-text-only hcxtools hcxdumptool bully mdk4 beef-xss -y
+sudo apt-get install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd -y
+sudo apt-get install ettercap-text-only hcxdumptool mdk4 -y
 sudo systemctl disable lighttpd
 sudo systemctl stop lighttpd
 cd $TOOLS
@@ -169,7 +169,7 @@ sudo ln -s /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
 
 #eapeak
 cd $TOOLS
-sudo apt-get install python-dev libssl-dev swig python3-dev gcc python-m2crypto -y
+sudo apt-get install python-dev libssl-dev swig python3-dev gcc -y
 sudo pip3 install pipenv
 
 #pip2 install m2crypto
@@ -200,7 +200,7 @@ cd $TOOLS
 git clone https://github.com/sensepost/berate_ap
 
 #MD4
-apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev 
+apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev -y
 cd $TOOLS
 git clone https://github.com/aircrack-ng/mdk4
 cd mdk4
