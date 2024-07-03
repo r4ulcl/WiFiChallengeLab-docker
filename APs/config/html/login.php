@@ -97,11 +97,29 @@ if (isset($_POST['Submit'])) {
     echo "<br><br>";
   }
 
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) {
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { #only WEP
     #relay user
     echo "<br><br>";
     echo "<br><br>";
     echo "flag{iAYcxpe6N2A98zhglx6E}";
+    echo "<br><br>";
+    echo "<br><br>";
+  }
+
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.14.') !== false) { #only SAE management
+    #relay user
+    echo "<br><br>";
+    echo "<br><br>";
+    echo "flag{3LE3w3ypyFO2mOjDqCag}";
+    echo "<br><br>";
+    echo "<br><br>";
+  }
+
+  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
+    #relay user
+    echo "<br><br>";
+    echo "<br><br>";
+    echo "flag{a56X2RKBmu9p192lweKF}";
     echo "<br><br>";
     echo "<br><br>";
   }
