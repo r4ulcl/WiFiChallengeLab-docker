@@ -176,8 +176,6 @@ if (isset($_POST['Submit'])) {
     }
 
     ?>
-
-
     <form action="" method="post" name="Login_Form">
       <table width="400" border="0" align="center" cellpadding="5" cellspacing="1" class="Table">
         <?php if (isset($msg)) { ?>
@@ -193,15 +191,15 @@ if (isset($_POST['Submit'])) {
           </td>
         </tr>
         <tr>
-          <td align="right" valign="top">Username</td>
+          <td align="right" valign="middle">Username</td>
           <td><input name="Username" type="text" class="Input"></td>
         </tr>
         <tr>
-          <td align="right">Password</td>
+          <td align="right" valign="middle">Password</td>
           <td><input name="Password" type="password" class="Input"></td>
         </tr>
         <tr>
-          <td> </td>
+          <td></td>
           <td><input name="Submit" type="submit" value="Login" class="Button3"></td>
         </tr>
       </table>

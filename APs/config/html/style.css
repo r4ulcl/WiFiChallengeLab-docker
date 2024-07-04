@@ -85,3 +85,44 @@ button:disabled {
   color: #8be9fd;
   margin-top: 0.5rem;
 }
+
+.message {
+  text-align: center;
+  color: #ff5555;
+  margin-bottom: 1rem;
+}
+
+.table {
+  width: 100%;
+}
+
+.table td {
+  padding: 10px;
+  vertical-align: middle;
+}
+
+.Input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid #6272a4;
+  border-radius: 5px;
+  background: #6272a4;
+  color: #f8f8f2;
+  font-size: 1.1em;
+}
+
+.Button3 {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: #ff79c6;
+  color: #282a36;
+  border-radius: 5px;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.Button3:hover {
+  background-color: #ff92d0;
+}
