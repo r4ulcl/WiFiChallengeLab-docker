@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=6
-ssid=WIFI-JUAN
+ssid=$ESSID_OTHER1
 
 wpa=2
 wpa_key_mgmt=WPA-PSK

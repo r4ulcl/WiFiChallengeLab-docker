@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=6
-ssid=MiFibra-5-D6G3
+ssid=$ESSID_OTHER3
 
 wpa=2
 wpa_key_mgmt=WPA-PSK
