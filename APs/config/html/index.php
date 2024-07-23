@@ -29,7 +29,9 @@ if (!isset($_SESSION['UserData']['Username'])) {
 	}
 
 	if ($_SESSION["Username"] == "CONTOSO\Administrator") {
-		if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
+		if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT 1
+			echo "flag{04e474a4826cf10ba9f60da7ce07105ea2716aac}";
+		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false) { //only MGT	2
 			echo "flag{04e474a4826cf10ba9f60da7ce07105ea2716aac}";
 		} else {
 			echo "Your Princess Is in Another Castle!";
