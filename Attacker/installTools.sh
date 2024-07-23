@@ -81,7 +81,7 @@ pip3 install -r requirements.txt
 
 # pcapFilter.sh
 cd $TOOLS
-wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/6759cb1117569d5a2cb4c5166be76c717c3673e0/pcapFilter.sh
+wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/78e097e1d4a9eb5f43ab0b2763195c04f02c4998/pcapFilter.sh
 chmod +x pcapFilter.sh
 
 # UnicastDeauth
