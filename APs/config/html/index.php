@@ -56,7 +56,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 
 	if ($_SESSION["Username"] == "CONTOSO\juan.tr") {
 		if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
-			echo "flag{hGDSm8oltjM9q217iJYu}";
+			echo "flag{3407a6e0ad77965731da8357c4270ecce8b642e4}";
 			echo "<br><br>";
 		} else {
 			echo "Your Princess Is in Another Castle!";
