@@ -78,9 +78,8 @@ pip install -r './UnicastDeauth/requirements.txt'
 
 #Eaphhammer
 cd $TOOLS
-git clone https://github.com/s0lst1c3/eaphammer.git
+git clone https://github.com/r4ulcl/eaphammer.git
 cd eaphammer
-apt-get remove -y python3-pyee
 for L in `cat kali-dependencies.txt` ; do echo $L; apt-get install $L -y ;done
 sudo apt-get install dsniff apache2 -y
 sudo systemctl stop apache2
@@ -93,6 +92,7 @@ python3 -m pip install flask flask_cors flask_socketio pywebcopy
 apt-get install python-netifaces
 sudo python3 -m pip install --upgrade pyopenssl
 
+wget https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
 
 #hostapd-wpe
 cd $TOOLS
@@ -293,3 +293,4 @@ sudo python3 setup.py install
 #apt-get install -y ssh
 #echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
 
+sudo systemctl disable lighttpd

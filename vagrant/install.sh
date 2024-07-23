@@ -1,10 +1,38 @@
 #!/bin/bash
 
+# Function to edit a configuration file
+edit_config_file() {
+    local file="$1"
+    local setting="$2"
+    local value="$3"
+
+    if grep -q "^${setting}" "${file}"; then
+        sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "${file}"
+    else
+        echo "${setting} \"${value}\";" | sudo tee -a "${file}" > /dev/null
+    fi
+}
+
+
+
 # update package lists
 sudo apt-get update
 sudo apt-get full-upgrade -y
 
-sudo apt remove unattended-upgrades -y
+
+# Disable automatic updates in 20auto-upgrades
+auto_upgrades_file="/etc/apt/apt.conf.d/20auto-upgrades"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Update-Package-Lists" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Download-Upgradeable-Packages" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::AutocleanInterval" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Unattended-Upgrade" "0"
+
+# Stop and disable the unattended-upgrades service
+sudo systemctl stop unattended-upgrades
+sudo systemctl disable unattended-upgrades
+
+sudo systemctl disable apt-daily-upgrade.service
+sudo systemctl disable apt-daily.service
 
 ## Install drivers modprobe 
 sudo apt-get install -y linux-generic
