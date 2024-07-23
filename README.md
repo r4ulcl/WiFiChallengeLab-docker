@@ -71,7 +71,7 @@ Download the repository and start the docker with the APs, the clients and nzyme
 ``` bash
 git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 cd WiFiChallengeLab-docker
-docker-compose up -d --file docker-compose.yml
+docker compose up -d --file docker-compose.yml
 ```
 
 #### Optionally: Install Wi-Fi tools
@@ -134,7 +134,7 @@ vagrant up hyper-v_vm --provider=hyperv
 To modify the files you can download the repository and edit both APs and clients (in the VM the path is /var/WiFiChallenge). The files are divided by APs, Clients, and Nzyme files.
 
 ## Recompile Docker
-To recreate the Docker files with the changes made, modify the docker-compose.yml file by commenting out the "image:" line in each Docker and uncommenting the line with "build:". Then use "docker-compose build" to create a new version.
+To recreate the Docker files with the changes made, modify the docker-compose.yml file by commenting out the "image:" line in each Docker and uncommenting the line with "build:". Then use "docker compose build" to create a new version.
 
 ## Support this project
 
