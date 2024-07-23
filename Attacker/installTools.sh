@@ -46,9 +46,18 @@ wget https://www.openssl.org/source/$VERSION.tar.gz
 tar -xvf $VERSION.tar.gz > /dev/null
 rm $VERSION.tar.gz
 cd $VERSION
-./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
-make
-make test
+./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl shared zlib
+
+# Update the library path in .bashrc
+echo 'export PATH=/usr/local/openssl/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/openssl/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+
+# Source .bashrc to apply changes
+source ~/.bashrc
+
+make -j $(nproc)
+#make test
 make install
 
 #wifi_db
@@ -57,9 +66,12 @@ sudo apt-get install python3-pip sqlitebrowser -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
 sudo apt install pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc -y
 
+#git clone https://salsa.debian.org/pkg-security-team/hcxtools ##6.2.7
 git clone https://github.com/ZerBea/hcxtools.git
 cd hcxtools
-make 
+git checkout 6.2.7
+
+make -j $(nproc)
 sudo make install
 cd ..
 
@@ -256,7 +268,7 @@ sudo apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev n
 cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
 git apply wpa_supplicant.patch
 cd wpa_supplicant-2.10/wpa_supplicant
-make -j4
+make -j $(nproc)
 ls -al wpa_supplicant
 
 
