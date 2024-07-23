@@ -154,10 +154,10 @@ done &
 LAST=$!
 
 # PSK .2
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WPA_PSK -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WPA_PSK  -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WPA_PSK2 -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK2.log &
 
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP -c  /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP2 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP2.log &
 
 # OPEN .0

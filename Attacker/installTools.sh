@@ -49,9 +49,9 @@ cd $VERSION
 ./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl shared zlib
 
 # Update the library path in .bashrc
-echo 'export PATH=/usr/local/openssl/bin:$PATH' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/usr/local/openssl/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
-echo 'export PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+#echo 'export PATH=/usr/local/openssl/bin:$PATH' >> ~/.bashrc
+#echo 'export LD_LIBRARY_PATH=/usr/local/openssl/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+#echo 'export PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
 
 # Source .bashrc to apply changes
 source ~/.bashrc
@@ -152,6 +152,9 @@ rm /usr/bin/hashcat
 #sudo cp -Rv modules/ /usr/bin/
 #udo cp hashcat.hcstat2 /usr/bin/
 #sudo cp hashcat.hctune /usr/bin/
+
+echo "alias hashcat='~/tools/hashcat-6.0.0/hashcat.bin'" >> /root/.bashrc
+echo "alias hashcat='sudo ~/tools/hashcat-6.0.0/hashcat.bin'" >> /home/user/.bashrc
 
 # Creap
 cd $TOOLS
