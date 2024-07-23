@@ -44,9 +44,9 @@ if (!isset($_SESSION['UserData']['Username'])) {
 		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { //only wep
 			echo "flag{c342fe657870020a1b164f2075f447564fdd1c3d}";
 		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.3.') !== false) { //only WPS
-			echo "flag{KD5TaejRFIDgIQwjgUfB}";
+			echo "flag{850e63f13f6c5e9a423670671a08b912c78fadc9}";
 		} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.16.') !== false) { //only WPS
-			echo "flag{W5ri9DXRJZCTBpFFxXBM}";
+			echo "flag{680efaa62f7e953c24667285173711bc6bb6d3ff}";
 		} else {
 			echo "No FLAG, try logging in with another user ;)";
 		}
