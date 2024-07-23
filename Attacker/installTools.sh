@@ -122,19 +122,24 @@ apt-get install aircrack-ng -y
 
 # hashcat
 cd $TOOLS
-apt-get install hashcat -y
-sudo apt purge hashcat
+# Install old version to dependencies
+sudo apt-get install hashcat p7zip -y
+#sudo apt install build-essential mesa-opencl-icd ocl-icd-libopencl1 ocl-icd-opencl-dev opencl-headers -y
 
 wget https://hashcat.net/files/hashcat-6.0.0.7z
 sudo p7zip -d hashcat-6.0.0.7z
-cd hashcat-6.0.0/
+rm hashcat-6.0.0.7z
 
-sudo cp hashcat.bin /usr/bin/
-sudo ln -s /usr/bin/hashcat.bin /usr/bin/hashcat
-sudo cp -Rv OpenCL/ /usr/bin/
-sudo cp -Rv modules/ /usr/bin/
-sudo cp hashcat.hcstat2 /usr/bin/
-sudo cp hashcat.hctune /usr/bin/
+# Delete old version of hashcat to avoid confusion. 
+rm /usr/bin/hashcat
+
+#cd hashcat-6.0.0/
+#sudo cp hashcat.bin /usr/bin/
+#sudo ln -s /usr/bin/hashcat.bin /usr/bin/hashcat
+#sudo cp -Rv OpenCL/ /usr/bin/
+#sudo cp -Rv modules/ /usr/bin/
+#udo cp hashcat.hcstat2 /usr/bin/
+#sudo cp hashcat.hctune /usr/bin/
 
 # Creap
 cd $TOOLS

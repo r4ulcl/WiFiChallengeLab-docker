@@ -16,6 +16,8 @@ if (isset($_POST['Submit'])) {
     'GLOBAL\GlobalAdmin' => 'SuperSuperSecure@!@',
     'CONTOSO\Administrator' => 'SuperSecure@!@',
     'CONTOSO\juan.tr' => 'bulldogs1234',
+    'CONTOSO\test' => 'monkey',
+    'CONTOSO\ftp' => '12345678',
     'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
     'CORPO\god' => 'tommy1',
     'admin' => 'admin',
@@ -82,7 +84,7 @@ if (isset($_POST['Submit'])) {
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{NBLvyxgwckKnyGup6HNj}";
+    echo "flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}";
     echo "<br><br>";
     echo "<br><br>";
   }
@@ -92,7 +94,7 @@ if (isset($_POST['Submit'])) {
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{gsnyT98GxngXgMPJEIKw}";
+    echo "flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}";
     echo "<br><br>";
     echo "<br><br>";
   }
@@ -101,7 +103,7 @@ if (isset($_POST['Submit'])) {
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{iAYcxpe6N2A98zhglx6E}";
+    echo "flag{c342fe657870020a1b164f2075f447564fdd1c3d}";
     echo "<br><br>";
     echo "<br><br>";
   }
@@ -110,7 +112,7 @@ if (isset($_POST['Submit'])) {
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{3LE3w3ypyFO2mOjDqCag}";
+    echo "flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}";
     echo "<br><br>";
     echo "<br><br>";
   }
@@ -119,7 +121,7 @@ if (isset($_POST['Submit'])) {
     #relay user
     echo "<br><br>";
     echo "<br><br>";
-    echo "flag{a56X2RKBmu9p192lweKF}";
+    echo "flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}";
     echo "<br><br>";
     echo "<br><br>";
   }
