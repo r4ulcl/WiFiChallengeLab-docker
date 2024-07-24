@@ -7,7 +7,7 @@ HALT=true
 OPTION=$1
 
 if [ -z "${OPTION}" ]; then
-    echo "Unknown option, only VMware or VirtualBox"
+    echo "Unknown option, only vmware, virtualbox or both"
     exit 1
 fi
 
@@ -48,8 +48,27 @@ elif [ $OPTION == "virtualbox" ]; then
         vagrant halt virtualbox_vm 
     fi
 
-elif [ $OPTION == "both" ]; then
-    echo "both same time"
+elif [ $OPTION == "hyper-v" ]; then
+    echo "hyper-v"
+    if [ "$DESTROY" = true ] ; then
+        vagrant destroy hyper-v_vm --force
+    fi
+    D=`date`
+    echo "$D Start hyper-v_vm " | tee -a hyper-v_vm.log
+    vagrant up hyper-v_vm 
+    D=`date`
+    echo "$D Finish hyper-v_vm " | tee -a hyper-v_vm.log
+    # Configure background, etc
+    vagrant halt hyper-v_vm
+    vagrant up hyper-v_vm
+    timeout 30s vagrant ssh hyper-v_vm
+    if [ "$HALT" = true ] ; then
+        vagrant halt hyper-v_vm 
+    fi
+    
+
+elif [ $OPTION == "all" ]; then
+    echo "all same time"
     echo $0
     # Start vmware
     bash $0 vmware &
@@ -58,12 +77,17 @@ elif [ $OPTION == "both" ]; then
     bash $0 virtualbox &
     LAST2=$! 
 
+    # Start hyper-v
+    bash $0 hyper-v &
+    LAST3=$! 
+
     #Wait for them
     wait $LAST1
     wait $LAST2
+    wait $LAST3
 
 else
-    echo "Unknown option, only VMware or VirtualBox or both"
+    echo "Unknown option, only VMware, VirtualBox, hyper-v or all"
     exit 1
 fi
 

@@ -2,13 +2,6 @@ name: Docker Image CI APs
 
 on:
   push:
-    branches:
-      - 'master'
-    tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - 'master'
     tags:
       - 'v*'
     
@@ -42,7 +35,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./APs
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

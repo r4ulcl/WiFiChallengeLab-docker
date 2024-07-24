@@ -1,23 +1,32 @@
 VAGRANT_COMMAND = ARGV[0]
 
 Vagrant.configure("2") do |config|
-  if VAGRANT_COMMAND == "ssh"
-#    config.ssh.username = 'user'
-  end
 
+
+  config.vm.define "hyper-v_vm" do |hyper_v_vm|
+    # Add other configuration options here
+    hyper_v_vm.vm.box = "generic/ubuntu2004"
+    hyper_v_vm.vm.define "WiFiChallengeLab HyperV"
+    # hyper_v_vm.vm.network "private_network", ip: "192.168.58.10"
+    hyper_v_vm.vm.hostname  = "WiFiChallengeLab"
+    hyper_v_vm.vm.provider "hyperv" do |hv|
+      hv.vmname = "WiFiChallenge Lab v2.0.4"
+      hv.memory = 2048
+      hv.cpus = 2
+    end
+    hyper_v_vm.vm.provision :shell, path: "./install.sh"
+    hyper_v_vm.vm.synced_folder "../", "/media/WiFiChallenge", type: "rsync"
+  end
+  
   config.vm.define "virtualbox_vm" do |virtualbox_vm|
     # Add other configuration options here
-    #virtualbox_vm.vm.box = "ubuntu/focal64"
     virtualbox_vm.vm.box = "generic/ubuntu2004"
     virtualbox_vm.vm.define "WiFiChallengeLab vbox"
-    #virtualbox_vm.vm.network "private_network", ip: "192.168.56.10"
     virtualbox_vm.vm.hostname  = "WiFiChallengeLab"
     virtualbox_vm.vm.provider "virtualbox" do |vb|
       vb.memory = "2048"
       vb.cpus = 2
-      #vb.memory = "8192"
-      #vb.cpus = 8
-      vb.name = "WiFiChallenge Lab v2.0"
+      vb.name = "WiFiChallenge Lab v2.0.4"
     end
     virtualbox_vm.vm.provision :shell, path: "./install.sh"
     virtualbox_vm.vm.synced_folder "../", "/media/WiFiChallenge"
@@ -29,19 +38,18 @@ Vagrant.configure("2") do |config|
     vmware_vm.vm.define "WiFiChallengeLab VMWare"
     vmware_vm.vm.provider "vmware_desktop" do |v|
       v.linked_clone = false
-      v.clone_directory = "/mnt/work/VMWare/"
+      v.clone_directory = "E:/VMWare"
+      v.force_vmware_license = "workstation"  # force the licence for fix some vagrant plugin issue
+      v.gui = true
+      v.memory = "2048"
+      v.cpus = 2
+      v.vmx["displayName"] = "WiFiChallenge Lab v2.0.4"
     end
     #vmware_vm.vm.network "private_network", ip: "192.168.57.10"
     vmware_vm.vm.hostname  = "WiFiChallengeLab"
-    vmware_vm.vm.provider "vmware_desktop" do |vb|
-      vb.memory = "2048"
-      vb.cpus = 2
-      #vb.memory = "8192"
-      #vb.cpus = 8
-    end
     vmware_vm.vm.provision :shell, path: "./install.sh"
     vmware_vm.vm.synced_folder "../", "/media/WiFiChallenge"
-
   end
 
-end  
+
+end

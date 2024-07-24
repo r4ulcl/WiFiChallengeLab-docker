@@ -5,12 +5,13 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+sudo apt-get install curl git -y
+
 # Rockyou
 cd 
 curl https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -s -L | head -n 1000000 > ~/rockyou-top100000.txt
 #wget https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt
 wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
-
 
 # Hacking tools
 FOLDER=`pwd`
@@ -40,27 +41,52 @@ git clone https://github.com/blackarrowsec/EAP_buster
 # OpenSSL 3 for ubuntu
 sudo apt-get install build-essential checkinstall zlib1g-dev -y
 cd /usr/local/src/
-wget https://www.openssl.org/source/openssl-3.0.2.tar.gz
-sudo tar -xvf openssl-3.0.2.tar.gz
-rm openssl-3.0.2.tar.gz
-cd openssl-3.0.2
-./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib
-make
-make test
+VERSION='openssl-3.2.1'
+wget https://www.openssl.org/source/$VERSION.tar.gz
+tar -xvf $VERSION.tar.gz > /dev/null
+rm $VERSION.tar.gz
+cd $VERSION
+./config --prefix=/usr/local/openssl --openssldir=/usr/local/openssl shared zlib
+
+# Update the library path in .bashrc
+#echo 'export PATH=/usr/local/openssl/bin:$PATH' >> ~/.bashrc
+#echo 'export LD_LIBRARY_PATH=/usr/local/openssl/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+#echo 'export PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:$PKG_CONFIG_PATH' >> ~/.bashrc
+
+# Source .bashrc to apply changes
+source ~/.bashrc
+
+make -j $(nproc)
+#make test
 make install
 
 #wifi_db
 cd $TOOLS
 sudo apt-get install python3-pip sqlitebrowser -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install tshark -y
+sudo apt install pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc -y
+
+#git clone https://salsa.debian.org/pkg-security-team/hcxtools ##6.2.7
+git clone https://github.com/ZerBea/hcxtools.git
+cd hcxtools
+git checkout 6.2.7
+
+make -j $(nproc)
+sudo make install
+cd ..
+
 git clone https://github.com/r4ulcl/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
 
 # pcapFilter.sh
 cd $TOOLS
-wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/a22ac3095e197dc97745d36ece49bb455fc6d1ae/pcapFilter.sh
+wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/78e097e1d4a9eb5f43ab0b2763195c04f02c4998/pcapFilter.sh
 chmod +x pcapFilter.sh
+
+# UnicastDeauth
+git clone 'https://github.com/mamatb/UnicastDeauth.git'
+pip install -r './UnicastDeauth/requirements.txt'
 
 #Eaphhammer
 cd $TOOLS
@@ -78,6 +104,7 @@ python3 -m pip install flask flask_cors flask_socketio pywebcopy
 apt-get install python-netifaces
 sudo python3 -m pip install --upgrade pyopenssl
 
+wget https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
 
 #hostapd-wpe
 cd $TOOLS
@@ -105,8 +132,29 @@ make install
 #aircrack
 apt-get install aircrack-ng -y
 
-apt-get install hashcat -y
+# hashcat
+cd $TOOLS
+# Install old version to dependencies
+sudo apt-get install hashcat p7zip -y
+#sudo apt install build-essential mesa-opencl-icd ocl-icd-libopencl1 ocl-icd-opencl-dev opencl-headers -y
 
+wget https://hashcat.net/files/hashcat-6.0.0.7z
+sudo p7zip -d hashcat-6.0.0.7z
+rm hashcat-6.0.0.7z
+
+# Delete old version of hashcat to avoid confusion. 
+rm /usr/bin/hashcat
+
+#cd hashcat-6.0.0/
+#sudo cp hashcat.bin /usr/bin/
+#sudo ln -s /usr/bin/hashcat.bin /usr/bin/hashcat
+#sudo cp -Rv OpenCL/ /usr/bin/
+#sudo cp -Rv modules/ /usr/bin/
+#udo cp hashcat.hcstat2 /usr/bin/
+#sudo cp hashcat.hctune /usr/bin/
+
+echo "alias hashcat='~/tools/hashcat-6.0.0/hashcat.bin'" >> /root/.bashrc
+echo "alias hashcat='sudo ~/tools/hashcat-6.0.0/hashcat.bin'" >> /home/user/.bashrc
 
 # Creap
 cd $TOOLS
@@ -116,8 +164,8 @@ apt-get install arp-scan -y
 
 
 #airgeddon
-sudo apt-get install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd-y
-sudo apt-get install asleap bettercap ettercap-text-only hcxtools hcxdumptool bully mdk4 beef-xss -y
+sudo apt-get install tshark john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd -y
+sudo apt-get install ettercap-text-only hcxdumptool mdk4 -y
 sudo systemctl disable lighttpd
 sudo systemctl stop lighttpd
 cd $TOOLS
@@ -141,7 +189,7 @@ sudo ln -s /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
 
 #eapeak
 cd $TOOLS
-sudo apt-get install python-dev libssl-dev swig python3-dev gcc python-m2crypto -y
+sudo apt-get install python-dev libssl-dev swig python3-dev gcc -y
 sudo pip3 install pipenv
 
 #pip2 install m2crypto
@@ -172,7 +220,7 @@ cd $TOOLS
 git clone https://github.com/sensepost/berate_ap
 
 #MD4
-apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev 
+apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev -y
 cd $TOOLS
 git clone https://github.com/aircrack-ng/mdk4
 cd mdk4
@@ -184,6 +232,7 @@ cd $TOOLS
 git clone https://github.com/Wh1t3Rh1n0/air-hammer
 cd air-hammer
 curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+pip2 install -U setuptools 
 sudo python2 get-pip.py
 pip2 install wpa_supplicant
 pip2 install service_identity
@@ -222,7 +271,7 @@ sudo apt-get install -y pkg-config libnl-3-dev gcc libssl-dev libnl-genl-3-dev n
 cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
 git apply wpa_supplicant.patch
 cd wpa_supplicant-2.10/wpa_supplicant
-make -j4
+make -j $(nproc)
 ls -al wpa_supplicant
 
 
@@ -251,11 +300,10 @@ cd wifite2
 sudo python3 setup.py install
 
 # Fluxion
-cd $TOOLS
-
-git clone https://www.github.com/FluxionNetwork/fluxion.git
-cd fluxion 
-./fluxion.sh
+#cd $TOOLS
+#git clone https://www.github.com/FluxionNetwork/fluxion.git
+#cd fluxion 
+#./fluxion.sh
 
 # Kismet
 ##sudo apt-get install -y build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets librtlsdr0 libubertooth-dev libbtbb-dev
@@ -265,3 +313,4 @@ cd fluxion
 #apt-get install -y ssh
 #echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
 
+sudo systemctl disable lighttpd

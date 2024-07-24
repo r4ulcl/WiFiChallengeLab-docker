@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=11
-ssid=wifi-free
+ssid=$ESSID_OPN_HIDDEN
 
 wpa=0
 

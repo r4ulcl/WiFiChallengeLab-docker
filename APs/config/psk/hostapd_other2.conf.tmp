@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=9
-ssid=vodafone7123
+ssid=$ESSID_OTHER2
 
 wpa=2
 wpa_key_mgmt=WPA-PSK

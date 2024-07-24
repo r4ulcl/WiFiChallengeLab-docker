@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=6
-ssid=wifi-mobile
+ssid=$ESSID_PSK
 
 wpa=2
 wpa_key_mgmt=WPA-PSK

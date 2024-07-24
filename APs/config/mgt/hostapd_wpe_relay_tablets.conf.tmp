@@ -12,7 +12,7 @@ private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 
 # 802.11 Options
-ssid=wifi-regional-tablets
+ssid=$ESSID_MGTRELAY_TABLETS
 channel=44
 
 # WPE Options - Dont need to change these to make it all work 

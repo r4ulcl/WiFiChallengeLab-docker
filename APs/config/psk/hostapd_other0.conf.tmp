@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=3
-ssid=MOVISTAR_JYG2
+ssid=$ESSID_OTHER0
 
 wpa=2
 wpa_key_mgmt=WPA-PSK

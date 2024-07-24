@@ -3,7 +3,7 @@ driver=nl80211
 
 hw_mode=g
 channel=6
-ssid=wifi-guest
+ssid=$ESSID_OPN
 
 wpa=0
 

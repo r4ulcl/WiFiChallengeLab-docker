@@ -1,24 +1,41 @@
 #!/bin/bash
 
+# Function to edit a configuration file
+edit_config_file() {
+    local file="$1"
+    local setting="$2"
+    local value="$3"
+
+    if grep -q "^${setting}" "${file}"; then
+        sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "${file}"
+    else
+        echo "${setting} \"${value}\";" | sudo tee -a "${file}" > /dev/null
+    fi
+}
+
+
+
 # update package lists
 sudo apt-get update
+sudo apt-get full-upgrade -y
+
+
+# Disable automatic updates in 20auto-upgrades
+auto_upgrades_file="/etc/apt/apt.conf.d/20auto-upgrades"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Update-Package-Lists" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Download-Upgradeable-Packages" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::AutocleanInterval" "0"
+edit_config_file "${auto_upgrades_file}" "APT::Periodic::Unattended-Upgrade" "0"
+
+# Stop and disable the unattended-upgrades service
+sudo systemctl stop unattended-upgrades
+sudo systemctl disable unattended-upgrades
+
+sudo systemctl disable apt-daily-upgrade.service
+sudo systemctl disable apt-daily.service
 
 ## Install drivers modprobe 
 sudo apt-get install -y linux-generic
-
-# Add SWAP file
-# Set the size of the swap file in bytes
-swap_size=4G
-# Create a new file to be used as a swap file
-sudo fallocate -l $swap_size /swapfile
-# Set the correct permissions on the file
-sudo chmod 600 /swapfile
-# Format the file as a swap file
-sudo mkswap /swapfile
-# Enable the swap file
-sudo swapon /swapfile
-# Make the change permanent by adding the following line to /etc/fstab
-echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
 
 # Create a sudo user
 # Create the user
@@ -54,11 +71,6 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-## Install docker-compose
-#sudo apt-get install -y docker-compose
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
 # Fix DNS error Docker
 sudo apt-get install bridge-utils -y
 sudo service docker restart
@@ -73,6 +85,8 @@ shred -vzn 3 /var/WiFiChallenge/Clients
 
 find /var/WiFiChallenge/APs -type f -exec shred -zvu -n 5 {} \;
 find /var/WiFiChallenge/Clients -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallenge/vagrant -type f -exec shred -zvu -n 5 {} \;
+
 rm -r /var/WiFiChallenge/Clients /var/WiFiChallenge/APs
 
 ## Install RDP server
@@ -91,8 +105,8 @@ sudo apt-get install -y p7zip-full
 
 ## Enable docker
 cd /var/WiFiChallenge/
-sudo docker-compose -f docker-compose.yml up -d
-#sudo docker-compose -f docker-compose-minimal.yml up -d
+sudo docker compose -f docker-compose.yml up -d
+#sudo docker compose -f docker-compose-minimal.yml up -d
 
 
 ## remove all non-essential programs in an Ubuntu 20 minimal ISO-based Vagrant VM
@@ -113,23 +127,36 @@ sudo apt-get clean
 sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-install  gnome-games-common libreoffice* empathy transmission-gtk cheese gnome-software-common gnome-software-plugin-flatpak gnome-software-plugin-snap gnome-terminal gnome-orca onboard simple-scan gnome-font-viewer gnome-calculator gnome-clocks gnome-screenshot gnome-system-log gnome-system-monitor gnome-documents gnome-music gnome-video-effects gnome-boxes gnome-dictionary gnome-photos gnome-weather gnome-maps gnome-logs gnome-clocks gnome-characters gnome-calendar aisleriot gnome-sudoku gnome-mines gnome-mahjongg thunderbird
 
 # First FLAG
-echo 'flag{JPTEXm5yEaYouyIEFffEvPjil}' | sudo tee /root/flag.txt
+echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
 echo '#!/bin/bash
 cd /var/WiFiChallenge
 
-sudo docker-compose restart aps
-sudo docker-compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
+sudo docker compose restart aps
+sudo docker compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
 chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 echo '#!/bin/bash
 #Update images from AP and clients
 cd /var/WiFiChallenge
-sudo docker-compose pull
-sudo docker-compose up --detach
+sudo docker compose pull
+sudo docker compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 chmod +x /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
 
+# Fix "Your kernel does not support swap limit capabilities or the cgroup is not mounted. Memory limited without swap."
+
+grub_file="/etc/default/grub"
+params="cgroup_enable=memory swapaccount=1"
+
+# Check if the parameters are already present
+if grep -q "$params" "$grub_file"; then
+    echo "Parameters already present in GRUB_CMDLINE_LINUX."
+else
+  # Add the parameters to GRUB_CMDLINE_LINUX
+  sudo sed -i "/^GRUB_CMDLINE_LINUX=/ s/\"$/ $params\"/" "$grub_file"
+fi
+sudo update-grub
 
 #Fix password on wifi scan
 # Change the configuration file
@@ -146,7 +173,7 @@ sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
 # nzyme alerts
 sudo apt-get install -y jq
 # nzyme icon for alerts
-sudo wget https://v1.nzyme.org/img/favicon.ico -O /opt/background/nzyme.ico
+sudo wget https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
 
 echo '#!/bin/bash
 
@@ -264,6 +291,7 @@ gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell fav
 # Remove fstab info in VBox
 sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
+firefox &
 
 EOF
 #' > 
@@ -347,5 +375,6 @@ sudo apt-get -y clean
 
 docker system prune -a -f
 
-
-sudo dd if=/dev/zero of=zerofile bs=1M ; sudo rm -rf zerofile
+echo "Starting dd, this may take a while"
+sudo dd if=/dev/zero of=/tmp/zerofile bs=1M ; sudo rm -rf /tmp/zerofile
+sudo rm -rf /tmp/zerofile
