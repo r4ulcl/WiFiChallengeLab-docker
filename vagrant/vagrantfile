@@ -11,8 +11,8 @@ Vagrant.configure("2") do |config|
     hyper_v_vm.vm.hostname  = "WiFiChallengeLab"
     hyper_v_vm.vm.provider "hyperv" do |hv|
       hv.vmname = "WiFiChallenge Lab v2.0.4"
-      hv.memory = 2048
-      hv.cpus = 2
+      hv.memory = 4096
+      hv.cpus = 4
     end
     hyper_v_vm.vm.provision :shell, path: "./install.sh"
     hyper_v_vm.vm.synced_folder "../", "/media/WiFiChallenge", type: "rsync"
@@ -24,8 +24,8 @@ Vagrant.configure("2") do |config|
     virtualbox_vm.vm.define "WiFiChallengeLab vbox"
     virtualbox_vm.vm.hostname  = "WiFiChallengeLab"
     virtualbox_vm.vm.provider "virtualbox" do |vb|
-      vb.memory = "2048"
-      vb.cpus = 2
+      vb.memory = "4096"
+      vb.cpus = 4
       vb.name = "WiFiChallenge Lab v2.0.4"
     end
     virtualbox_vm.vm.provision :shell, path: "./install.sh"
@@ -41,9 +41,9 @@ Vagrant.configure("2") do |config|
       v.clone_directory = "E:/VMWare"
       v.force_vmware_license = "workstation"  # force the licence for fix some vagrant plugin issue
       v.gui = true
-      v.memory = "2048"
-      v.cpus = 2
       v.vmx["displayName"] = "WiFiChallenge Lab v2.0.4"
+      v.memory = "4096"
+      v.cpus = 4
     end
     #vmware_vm.vm.network "private_network", ip: "192.168.57.10"
     vmware_vm.vm.hostname  = "WiFiChallengeLab"

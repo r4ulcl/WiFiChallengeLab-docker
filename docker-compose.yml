@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:latest
+    image: r4ulcl/wifichallengelab-aps:dev
     #build: ./APs/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-APs
@@ -12,7 +12,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients:latest
+    image: r4ulcl/wifichallengelab-clients:dev
     #build: ./Clients/ # uncomment to build the Docker file
     restart: unless-stopped
     container_name: WiFiChallengeLab-Clients
