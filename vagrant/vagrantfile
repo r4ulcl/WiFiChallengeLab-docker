@@ -51,5 +51,21 @@ Vagrant.configure("2") do |config|
     vmware_vm.vm.synced_folder "../", "/media/WiFiChallenge"
   end
 
+  config.vm.define "qemu_arm_vm" do |qemu_vm|
+    # Add other configuration options here
+    qemu_vm.vm.box = "generic/ubuntu2004"
+    qemu_vm.vm.define "WiFiChallengeLab QEMU"
+    qemu_vm.vm.hostname  = "WiFiChallengeLab"
+    qemu_vm.vm.provider "qemu" do |libvirt|
+    #qemu_vm.vm.provider :libvirt do |libvirt|
+      libvirt.memory = "4096"
+      libvirt.cpus = 4
+      libvirt.driver = "qemu"
+      libvirt.machine_type = "virt"
+      libvirt.cpu_model = "cortex-a57"    
+    end
+    qemu_vm.vm.provision :shell, path: "./install.sh"
+    qemu_vm.vm.synced_folder "../", "/media/WiFiChallenge"
+  end
 
 end
