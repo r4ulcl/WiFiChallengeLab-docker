@@ -101,7 +101,7 @@ sudo apt-get install build-essential libssl-dev libffi-dev python-dev -y
 sudo apt-get install python-openssl python3-openssl -y
 ./ubuntu-unattended-setup
 python3 -m pip install flask flask_cors flask_socketio pywebcopy
-apt-get install python-netifaces
+sudo apt-get install python-netifaces -y
 sudo python3 -m pip install --upgrade pyopenssl
 
 wget https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
