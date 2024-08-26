@@ -1,8 +1,17 @@
+FROM chainguard/git:latest as repo
+RUN git clone --depth 1 --branch 1.2.2 https://github.com/nzymedefense/nzyme.git
+
+
+FROM maven:3.8.3-adoptopenjdk-11 as build
+COPY --from=repo /home/git/nzyme /nzyme
+WORKDIR /nzyme
+RUN mvn jdeb:jdeb
+
+
 FROM ubuntu:20.04
-RUN apt-get update && apt-get install -y --no-install-recommends python3 libpcap0.8 openjdk-11-jre-headless wireless-tools gettext-base curl \
+COPY --from=build /nzyme/target/nzyme_1.2.2_all.deb nzyme.deb
+RUN apt-get update && apt-get install -y --no-install-recommends python3 libpcap0.8 openjdk-11-jre-headless wireless-tools gettext-base curl git \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && export VERSION=`curl -s https://v1.nzyme.org/blog/rss.xml | grep -E '[0-9]+\.[0-9]+\.[0-9]+' -o | head -n1` \
-    && echo $VERSION && curl -s https://assets.nzyme.org/releases/nzyme-$VERSION.deb -o nzyme.deb  \
     && dpkg -i nzyme.deb && rm nzyme.deb
 
 # Entrypoint: Replace variables in config 
