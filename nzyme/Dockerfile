@@ -5,7 +5,7 @@ RUN git clone --depth 1 --branch 1.2.2 https://github.com/nzymedefense/nzyme.git
 FROM maven:3.8.3-adoptopenjdk-11 as build
 COPY --from=repo /home/git/nzyme /nzyme
 WORKDIR /nzyme
-RUN mvn jdeb:jdeb
+RUN mvn -Dmaven.test.skip=true install jdeb:jdeb
 
 
 FROM ubuntu:20.04
@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 libpcap
 
 # Entrypoint: Replace variables in config 
 COPY docker-entrypoint.sh /bin/
+COPY nzyme.conf /etc/nzyme/nzyme.conf.tmp
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-CMD /bin/bash /usr/share/nzyme/bin/nzyme
+CMD /usr/bin/java -jar /opt/nzyme/nzyme-1.2.2.jar -c /etc/nzyme/nzyme.conf

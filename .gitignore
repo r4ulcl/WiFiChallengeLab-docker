@@ -3,3 +3,4 @@ logsClient/*
 vagrant/.vagrant/*
 vagrant/date.log
 *.log
+.DS_Store
