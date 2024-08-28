@@ -1,0 +1,85 @@
+services:
+  aps:
+    build: ./APs/ # uncomment to build the Docker file
+    restart: unless-stopped
+    container_name: WiFiChallengeLab-APs
+    env_file: ./APs/.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./logsAP:/root/logs/
+    network_mode: host #NETNS
+    privileged: true #NETNS
+
+  clients:
+    build: ./Clients/ # uncomment to build the Docker file
+    restart: unless-stopped
+    container_name: WiFiChallengeLab-Clients
+    env_file: ./Clients/.env
+    volumes:
+      - /lib/modules:/lib/modules
+      - ./logsClient:/root/logs/
+    depends_on:
+      - aps
+    network_mode: host #NETNS
+    privileged: true #NETNS
+
+  nzyme:
+    build: ./nzyme/
+    restart: unless-stopped
+    env_file: .env
+    container_name: WiFiChallengeLab-nzyme
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
+      - ./logsNzyme:/var/log/nzyme/
+    #ports:
+    #  - "22900:22900"
+    depends_on:
+      - aps
+      - db
+    environment:
+      - TZ=Europe/Berlin
+      - DATABASE_URL=$DATABASE_URL
+      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
+      - EXTERNAL_URL=$EXTERNAL_URL
+    network_mode: host #USB Antena
+    cap_add: # full access to wifi interface
+      - NET_ADMIN
+      - NET_RAW
+    deploy:
+        resources:
+            limits:
+              cpus: "0.50"
+              memory: 512M
+            reservations:
+              memory: 128M
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    env_file: .env
+    container_name: WiFiChallengeLab-nzyme-db
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - aps
+    environment:
+      - TZ=Europe/Berlin
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASS
+    volumes:
+      - ./nzyme/data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
+      interval: 10s
+      start_period: 30s
+    deploy:
+        resources:
+            limits:
+              cpus: "0.50"
+              memory: 512M
+            reservations:
+              memory: 128M
