@@ -26,7 +26,7 @@ services:
     privileged: true #NETNS
 
   nzyme:
-    image: r4ulcl/nzyme:latest
+    image: r4ulcl/wifichallengelab-nzyme:dev
     #build: ./nzyme/
     restart: unless-stopped
     #env_file: ./nzyme/.env
