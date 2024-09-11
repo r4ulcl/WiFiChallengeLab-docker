@@ -15,7 +15,6 @@ RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 COPY config/wlan_config_clients /root/
 
 #Copy config files
-COPY config/certs/ /root/certs/
 COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/

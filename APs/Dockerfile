@@ -1,6 +1,6 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
 
 #RUN date
 
@@ -10,7 +10,6 @@ COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/wep/ /root/wep/
-COPY config/certs/ /root/mgt/certs/
 
 #COPY var file
 COPY config/wlan_config_aps /root/
@@ -30,14 +29,24 @@ COPY config/interfaces /etc/network/interfaces.tmp
 #Copy HTML files
 COPY config/html /var/www/html/
 RUN mkdir /var/www/html/.internalCA/
-RUN cp /root/mgt/certs/ca.crt /var/www/html/.internalCA/ca.crt.txt \
-	; cp /root/mgt/certs/ca.key /var/www/html/.internalCA/ca.key.txt \
-	; cp /root/mgt/certs/ca.serial /var/www/html/.internalCA/ca.serial.txt \
-	; cp /root/mgt/certs/server.crt /var/www/html/.internalCA/server.crt.txt \
-	; cp /root/mgt/certs/server.key /var/www/html/.internalCA/server.key.txt  \
-	; cp /root/mgt/certs/client.ext /var/www/html/.internalCA/client.ext.txt  \
-	; cp /root/mgt/certs/client.conf /var/www/html/.internalCA/client.conf.txt  \
-	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
+
+RUN chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
+
+#RUN cp /root/mgt/certs/ca.crt /var/www/html/.internalCA/ca.crt.txt \
+#	; cp /root/mgt/certs/ca.key /var/www/html/.internalCA/ca.key.txt \
+#	; cp /root/mgt/certs/ca.serial /var/www/html/.internalCA/ca.serial.txt \
+#	; cp /root/mgt/certs/server.crt /var/www/html/.internalCA/server.crt.txt \
+#	; cp /root/mgt/certs/server.key /var/www/html/.internalCA/server.key.txt  \
+#	; cp /root/mgt/certs/client.ext /var/www/html/.internalCA/client.ext.txt  \
+#	; cp /root/mgt/certs/client.conf /var/www/html/.internalCA/client.conf.txt  \
+#	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
+
+# Enable the SSL module and default SSL site
+RUN a2enmod ssl \
+    && a2ensite default-ssl
+
+# Copy Apache configuration files
+COPY config/apache-config/ssl.conf /etc/apache2/sites-available/default-ssl.conf
 
 #WPS 
 RUN touch /var/run/hostapd_wps_pin_requests

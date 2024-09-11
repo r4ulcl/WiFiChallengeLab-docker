@@ -1,5 +1,0 @@
-extensions = x509v3
- 
-[ x509v3 ]
-nsCertType = client,email,objsign
-keyUsage   = digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment
