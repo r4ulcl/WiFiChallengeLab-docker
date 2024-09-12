@@ -2,7 +2,7 @@
 
 // Check if user is already logged in
 if (isset($_SESSION['UserData']['Username'])) {
-  header("Location: index.php"); // Redirect to index.php
+  header("Location:index.php"); // Redirect to index.php
   exit; // Make sure to exit after redirection
 }
 
