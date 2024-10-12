@@ -106,17 +106,17 @@ sudo python3 -m pip install --upgrade pyopenssl
 
 wget https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
 
-#hostapd-wpe
+# Hostapd-wpe
 cd $TOOLS
 # https://github.com/aircrack-ng/aircrack-ng/tree/master/patches/wpe/hostapd-wpe
-sudo apt install libsqlite3-dev -y
-wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.10-wpe.patch
-wget https://w1.fi/releases/hostapd-2.10.tar.gz
-tar -zxf hostapd-2.10.tar.gz
-rm hostapd-2.10.tar.gz
-cd hostapd-2.10
-patch -p1 < ../hostapd-2.10-wpe.patch
-rm ../hostapd-2.10-wpe.patch
+apt install libsqlite3-dev -y
+wget https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/52925bbdd13f739af6fc32e11f589b8c3e6e1fe5/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch
+wget https://w1.fi/releases/hostapd-2.11.tar.gz
+tar -zxf hostapd-2.11.tar.gz
+rm hostapd-2.11.tar.gz
+cd hostapd-2.11
+patch -p1 < ../hostapd-2.11-wpe.patch
+rm ../hostapd-2.11-wpe.patch
 cd hostapd
 
 sudo apt install libsqlite3-dev -y
