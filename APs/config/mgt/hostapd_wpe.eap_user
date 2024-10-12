@@ -110,6 +110,7 @@
 #"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
 
 "CONTOSO\Administrator"			GTC			"SuperSecure@!@" [2]
+"CONTOSO\Administrator"			MSCHAPV2			"SuperSecure@!@" [2]
 "CONTOSO\juan.tr"			MSCHAPV2		"bulldogs1234" [2]
 "CONTOSO\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
 
