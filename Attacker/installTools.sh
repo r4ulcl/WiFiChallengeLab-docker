@@ -309,6 +309,12 @@ sudo python3 setup.py install
 ##sudo apt-get install -y build-essential git libwebsockets-dev pkg-config zlib1g-dev libnl-3-dev libnl-genl-3-dev libcap-dev libpcap-dev libnm-dev libdw-dev libsqlite3-dev libprotobuf-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler libsensors4-dev libusb-1.0-0-dev python3 python3-setuptools python3-protobuf python3-requests python3-numpy python3-serial python3-usb python3-dev python3-websockets librtlsdr0 libubertooth-dev libbtbb-dev
 #sudo DEBIAN_FRONTEND=noninteractive apt-get install -y kismet
 
+# assless-chaps
+cd $TOOLS
+git clone https://github.com/sensepost/assless-chaps
+python3 -m pip install pycryptodome
+bzip2 -d  assless-chaps/10-million-password-list-top-1000000.db.bz2
+
 #Enable ssh (if dont use vagrant)
 #apt-get install -y ssh
 #echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
