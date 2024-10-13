@@ -1,13 +1,12 @@
 <?php
+// Start the session
+session_start();
 
-// Check if user is already logged in
-if (isset($_SESSION['UserData']['Username'])) {
-  header("Location:index.php"); // Redirect to index.php
-  exit; // Make sure to exit after redirection
+// Check if the user is already logged in
+if (isset($_SESSION['Username'])) {
+    header("Location: index.php");
+    exit;
 }
-
-session_start(); /* Starts the session */
-
 
 /* Check Login form submitted */
 if (isset($_POST['Submit'])) {
