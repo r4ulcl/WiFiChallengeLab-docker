@@ -314,6 +314,12 @@ git clone https://github.com/derv82/wifite2.git
 cd wifite2
 python3 setup.py install
 
+# assless-chaps
+cd $TOOLS
+git clone https://github.com/sensepost/assless-chaps
+python3 -m pip install pycryptodome
+bzip2 -d  assless-chaps/10-million-password-list-top-1000000.db.bz2
+
 # Enable ssh (if dont use vagrant)
 #apt install -y ssh
 #echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
