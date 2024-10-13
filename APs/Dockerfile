@@ -1,6 +1,9 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo  iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
 
 #RUN date
 
@@ -30,7 +33,8 @@ COPY config/interfaces /etc/network/interfaces.tmp
 COPY config/html /var/www/html/
 RUN mkdir /var/www/html/.internalCA/
 
-RUN chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
+RUN chown -R www-data:www-data /var/www/html/ 
+RUN rm /var/www/html/index.html
 
 #RUN cp /root/mgt/certs/ca.crt /var/www/html/.internalCA/ca.crt.txt \
 #	; cp /root/mgt/certs/ca.key /var/www/html/.internalCA/ca.key.txt \
@@ -41,18 +45,39 @@ RUN chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
 #	; cp /root/mgt/certs/client.conf /var/www/html/.internalCA/client.conf.txt  \
 #	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
 
-# Enable the SSL module and default SSL site
-RUN a2enmod ssl \
-    && a2ensite default-ssl
+# Make sure Apache uses index.php as the default file
+RUN echo "<IfModule mod_dir.c>\n DirectoryIndex index.php index.html\n</IfModule>" > /etc/apache2/mods-enabled/dir.conf
 
-# Copy Apache configuration files
-COPY config/apache-config/ssl.conf /etc/apache2/sites-available/default-ssl.conf
+# Enable Apache SSL and rewrite modules
+RUN a2enmod ssl
+RUN a2enmod rewrite
+
+# Create a custom SSL VirtualHost configuration for Apache
+RUN echo "<IfModule mod_ssl.c>\n\
+<VirtualHost *:443>\n\
+    ServerAdmin webmaster@wifichallenge.com\n\
+    DocumentRoot /var/www/html\n\
+    SSLEngine on\n\
+    SSLCertificateFile /root/certs/server.crt\n\
+    SSLCertificateKeyFile /root/certs/server.key\n\
+    <Directory /var/www/html>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+    ErrorLog \${APACHE_LOG_DIR}/error.log\n\
+    CustomLog \${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>\n\
+</IfModule>" > /etc/apache2/sites-available/default-ssl.conf
+
+# Enable the SSL site configuration
+RUN a2ensite default-ssl
 
 #WPS 
 RUN touch /var/run/hostapd_wps_pin_requests
 
 #Apache
-RUN update-rc.d apache2 defaults
+#RUN update-rc.d apache2 defaults
 
 
 #Change name of wpa_supplicant to avoid airmon-ng check kill, etc
