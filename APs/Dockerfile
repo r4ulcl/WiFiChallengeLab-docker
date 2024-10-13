@@ -1,8 +1,6 @@
 FROM debian
 #FROM kalilinux/kali-rolling
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
 
 #RUN date
@@ -36,21 +34,11 @@ RUN mkdir /var/www/html/.internalCA/
 RUN chown -R www-data:www-data /var/www/html/ 
 RUN rm /var/www/html/index.html
 
-#RUN cp /root/mgt/certs/ca.crt /var/www/html/.internalCA/ca.crt.txt \
-#	; cp /root/mgt/certs/ca.key /var/www/html/.internalCA/ca.key.txt \
-#	; cp /root/mgt/certs/ca.serial /var/www/html/.internalCA/ca.serial.txt \
-#	; cp /root/mgt/certs/server.crt /var/www/html/.internalCA/server.crt.txt \
-#	; cp /root/mgt/certs/server.key /var/www/html/.internalCA/server.key.txt  \
-#	; cp /root/mgt/certs/client.ext /var/www/html/.internalCA/client.ext.txt  \
-#	; cp /root/mgt/certs/client.conf /var/www/html/.internalCA/client.conf.txt  \
-#	; chown -R www-data:www-data /var/www/html/ ; rm /var/www/html/index.html
-
 # Make sure Apache uses index.php as the default file
 RUN echo "<IfModule mod_dir.c>\n DirectoryIndex index.php index.html\n</IfModule>" > /etc/apache2/mods-enabled/dir.conf
 
-# Enable Apache SSL and rewrite modules
-RUN a2enmod ssl
-RUN a2enmod rewrite
+# Enable the SSL and rewrite modules
+RUN a2enmod ssl && a2enmod rewrite
 
 # Create a custom SSL VirtualHost configuration for Apache
 RUN echo "<IfModule mod_ssl.c>\n\
@@ -70,14 +58,12 @@ RUN echo "<IfModule mod_ssl.c>\n\
 </VirtualHost>\n\
 </IfModule>" > /etc/apache2/sites-available/default-ssl.conf
 
-# Enable the SSL site configuration
-RUN a2ensite default-ssl
+# Enable the SSL site
+RUN a2ensite default-ssl.conf
+
 
 #WPS 
 RUN touch /var/run/hostapd_wps_pin_requests
-
-#Apache
-#RUN update-rc.d apache2 defaults
 
 
 #Change name of wpa_supplicant to avoid airmon-ng check kill, etc
@@ -105,6 +91,9 @@ RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 COPY config/opennds.conf.tmp /etc/opennds/opennds.conf.tmp
 COPY config/theme_user-email-login-basic.sh /usr/lib/opennds/
 RUN chmod +x /usr/lib/opennds/theme_user-email-login-basic.sh
+
+# Expose both HTTP and HTTPS ports
+EXPOSE 80 443
 
 # exec ns-inet.sh and waits aits
 CMD ["/bin/bash", "/root/ns-inet.sh"]

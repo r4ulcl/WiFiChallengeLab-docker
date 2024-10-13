@@ -11,7 +11,7 @@ services:
       - /lib/modules:/lib/modules
       - ./logsAP:/root/logs/
     healthcheck: # Check webserver, 2 APs
-      test: ["CMD-SHELL", "curl -f http://localhost/login.php || exit 1 && ps aux | grep hostapd_aps | grep -v 'grep' | grep -c -E 'hostapd_aps' | awk '{if ($1 != 10) exit 1}'"]
+      test: ["CMD-SHELL", "ip netns exec ns-ap /bin/bash -c 'curl -f http://localhost/login.php' || exit 1 && ps aux | grep hostapd_aps | grep -v 'grep' | grep -c -E 'hostapd_aps' | awk '{if ($1 != 10) exit 1}'"]
       interval: 5s
       timeout: 5s
       retries: 3
