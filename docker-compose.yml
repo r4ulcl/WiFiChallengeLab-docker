@@ -10,6 +10,12 @@ services:
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
       - ./logsAP:/root/logs/
+    healthcheck: # Check webserver, 2 APs
+      test: ["CMD-SHELL", "curl -f http://localhost/login.php || exit 1 && ps aux | grep hostapd_aps | grep -v 'grep' | grep -c -E 'hostapd_aps' | awk '{if ($1 != 10) exit 1}'"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     network_mode: host #NETNS
     privileged: true #NETNS
 
@@ -27,6 +33,12 @@ services:
       - aps
     network_mode: host #NETNS
     privileged: true #NETNS
+    healthcheck: # Check client PSK
+      test: ["CMD-SHELL", "ps aux | grep wpa_wifichallenge_supplicant | grep -vE 'grep|sudo|timeout' | grep -c -E 'wpa_wifichallenge_supplicant' | awk '{if ($1 < 17) exit 1}'"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
 
   nzyme:
     image: r4ulcl/wifichallengelab-nzyme:dev
