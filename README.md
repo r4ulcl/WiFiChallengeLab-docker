@@ -57,26 +57,33 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
 
 ## Using WiFiChallenge Lab
 
-### Using the VM
+### Using the Virtual Machine (VM) from the Releases or Proton Drive
 
-Download the VM for VMWare or VirtualBox:
+To get started with the VM, download the appropriate version for your preferred platform:
 
-- [GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
-- [Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
+- [VMWare or VirtualBox from GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
+- [VMWare or VirtualBox from Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
-### Docker inside a Linux host or a custom VM
+### Using Docker on a Linux Host or Custom VM (Supports x86-64 and ARM)
 
-Download the repository and start the docker with the APs, the clients and nzyme for alerts. 
+I recommend using Ubuntu 20.04 for a streamlined setup with the provided script, but any OS with Docker support should work.
 
-``` bash
-git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
-cd WiFiChallengeLab-docker
-docker compose up -d --file docker-compose.yml
+1. Clone the repository and set up Docker to manage Access Points (APs), clients, and nzyme for alerts:
+
+    ```bash
+    git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+    cd WiFiChallengeLab-docker
+    docker compose up -d --file docker-compose.yml
+    ```
+
+### Optional: Install Wi-Fi Tools
+
+If you are running Ubuntu 20.04, you can install additional Wi-Fi hacking tools by navigating to the appropriate directory and running the provided installation script:
+
+```bash
+cd Attacker
+./installTools.sh
 ```
-
-#### Optionally: Install Wi-Fi tools
-
-Go to the folder where the tools will be installed and execute `Attacker/installTools.sh`
 
 ### Create your own VM using vagrant
 
