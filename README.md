@@ -149,6 +149,10 @@ To recreate the Docker files with the changes made, modify the docker-compose.ym
 
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png">](https://www.buymeacoffee.com/r4ulcl)
  
+## Collaborators
+
+Oscar Alfonso (OscarAkaElvis / v1s1t0r, [airgeddon](https://github.com/v1s1t0r1sh3r3/airgeddon) author) - Collaboration in testing and script improvement
+
 ## License
 
 [GNU General Public License v3.0](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE)
