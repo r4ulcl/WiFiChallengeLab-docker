@@ -6,6 +6,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # Hacking tools
+cd
 FOLDER=`pwd`
 TOOLS=$FOLDER/tools
 mkdir $TOOLS
@@ -25,11 +26,6 @@ apt install wget curl git -y
 cd 
 curl https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt -s -L | head -n 1000000 > ~/rockyou-top100000.txt
 wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
-
-# Hacking tools
-FOLDER=`pwd`
-TOOLS=$FOLDER/tools
-mkdir $TOOLS
 
 apt upgrade -y
 
@@ -61,14 +57,12 @@ cd $TOOLS
 apt install python3-pip sqlitebrowser -y
 apt install tshark -y
 apt install pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc -y
-git clone https://github.com/ZerBea/hcxtools.git
-cd hcxtools
-git checkout 6.2.7
-make -j $(nproc)
-make install
-cd ..
+wget https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/hcxtools_6.0.2-1+b1_amd64.deb
+dpkg -i hcxtools_6.0.2-1+b1_amd64.deb
+rm -rf hcxtools_6.0.2-1+b1_amd64.deb
 
 # Wifi_db
+cd $TOOLS
 git clone https://github.com/r4ulcl/wifi_db
 cd wifi_db
 pip3 install -r requirements.txt 
@@ -84,7 +78,7 @@ pip install -r './UnicastDeauth/requirements.txt'
 
 # EapHammer
 cd $TOOLS
-git clone https://github.com/r4ulcl/eaphammer.git
+git clone https://github.com/s0lst1c3/eaphammer.git
 cd eaphammer
 for L in `cat kali-dependencies.txt` ; do echo $L; apt install $L -y ;done
 apt install dsniff apache2 -y
@@ -128,6 +122,8 @@ autoreconf -i
 make
 make install
 ldconfig
+cd $TOOLS
+rm -r aircrack-ng
 
 # Hashcat
 cd $TOOLS
@@ -141,9 +137,9 @@ dpkg -i hashcat-utils_1.9-0kali2_amd64.deb
 rm -rf hashcat-utils_1.9-0kali2_amd64.deb
 
 # Delete old version of hashcat to avoid confusion
-rm /usr/bin/hashcat
+rm /usr/bin/hashcat > /dev/null 2>&1
 
-ln -s /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat
+ln -s /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat > /dev/null 2>&1
 echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 
 # Creap
@@ -172,15 +168,17 @@ rm -rf bettercap_2.28-0kali2_amd64.deb
 apt install autoconf bison build-essential libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev libgdbm6 libgdbm-dev libdb-dev ruby-bundler nodejs rbenv -y
 cd $HOME
 curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
 echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
 echo 'eval "$(rbenv init -)"' >> ~/.bashrc
 source ~/.bashrc
-rbenv install 3.0.3
-rbenv global 3.0.3
-rbenv local 3.0.3
+rbenv install 3.1.4
+rbenv global 3.1.4
 cd /usr/share/
 git clone https://github.com/beefproject/beef.git
 cd beef
+rbenv local 3.1.4
 gem install bundler
 bundle install
 echo -e '#!/usr/bin/env bash\n\ncd /usr/share/beef\n./beef' > "/usr/local/bin/beef"
@@ -194,6 +192,9 @@ systemctl stop lighttpd
 cd $TOOLS
 git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
 cd airgeddon
+
+# Disable airgeddon auto-update
+sed -i '/^AIRGEDDON_AUTO_UPDATE=/c\AIRGEDDON_AUTO_UPDATE=false' .airgeddonrc
 
 # Plugins airgeddon
 cd plugins
@@ -322,4 +323,4 @@ bzip2 -d  assless-chaps/10-million-password-list-top-1000000.db.bz2
 
 # Enable ssh (if dont use vagrant)
 #apt install -y ssh
-#echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
+#echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh
