@@ -35,6 +35,9 @@ apt install nmap -y
 # Python3
 apt install -y python3 
 
+# wpa_gui
+apt install -y wpagui 
+
 # EAP_buster
 cd $TOOLS
 git clone https://github.com/blackarrowsec/EAP_buster
