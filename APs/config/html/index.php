@@ -157,9 +157,9 @@ if (!isset($_SESSION['UserData']['Username'])) {
 			echo "<br><br>";
 			echo "
 		eap_user_file=/root/mgt/hostapd_wpe.eap_user<br>
-		ca_cert=/root/mgt/certs/ca.crt<br>
-		server_cert=/root/mgt/certs/server.crt<br>
-		private_key=/root/mgt/certs/server.key<br>
+		ca_cert=/root/certs/ca.crt<br>
+		server_cert=/root/certs/server.crt<br>
+		private_key=/root/certs/server.key<br>
 		private_key_passwd=whatever<br>
 		dh_file=/etc/hostapd-wpe/dh<br>
 		<br>

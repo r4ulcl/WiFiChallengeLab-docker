@@ -80,20 +80,43 @@ git clone 'https://github.com/mamatb/UnicastDeauth.git'
 pip install -r './UnicastDeauth/requirements.txt'
 
 # EapHammer
+#!/bin/bash
+
+# Navigate to the tools directory
 cd $TOOLS
+
+# Clone the EapHammer repository
 git clone https://github.com/s0lst1c3/eaphammer.git
 cd eaphammer
-for L in `cat kali-dependencies.txt` ; do echo $L; apt install $L -y ;done
-apt install dsniff apache2 -y
+
+# Install dependencies listed in kali-dependencies.txt
+echo "Installing dependencies from kali-dependencies.txt..."
+while read -r dependency; do
+  echo "Installing $dependency..."
+  apt-get install "$dependency" -y || { echo "Failed to install $dependency. Attempting to fix."; apt --fix-broken install -y; }
+done < kali-dependencies.txt
+
+# Install additional packages
+echo "Installing additional packages..."
+apt-get install dsniff apache2 build-essential libssl-dev libffi-dev python-dev python-openssl python3-openssl -y || apt --fix-broken install -y
+
+# Disable and stop Apache2 service
+echo "Disabling Apache2 service..."
 systemctl stop apache2
 systemctl disable apache2
 update-rc.d apache2 disable
-apt install build-essential libssl-dev libffi-dev python-dev -y
-apt install python-openssl python3-openssl -y
-./ubuntu-unattended-setup
-python3 -m pip install flask flask_cors flask_socketio pywebcopy
-apt install python-netifaces
-python3 -m pip install --upgrade pyopenssl
+
+# Run EapHammer setup
+echo "Running EapHammer setup..."
+./ubuntu-unattended-setup || { echo "Failed to run ubuntu-unattended-setup. Exiting."; exit 1; }
+
+# Install Python dependencies
+echo "Installing Python dependencies..."
+python3 -m pip install --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl || { echo "Failed to install Python packages. Exiting."; exit 1; }
+apt-get install python-netifaces -y || apt --fix-broken install -y
+
+echo "EapHammer setup completed successfully!"
+
 
 wget https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
 

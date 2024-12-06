@@ -25,7 +25,7 @@ COPY config/wepClient /root/wepClient
 COPY config/connectINET.sh /root/
 
 #Update certs
-#RUN cd /root/mgt/certs/ ; make install
+#RUN cd /root/certs/ ; make install
 
 #COPY config/dnsmasq.conf /etc/dnsmasq.conf
 # Not used COPY config/interfaces /etc/network/interfaces

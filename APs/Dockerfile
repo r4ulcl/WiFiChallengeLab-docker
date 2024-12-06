@@ -22,7 +22,7 @@ COPY config/connectINET.sh /root/
 COPY config/cronAPs.sh /root/
 
 #Update certs
-#RUN cd /root/mgt/certs/ ; make install
+#RUN cd /root/certs/ ; make install
 
 COPY config/dnsmasq.conf /etc/dnsmasq.conf.tmp
 COPY config/interfaces /etc/network/interfaces.tmp
