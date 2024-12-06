@@ -15,7 +15,7 @@ services:
         ["CMD-SHELL", "ip netns exec ns-ap /bin/bash -c '
         curl -f -s http://localhost/login.php >/dev/null || exit 1;
         curl -f -s http://localhost:8080 >/dev/null || exit 1;
-        if [ $(ps aux | grep hostapd_aps | grep -v grep | grep -c hostapd_aps) -ne 10 ]; then exit 1; fi'"]
+        if [ $(ps aux | grep hostapd_aps | grep -v grep | grep -c hostapd_aps) -ne 15 ]; then exit 1; fi'"]
       interval: 5s
       timeout: 5s
       retries: 3
