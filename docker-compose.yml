@@ -2,20 +2,22 @@ services:
   aps:
     image: r4ulcl/wifichallengelab-aps:dev
     #build: ./APs/ # uncomment to build the Docker file
-    restart: unless-stopped
+    restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     #env_file: ./APs/.env
     volumes:
       - ./certs:/root/certs/:ro
+      - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
       - ./logsAP:/root/logs/
     healthcheck:
-      test: >
-        ["CMD-SHELL", "ip netns exec ns-ap /bin/bash -c '
-        curl -f -s http://localhost/login.php >/dev/null || exit 1;
-        curl -f -s http://localhost:8080 >/dev/null || exit 1;
-        if [ $(ps aux | grep hostapd_aps | grep -v grep | grep -c hostapd_aps) -ne 15 ]; then exit 1; fi'"]
+      test:
+        - CMD-SHELL
+        - ip netns exec ns-ap /bin/bash -c '
+          curl -f -s http://localhost/login.php >/dev/null || exit 1;
+          curl -s http://localhost:8080 >/dev/null || exit 2;
+          if [ $(ps aux | grep hostapd_aps | grep -v grep | grep -c hostapd_aps) -ne 15 ]; then exit 3; fi'
       interval: 5s
       timeout: 5s
       retries: 3
@@ -26,7 +28,7 @@ services:
   clients:
     image: r4ulcl/wifichallengelab-clients:dev
     #build: ./Clients/ # uncomment to build the Docker file
-    restart: unless-stopped
+    restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     #env_file: ./Clients/.env
     volumes:
@@ -38,18 +40,20 @@ services:
     network_mode: host #NETNS
     privileged: true #NETNS
     healthcheck:
-      test: >
-        ["CMD-SHELL", "/bin/bash -c '
-        if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE \"grep|sudo|timeout\" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 1; fi'"]
+      test:
+        - CMD-SHELL
+        - /bin/bash -c '
+          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 1; fi'
       interval: 5s
       timeout: 5s
       retries: 3
       start_period: 45s
 
+
   nzyme:
     image: r4ulcl/wifichallengelab-nzyme:dev
     #build: ./nzyme/
-    restart: unless-stopped
+    restart: on-failure   # Automatically restart on failure
     #env_file: ./nzyme/.env
     env_file: .env
     container_name: WiFiChallengeLab-nzyme
@@ -88,7 +92,7 @@ services:
 
   db:
     image: postgres:14
-    restart: unless-stopped
+    restart: on-failure   # Automatically restart on failure
     #env_file: ./nzyme/.env
     env_file: .env
     container_name: WiFiChallengeLab-nzyme-db

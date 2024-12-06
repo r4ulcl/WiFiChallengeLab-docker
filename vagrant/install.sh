@@ -319,6 +319,62 @@ sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
 }
 EOF
 
+# Add healthceck script to restart if fails
+# Define paths for scripts and service files
+SCRIPT_PATH="/usr/local/bin/monitor-health.sh"
+SERVICE_PATH="/etc/systemd/system/monitor-health.service"
+
+# 1. Create the monitor-health.sh script
+cat << 'EOF' > $SCRIPT_PATH
+#!/bin/bash
+
+# Loop to constantly monitor containers' health
+while true; do
+  # Check all containers with an "unhealthy" status
+  for container in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
+    # Log the unhealthy container being restarted
+    echo "$(date) - Restarting unhealthy container: $container"
+    docker restart "$container"
+  done
+
+  # Sleep for a few seconds before checking again
+  sleep 10
+done
+EOF
+
+# Make the monitor-health.sh script executable
+chmod +x $SCRIPT_PATH
+
+echo "monitor-health.sh script created and made executable."
+
+# 2. Create the systemd service file
+echo "Creating the systemd service file..."
+
+cat << EOF > $SERVICE_PATH
+[Unit]
+Description=Monitor Docker Health and Restart Unhealthy Containers
+After=docker.service
+
+[Service]
+ExecStart=$SCRIPT_PATH
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 3. Reload systemd, enable and start the service
+# Reload systemd to pick up the new service file
+systemctl daemon-reload
+# Enable the service to start on boot
+systemctl enable monitor-health.service
+# Start the service immediately
+systemctl start monitor-health.service
+# 4. Verify the service is running
+systemctl status monitor-health.service --no-pager
+
 
 # Disable systemd-resolved
 sudo sed -i 's/^DNSStubListener=yes/DNSStubListener=no/g' /etc/systemd/resolved.conf
