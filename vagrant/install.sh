@@ -330,15 +330,17 @@ cat << 'EOF' > $SCRIPT_PATH
 
 # Loop to constantly monitor containers' health
 while true; do
-  # Check all containers with an "unhealthy" status
   for container in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
-    # Log the unhealthy container being restarted
-    echo "$(date) - Restarting unhealthy container: $container"
-    docker restart "$container"
+    # Wait 30 seconds and check again if the container is still unhealthy
+    sleep 30
+    if docker ps --filter "health=unhealthy" --filter "name=$container" --format "{{.Names}}" | grep -q "$container"; then
+      echo "$(date) - Restarting unhealthy container: $container"
+      docker restart "$container"
+    fi
   done
 
-  # Sleep for a few seconds before checking again
-  sleep 10
+  # Sleep before checking again
+  sleep 30
 done
 EOF
 

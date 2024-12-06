@@ -92,7 +92,7 @@ services:
 
   db:
     image: postgres:14
-    restart: on-failure   # Automatically restart on failure
+    restart: unless-stopped
     #env_file: ./nzyme/.env
     env_file: .env
     container_name: WiFiChallengeLab-nzyme-db
