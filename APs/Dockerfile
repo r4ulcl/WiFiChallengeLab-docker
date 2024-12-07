@@ -66,8 +66,8 @@ RUN a2ensite default-ssl.conf
 RUN touch /var/run/hostapd_wps_pin_requests
 
 
-#Change name of wpa_supplicant to avoid airmon-ng check kill, etc
-RUN mv /usr/sbin/hostapd /usr/sbin/hostapd_aps
+#Change name of hostapd to avoid airmon-ng check kill, etc
+RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 
 
 COPY config/ns-inet.sh /root/

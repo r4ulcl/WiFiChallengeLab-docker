@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
     hyper_v_vm.vm.hostname  = "WiFiChallengeLab"
     hyper_v_vm.vm.provider "hyperv" do |hv|
       hv.vmname = "WiFiChallenge Lab v2.1"
+      hv.maxmemory = 4096
       hv.memory = 4096
       hv.cpus = 4
     end

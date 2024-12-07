@@ -17,7 +17,7 @@ services:
         - ip netns exec ns-ap /bin/bash -c '
           curl -f -s http://localhost/login.php >/dev/null || exit 1;
           curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep hostapd_aps | grep -v grep | grep -c hostapd_aps) -ne 15 ]; then exit 3; fi'
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -ne 15 ]; then exit 3; fi'
       interval: 5s
       timeout: 5s
       retries: 3
