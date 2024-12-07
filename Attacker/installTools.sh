@@ -62,6 +62,7 @@ apt install tshark -y
 apt install pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc -y
 wget https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/hcxtools_6.0.2-1+b1_amd64.deb
 dpkg -i hcxtools_6.0.2-1+b1_amd64.deb
+apt --fix-broken install -y
 rm -rf hcxtools_6.0.2-1+b1_amd64.deb
 
 # Wifi_db
