@@ -109,11 +109,16 @@ update-rc.d apache2 disable
 
 # Run EapHammer setup
 echo "Running EapHammer setup..."
-./ubuntu-unattended-setup || { echo "Failed to run ubuntu-unattended-setup. Exiting."; exit 1; }
+./ubuntu-unattended-setup || echo "Failed to run ubuntu-unattended-setup."
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-python3 -m pip install --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl || { echo "Failed to install Python packages. Exiting."; exit 1; }
+python3 -m pip install --upgrade flask || echo "Failed to install Python packages."
+python3 -m pip install --upgrade flask_cors || echo "Failed to install Python packages."
+python3 -m pip install --upgrade flask_socketio || echo "Failed to install Python packages."
+python3 -m pip install --upgrade pywebcopy || echo "Failed to install Python packages."
+python3 -m pip install --upgrade pyopenssl || echo "Failed to install Python packages."
+python3 -m pip install --upgrade gevent || echo "Failed to install Python packages."
 apt-get install python-netifaces -y || apt --fix-broken install -y
 
 echo "EapHammer setup completed successfully!"
