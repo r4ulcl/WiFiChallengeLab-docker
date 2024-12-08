@@ -107,5 +107,10 @@
 #*		TLS
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
+# Allow anonymous identity
+"GLOBAL\anonymous"		TLS
+
+# Existing user identities
 "GLOBAL\GlobalAdmin"		TLS
+"GLOBAL\Manager"		TLS
 
