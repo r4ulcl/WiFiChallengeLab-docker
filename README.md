@@ -34,7 +34,7 @@ Docker version of WiFiChallenge Lab with modifications in the challenges and imp
 
 For direct access to download the VM and complete the challenges go to the CTFd web site: 
 
-[WiFiChallenge Lab v2.0](https://wifichallengelab.com/)
+[WiFiChallenge Lab v2.0](https://lab.WiFiChallenge.com/)
 
 
 

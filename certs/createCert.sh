@@ -22,15 +22,15 @@ stateOrProvinceName_default     = Madrid
 localityName                    = "3. Locality Name            (eg, city)     "
 localityName_default            = Madrid
 0.organizationName              = "4. Organization Name        (eg, company)  "
-0.organizationName_default      = WiFiChallengeLab
+0.organizationName_default      = WiFiChallenge
 organizationalUnitName          = "5. Organizational Unit Name (eg, section)  "
 organizationalUnitName_default  = Certificate Authority
 commonName                      = "6. Common Name              (eg, CA name)  "
 commonName_max                  = 64
-commonName_default              = WiFiChallengeLab CA
+commonName_default              = WiFiChallenge CA
 emailAddress                    = "7. Email Address            (eg, name@FQDN)"
 emailAddress_max                = 40
-emailAddress_default            = ca@WiFiChallengeLab.com' > ca.conf
+emailAddress_default            = ca@WiFiChallenge.com' > ca.conf
 
 openssl req -config ca.conf -new -key ca.key -out ca.csr
 
@@ -39,11 +39,11 @@ extensions = x509v3
  
 [ x509v3 ]
 basicConstraints      = CA:true,pathlen:0
-crlDistributionPoints = URI:http://WiFiChallengeLab.com/ca/mustermann.crl
+crlDistributionPoints = URI:http://WiFiChallenge.com/ca/mustermann.crl
 nsCertType            = sslCA,emailCA,objCA
-nsCaPolicyUrl         = "http://WiFiChallengeLab.com/ca/policy.htm"
-nsCaRevocationUrl     = "http://WiFiChallengeLab.com/ca/heimpold.crl"
-nsComment             = "WiFiChallengeLab CA"
+nsCaPolicyUrl         = "http://WiFiChallenge.com/ca/policy.htm"
+nsCaRevocationUrl     = "http://WiFiChallenge.com/ca/heimpold.crl"
+nsComment             = "WiFiChallenge CA"
 ' > ca.ext
 
 openssl x509 -days 1095 -extfile ca.ext -signkey ca.key -in ca.csr -req -out ca.crt
@@ -66,15 +66,15 @@ stateOrProvinceName             = "2. State or Province Name   (full name)    "
 localityName                    = "3. Locality Name            (eg, city)     "
 localityName_default            = Madrid
 0.organizationName              = "4. Organization Name        (eg, company)  "
-0.organizationName_default      = WiFiChallengeLab
+0.organizationName_default      = WiFiChallenge
 organizationalUnitName          = "5. Organizational Unit Name (eg, section)  "
 organizationalUnitName_default  = Server
 commonName                      = "6. Common Name              (eg, CA name)  "
 commonName_max                  = 64
-commonName_default              = WiFiChallengeLab CA
+commonName_default              = WiFiChallenge CA
 emailAddress                    = "7. Email Address            (eg, name@FQDN)"
 emailAddress_max                = 40
-emailAddress_default            = server@WiFiChallengeLab.com
+emailAddress_default            = server@WiFiChallenge.com
 
 ' > server.conf 
 
@@ -109,15 +109,15 @@ stateOrProvinceName_default     = Madrid
 localityName                    = "3. Locality Name            (eg, city)     "
 localityName_default            = Madrid
 0.organizationName              = "4. Organization Name        (eg, company)  "
-0.organizationName_default      = WiFiChallengeLab
+0.organizationName_default      = WiFiChallenge
 organizationalUnitName          = "5. Organizational Unit Name (eg, section)  "
 #organizationalUnitName_default  = 
 commonName                      = "6. Common Name              (eg, CA name)  "
 commonName_max                  = 64
-commonName_default              = WiFiChallengeLab CA
+commonName_default              = WiFiChallenge CA
 emailAddress                    = "7. Email Address            (eg, name@FQDN)"
 emailAddress_max                = 40
-emailAddress_default            = client@WiFiChallengeLab.com' > client.conf
+emailAddress_default            = client@WiFiChallenge.com' > client.conf
 
 echo 'extensions = x509v3
  
