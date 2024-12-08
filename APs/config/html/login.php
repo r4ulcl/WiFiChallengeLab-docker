@@ -61,8 +61,7 @@ if (isset($_POST['Submit'])) {
 </head>
 
 <body>
-
-
+  <div class="content">
   <?php
   /* Check IP from GLOBAL */
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) {
@@ -134,10 +133,7 @@ if (isset($_POST['Submit'])) {
 
   ?>
 
-
-  <div class="content">
-
-    <?php
+  <?php
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPEN
       echo "<h3>Open Router Login</h3>";
     }
