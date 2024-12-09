@@ -123,6 +123,18 @@ And for a Hyper-v VM, in a admin console:
 vagrant up hyper-v_vm --provider=hyperv
 ```
 
+### Create the VM manually (M1, M2, etc recommended)
+
+- Download a Ubuntu20.04 VM
+- Exeute the following code as root
+
+``` bash
+cd /var/
+git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+bash /var/WiFiChallengeLab-docker/vagrant/install.sh
+```
+
+
 ## Usage
 
 ### Attack from Ubuntu VM
@@ -138,7 +150,7 @@ vagrant up hyper-v_vm --provider=hyperv
 - TODO
 
 ## Modify config files
-To modify the files you can download the repository and edit both APs and clients (in the VM the path is /var/WiFiChallenge). The files are divided by APs, Clients, and Nzyme files.
+To modify the files you can download the repository and edit both APs and clients (in the VM the path is /var/WiFiChallengeLab-docker). The files are divided by APs, Clients, and Nzyme files.
 
 ## Recompile Docker
 To recreate the Docker files with the changes made, modify the docker-compose.yml file by commenting out the "image:" line in each Docker and uncommenting the line with "build:". Then use "docker compose build" to create a new version.

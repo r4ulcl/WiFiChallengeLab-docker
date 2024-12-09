@@ -13,7 +13,7 @@ edit_config_file() {
     fi
 }
 
-
+DEV=True
 
 # update package lists
 sudo apt-get update
@@ -66,19 +66,29 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo apt-get install bridge-utils -y
 sudo service docker restart
 
-## Go to WiFiChallengeFolder (git clone...)
-cp -r /media/WiFiChallenge /var/
-cd /var/WiFiChallenge
-shred -vzn 3 /var/WiFiChallenge/.git
+
+if [ "$DEV" == "True" ]; then
+  ## Go to WiFiChallengeFolder (git clone...)
+  cp -r /media/WiFiChallenge/ /var/
+  mv /var/WiFiChallenge /var/WiFiChallengeLab-docker
+else 
+  cd /var
+  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+fi
+
+cd /var/WiFiChallengeLab-docker
+
+# Delete unnecesary files
+shred -vzn 3 /var/WiFiChallengeLab-docker/.git
 # No need
-shred -vzn 3 /var/WiFiChallenge/APs
-shred -vzn 3 /var/WiFiChallenge/Clients
+shred -vzn 3 /var/WiFiChallengeLab-docker/APs
+shred -vzn 3 /var/WiFiChallengeLab-docker/Clients
 
-find /var/WiFiChallenge/APs -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallenge/Clients -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallenge/vagrant -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallengeLab-docker/APs -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallengeLab-docker/Clients -type f -exec shred -zvu -n 5 {} \;
+find /var/WiFiChallengeLab-docker/vagrant -type f -exec shred -zvu -n 5 {} \;
 
-rm -r /var/WiFiChallenge/Clients /var/WiFiChallenge/APs
+rm -r /var/WiFiChallengeLab-docker/Clients /var/WiFiChallengeLab-docker/APs
 
 ## Install RDP server
 echo 'Install RDP server'
@@ -89,13 +99,13 @@ echo 'Install hacking WiFi tools'
 sudo bash Attacker/installTools.sh
 
 ## Extract nzyme default logs (attacker)
-cd /var/WiFiChallenge/nzyme/
+cd /var/WiFiChallengeLab-docker/nzyme/
 rm -r logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 ## Enable docker
-cd /var/WiFiChallenge/
+cd /var/WiFiChallengeLab-docker/
 sudo docker compose -f docker-compose.yml up -d
 #sudo docker compose -f docker-compose-minimal.yml up -d
 
@@ -121,7 +131,7 @@ sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-inst
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
 echo '#!/bin/bash
-cd /var/WiFiChallenge
+cd /var/WiFiChallengeLab-docker
 
 sudo docker compose restart aps
 sudo docker compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
@@ -129,7 +139,7 @@ chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 echo '#!/bin/bash
 #Update images from AP and clients
-cd /var/WiFiChallenge
+cd /var/WiFiChallengeLab-docker
 sudo docker compose pull
 sudo docker compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
@@ -188,9 +198,9 @@ trap "rm ${PID_FILE}; exit 0" SIGINT SIGTERM SIGHUP
 echo $$ > "${PID_FILE}"
 # Loop
 GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
-ALERT1=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+ALERT1=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
 while true ; do
-  ALERT2=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+  ALERT2=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
   if [ "$ALERT1" != "$ALERT2" ] ; then
     ALERT1=$ALERT2
     notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$ALERT2"
@@ -239,7 +249,7 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 # Change icon theme to Adwaita
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
-sudo rm -rf /var/WiFiChallenge/zerofile 2> /dev/null
+sudo rm -rf /var/WiFiChallengeLab-docker/zerofile 2> /dev/null
 
 # Auto delete
 sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
