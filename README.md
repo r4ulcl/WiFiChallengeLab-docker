@@ -20,39 +20,34 @@
   </a>
 </p>
 
-
 # WiFiChallengeLab-docker
-
 
 [![Docker Image APs](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-aps) [![Docker Image Clients](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-clients)
 
-
-Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Ubuntu virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks. 
-
+Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Ubuntu virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks.
 
 ## CTFd Lab
 
-For direct access to download the VM and complete the challenges go to the CTFd web site: 
+For direct access to download the VM and complete the challenges go to the CTFd web site:
 
 [WiFiChallenge Lab v2.0](https://lab.WiFiChallenge.com/)
 
-
-
 ## Changelog from version v1.0
 
-The principal changes from version 1.0.5 to 2.0.3 are the following. 
+The principal changes from version 1.0.5 to 2.0.3 are the following.
+
 - Remove Nested VMs. Replaced with Docker
 - Add new attacks and modify the existent to make them more real
-    - WPA3 bruteforce and downgrade
-    - MGT Multiples APs
-    - Real captive portal evasion (instead of just MAC filtering)
-    - Phishing client with fake website.
+  - WPA3 bruteforce and downgrade
+  - MGT Multiples APs
+  - Real captive portal evasion (instead of just MAC filtering)
+  - Phishing client with fake website.
 - Eliminating the WPS pin attack as it is outdated, unrealistic, and overly simplistic.
 - Use Ubuntu as SO instead of Debian
 - Use vagrant to create the VM to be easy to replicate
 - More Virtual WiFi adapters
-    - More APs
-    - More clients
+  - More APs
+  - More clients
 - Monitorization and detection using nzyme WIDS.
 
 ## Using WiFiChallenge Lab
@@ -61,28 +56,31 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
 
 To get started with the VM, download the appropriate version for your preferred platform:
 
-- [VMWare or VirtualBox from GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
-- [VMWare or VirtualBox from Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
+- [From GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
+- [From Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
-### Using Docker on a Linux Host or Custom VM (Supports x86-64 and ARM)
+### Using Docker on a Linux Host or Custom VM with Ubuntu 20.04 (Supports x86-64 and ARM)
 
-I recommend using Ubuntu 20.04 for a streamlined setup with the provided script, but any OS with Docker support should work.
+1. Download a Ubuntu20.04 VM
+2. Execute the following code as root
 
-1. Clone the repository and set up Docker to manage Access Points (APs), clients, and nzyme for alerts:
+``` bash
+cd /var/
+git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+bash /var/WiFiChallengeLab-docker/vagrant/install.sh
+```
 
-    ```bash
-    git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
-    cd WiFiChallengeLab-docker
-    docker compose up -d --file docker-compose.yml
-    ```
+3. Reboot and login with user/user
+4. Continue in lab.wifichallenge.com
 
-### Optional: Install Wi-Fi Tools
+### Using Docker on a Linux Host or Custom VM like a kali linux
 
-If you are running Ubuntu 20.04, you can install additional Wi-Fi hacking tools by navigating to the appropriate directory and running the provided installation script:
+Clone the repository and set up Docker to manage Access Points (APs), clients, and nzyme for alerts:
 
 ```bash
-cd Attacker
-./installTools.sh
+git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+cd WiFiChallengeLab-docker
+docker compose up -d --file docker-compose.yml
 ```
 
 ### Create your own VM using vagrant
@@ -95,72 +93,78 @@ cd Attacker
 
 #### Create the VM with vagrant
 
-``` bash
+```bash
 git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 cd WiFiChallengeLab-docker
 cd vagrant
 ```
 
-Edit file vagrantfile memory and CPU to your needs. 
+Edit file vagrantfile memory and CPU to your needs.
 
-``` bash
+```bash
 nano vagrantfile
 ```
 
 If you want a VMWare VM:
 
-``` bash
+```bash
 vagrant up vmware_vm 
 ```
 
 For a VirtualBox VM:
-``` bash
+
+```bash
 vagrant up virtualbox_vm 
 ```
 
 And for a Hyper-v VM, in a admin console:
-``` bash
+
+```bash
 vagrant up hyper-v_vm --provider=hyperv
 ```
 
 ### Create the VM manually (M1, M2, etc recommended)
 
 - Download a Ubuntu20.04 VM
-- Exeute the following code as root
+- Execute the following code as root
 
-``` bash
+```bash
 cd /var/
 git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 bash /var/WiFiChallengeLab-docker/vagrant/install.sh
 ```
 
-
 ## Usage
 
 ### Attack from Ubuntu VM
-- The tools are installed and can be found in the tools folder of the root home. 
+
+- The tools are installed and can be found in the tools folder of the root home.
 - There are 7 antennas available, wlan0 to wlan6.
-- Do not disturb mode can be disabled with the following command. 
+- Do not disturb mode can be disabled with the following command.
 
 ### Attack from Host
-- Start the docker-compose.yml file and use the virtual WLAN. 
-- Use your own tools and configurations to attack. 
+
+- Start the docker-compose.yml file and use the virtual WLAN.
+- Use your own tools and configurations to attack.
 
 ### Attack from Docker Attacker
+
 - TODO
 
 ## Modify config files
+
 To modify the files you can download the repository and edit both APs and clients (in the VM the path is /var/WiFiChallengeLab-docker). The files are divided by APs, Clients, and Nzyme files.
 
 ## Recompile Docker
+
 To recreate the Docker files with the changes made, modify the docker-compose.yml file by commenting out the "image:" line in each Docker and uncommenting the line with "build:". Then use "docker compose build" to create a new version.
 
 ## Support this project
 
 ### Buymeacoffee
 
-[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png">](https://www.buymeacoffee.com/r4ulcl)
- 
+[`<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png">`](https://www.buymeacoffee.com/r4ulcl)
+
 ## Collaborators
 
 Oscar Alfonso (OscarAkaElvis / v1s1t0r, [airgeddon](https://github.com/v1s1t0r1sh3r3/airgeddon) author) - Collaboration in testing and script improvement

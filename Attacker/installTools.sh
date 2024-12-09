@@ -87,7 +87,7 @@ pip install -r './UnicastDeauth/requirements.txt'
 cd $TOOLS
 
 # Clone the EapHammer repository
-git clone https://github.com/s0lst1c3/eaphammer.git
+git clone https://github.com/r4ulcl/eaphammer.git
 cd eaphammer
 
 # Install dependencies listed in kali-dependencies.txt
