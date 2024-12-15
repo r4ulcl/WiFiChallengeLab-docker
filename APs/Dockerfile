@@ -60,7 +60,7 @@ RUN echo "<IfModule mod_ssl.c>\n\
 
 # Enable the SSL site
 RUN a2ensite default-ssl.conf
-
+RUN a2enmod ssl
 
 #WPS 
 RUN touch /var/run/hostapd_wps_pin_requests
