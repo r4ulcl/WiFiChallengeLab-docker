@@ -109,6 +109,7 @@
 
 # Allow anonymous identity
 "GLOBAL\anonymous"		TLS
+"anonymous@GLOBAL"  TLS
 
 # Existing user identities
 "GLOBAL\GlobalAdmin"		TLS

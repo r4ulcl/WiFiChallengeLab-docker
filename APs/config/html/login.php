@@ -79,53 +79,27 @@ if (isset($_POST['Submit'])) {
 
   # Check IP from CONTOSOREG Relay
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) {
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
     echo "flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}";
-    echo "<br><br>";
-    echo "<br><br>";
   }
 
   # Check IP from CONTOSOREG Tablets Relay
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) {
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
     echo "flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}";
-    echo "<br><br>";
-    echo "<br><br>";
   }
 
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { #only WEP
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
     echo "flag{c342fe657870020a1b164f2075f447564fdd1c3d}";
-    echo "<br><br>";
-    echo "<br><br>";
   }
 
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.14.') !== false) { #only SAE management
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
     echo "flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}";
-    echo "<br><br>";
-    echo "<br><br>";
   }
 
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
     echo "flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}";
-    echo "<br><br>";
-    echo "<br><br>";
   }
 
   if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
-    echo "<br><br>";
     echo "Hello Global Admin:";
     echo "<br><br>";
     echo "Your pass is: SuperSuperSecure@!@";

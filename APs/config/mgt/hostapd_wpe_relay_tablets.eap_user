@@ -111,4 +111,8 @@
 
 #"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
 
+# Allow anonymous identity
+"CONTOSOREG\anonymous"		MSCHAPV2
+"anonymous@CONTOSOREG"  MSCHAPV2
+
 "CONTOSOREG\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
