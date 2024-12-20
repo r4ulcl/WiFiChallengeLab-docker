@@ -212,7 +212,7 @@ sudo ip link set wlan60 up' > /var/aux.sh
 chmod +x /var/aux.sh
 
 # Configure GUI when user open terminal first time, then delete
-echo '#!/bin/bash
+cat << 'EOF' > /etc/configureUser.sh
 # Enable dock
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
@@ -241,6 +241,7 @@ gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
 
 # Configure firefox for TLS
+firefox &
 CA_CERT_PATH="/var/WiFiChallengeLab-docker/certs/ca.crt"
 PROFILE_PATH="$HOME/.mozilla/firefox"
 PROFILE_DIR=$(ls $PROFILE_PATH | grep -E '\.default-release$')
@@ -261,39 +262,9 @@ certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:$PROFILE_PATH/$PROFILE_DIR -i 
 sudo rm -rf /var/WiFiChallengeLab-docker/zerofile 2> /dev/null
 
 # Auto delete
-sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
-' > /etc/configureUser.sh
+sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc 2> /dev/null
+sed -i "s/bash \/etc\/configureUser.sh//g" /home/user/.bashrc 2> /dev/null
 
-echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
-
-
-# Configure GUI when user open terminal first time, then delete in ubuntu user
-sudo tee /etc/configureUseruser.sh > /dev/null <<EOF
-# Enable dock
-gnome-extensions enable ubuntu-dock@ubuntu.com
-gnome-extensions enable ubuntu-appindicators@ubuntu.com
-gnome-extensions enable desktop-icons@csoriano
-
-# Set background
-gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
-
-# Cron to monitor mode to nzyme
-(crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
-
-# Dark theme
-# Check if gnome-tweaks is installed
-if ! [ -x "$(command -v gnome-tweaks)" ]; then
-  sudo apt-get -y  install gnome-tweaks
-fi
-
-# Change theme to Adwaita-dark
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-
-# Change icon theme to Adwaita
-gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
-
-# Auto delete
-sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
 
 # Add Terminal to favorites
 gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop', 'org.gnome.Terminal.desktop']"
@@ -302,11 +273,11 @@ gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell fav
 sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
 firefox &
-
 EOF
-#' > 
 
-echo 'bash /etc/configureUseruser.sh' >> /home/user/.bashrc
+echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+echo 'bash /etc/configureUser.sh' >> /home/user/.bashrc
+
 
 
 # Enable SSH password login
