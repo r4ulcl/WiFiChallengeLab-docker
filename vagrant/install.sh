@@ -69,8 +69,8 @@ sudo service docker restart
 
 if [ "$DEV" == "True" ]; then
   ## Go to WiFiChallengeFolder (git clone...)
-  cp -r /media/WiFiChallenge/ /var/
-  mv /var/WiFiChallenge /var/WiFiChallengeLab-docker
+  cd /var
+  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
 else 
   cd /var
   git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
