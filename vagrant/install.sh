@@ -78,18 +78,6 @@ fi
 
 cd /var/WiFiChallengeLab-docker
 
-# Delete unnecesary files
-shred -vzn 3 /var/WiFiChallengeLab-docker/.git
-# No need
-shred -vzn 3 /var/WiFiChallengeLab-docker/APs
-shred -vzn 3 /var/WiFiChallengeLab-docker/Clients
-
-find /var/WiFiChallengeLab-docker/APs -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallengeLab-docker/Clients -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallengeLab-docker/vagrant -type f -exec shred -zvu -n 5 {} \;
-
-rm -r /var/WiFiChallengeLab-docker/Clients /var/WiFiChallengeLab-docker/APs
-
 ## Install RDP server
 echo 'Install RDP server'
 sudo bash Attacker/installRDP.sh
