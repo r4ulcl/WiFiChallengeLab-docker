@@ -83,6 +83,7 @@ emailAddress_max                = 40
 emailAddress_default            = server@WiFiChallenge.com
 EOF
 
+# Generate the server.ext file dynamically
 cat <<EOF > server.ext
 extensions = x509v3
 
@@ -90,12 +91,25 @@ extensions = x509v3
 nsCertType       = server
 keyUsage         = digitalSignature,nonRepudiation,keyEncipherment
 extendedKeyUsage = msSGC,nsSGC,serverAuth
+subjectAltName   = @alt_names
+
+[ alt_names ]
 EOF
 
+# Add IPs from 192.168.1.1 to 192.168.20.1 to SAN
+COUNTER=1
+for i in $(seq 1 20); do
+    echo "IP.$COUNTER = 192.168.$i.1" >> server.ext
+    ((COUNTER++))
+done
+
+# Initialize CA serial number
 echo -ne '01' > ca.serial
 
+# Create the Certificate Signing Request (CSR)
 openssl req -config server.conf -new -key server.key -out server.csr
 
+# Create the server certificate signed by the CA
 openssl x509 -days $CERT_VALIDITY_DAYS -extfile server.ext -CA ca.crt -CAkey ca.key -CAserial ca.serial -in server.csr -req -out server.crt
 
 # Creation Of A Client Certificate

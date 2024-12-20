@@ -4,3 +4,26 @@ extensions = x509v3
 nsCertType       = server
 keyUsage         = digitalSignature,nonRepudiation,keyEncipherment
 extendedKeyUsage = msSGC,nsSGC,serverAuth
+subjectAltName   = @alt_names
+
+[ alt_names ]
+IP.1 = 192.168.1.1
+IP.2 = 192.168.2.1
+IP.3 = 192.168.3.1
+IP.4 = 192.168.4.1
+IP.5 = 192.168.5.1
+IP.6 = 192.168.6.1
+IP.7 = 192.168.7.1
+IP.8 = 192.168.8.1
+IP.9 = 192.168.9.1
+IP.10 = 192.168.10.1
+IP.11 = 192.168.11.1
+IP.12 = 192.168.12.1
+IP.13 = 192.168.13.1
+IP.14 = 192.168.14.1
+IP.15 = 192.168.15.1
+IP.16 = 192.168.16.1
+IP.17 = 192.168.17.1
+IP.18 = 192.168.18.1
+IP.19 = 192.168.19.1
+IP.20 = 192.168.20.1

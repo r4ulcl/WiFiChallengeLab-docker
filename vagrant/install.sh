@@ -249,6 +249,27 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 # Change icon theme to Adwaita
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
+# Add CA to system and firefox to TLS
+sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
+
+# Configure firefox for TLS
+CA_CERT_PATH="/var/WiFiChallengeLab-docker/certs/ca.crt"
+PROFILE_PATH="$HOME/.mozilla/firefox"
+PROFILE_DIR=$(ls $PROFILE_PATH | grep -E '\.default-release$')
+
+# Path to the Firefox cert8.db (or cert9.db for newer Firefox versions)
+CERT_DB="$PROFILE_PATH/$PROFILE_DIR/cert9.db"
+
+# Check if certutil (from the `libnss3-tools` package) is installed
+if ! command -v certutil &> /dev/null; then
+    echo "certutil not found. Installing libnss3-tools..."
+    sudo apt-get update && sudo apt-get install -y libnss3-tools
+fi
+
+# Add the CA certificate to Firefox
+echo "Adding CA certificate to Firefox..."
+certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:$PROFILE_PATH/$PROFILE_DIR -i "$CA_CERT_PATH"
+
 sudo rm -rf /var/WiFiChallengeLab-docker/zerofile 2> /dev/null
 
 # Auto delete
