@@ -5,9 +5,9 @@ interface=$WLAN_MGT
 
 # May have to change these depending on build location
 eap_user_file=/root/mgt/hostapd_wpe.eap_user
-ca_cert=/root/mgt/certs/ca.crt
-server_cert=/root/mgt/certs/server.crt
-private_key=/root/mgt/certs/server.key
+ca_cert=/root/certs/ca.crt
+server_cert=/root/certs/server.crt
+private_key=/root/certs/server.key
 private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 

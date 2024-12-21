@@ -15,7 +15,6 @@ RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 COPY config/wlan_config_clients /root/
 
 #Copy config files
-COPY config/certs/ /root/certs/
 COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/
@@ -26,7 +25,7 @@ COPY config/wepClient /root/wepClient
 COPY config/connectINET.sh /root/
 
 #Update certs
-#RUN cd /root/mgt/certs/ ; make install
+#RUN cd /root/certs/ ; make install
 
 #COPY config/dnsmasq.conf /etc/dnsmasq.conf
 # Not used COPY config/interfaces /etc/network/interfaces

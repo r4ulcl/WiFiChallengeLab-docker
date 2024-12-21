@@ -91,6 +91,8 @@ do
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
 	URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
 	curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' --data-raw "username=CORPO\god&password=$PHISHING_PASS" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null
+	# avoid spam
+	sleep 1
 done &
 
 # Responder
@@ -98,10 +100,15 @@ while :
 do
 	# TODO Responder client connect
 	#dhclien-wifichallenge -r $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
-	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2>> /tmp/dhclien-wifichallenge
-	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
-	# Responder ""vuln""
-	timeout -k 1 5s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill
+	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge-Responder
+	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-Responder | awk '{print $2}' | head -n 1`
+	# Responder ""vuln"" - 20 seconds because the SMB takes aprox 10 seconds in respond "Authentication error"
+	# In background to be sure
+	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	sleep 0.5
+	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	timeout -k 1 20s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill
 done &
 
 # WEP traffic

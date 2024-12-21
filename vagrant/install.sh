@@ -13,26 +13,17 @@ edit_config_file() {
     fi
 }
 
-
+DEV=False
 
 # update package lists
 sudo apt-get update
 sudo apt-get full-upgrade -y
 
 
-# Disable automatic updates in 20auto-upgrades
-auto_upgrades_file="/etc/apt/apt.conf.d/20auto-upgrades"
-edit_config_file "${auto_upgrades_file}" "APT::Periodic::Update-Package-Lists" "0"
-edit_config_file "${auto_upgrades_file}" "APT::Periodic::Download-Upgradeable-Packages" "0"
-edit_config_file "${auto_upgrades_file}" "APT::Periodic::AutocleanInterval" "0"
-edit_config_file "${auto_upgrades_file}" "APT::Periodic::Unattended-Upgrade" "0"
+sudo apt remove unattended-upgrades -y
+sudo apt remove update-manager -y
+sudo apt remove update-notifier -y
 
-# Stop and disable the unattended-upgrades service
-sudo systemctl stop unattended-upgrades
-sudo systemctl disable unattended-upgrades
-
-sudo systemctl disable apt-daily-upgrade.service
-sudo systemctl disable apt-daily.service
 
 ## Install drivers modprobe 
 sudo apt-get install -y linux-generic
@@ -75,19 +66,17 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 sudo apt-get install bridge-utils -y
 sudo service docker restart
 
-## Go to WiFiChallengeFolder (git clone...)
-cp -r /media/WiFiChallenge /var/
-cd /var/WiFiChallenge
-shred -vzn 3 /var/WiFiChallenge/.git
-# No need
-shred -vzn 3 /var/WiFiChallenge/APs
-shred -vzn 3 /var/WiFiChallenge/Clients
 
-find /var/WiFiChallenge/APs -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallenge/Clients -type f -exec shred -zvu -n 5 {} \;
-find /var/WiFiChallenge/vagrant -type f -exec shred -zvu -n 5 {} \;
+if [ "$DEV" == "True" ]; then
+  ## Go to WiFiChallengeFolder (git clone...)
+  cd /var
+  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
+else 
+  cd /var
+  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+fi
 
-rm -r /var/WiFiChallenge/Clients /var/WiFiChallenge/APs
+cd /var/WiFiChallengeLab-docker
 
 ## Install RDP server
 echo 'Install RDP server'
@@ -98,13 +87,13 @@ echo 'Install hacking WiFi tools'
 sudo bash Attacker/installTools.sh
 
 ## Extract nzyme default logs (attacker)
-cd /var/WiFiChallenge/nzyme/
+cd /var/WiFiChallengeLab-docker/nzyme/
 rm -r logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 ## Enable docker
-cd /var/WiFiChallenge/
+cd /var/WiFiChallengeLab-docker/
 sudo docker compose -f docker-compose.yml up -d
 #sudo docker compose -f docker-compose-minimal.yml up -d
 
@@ -130,7 +119,7 @@ sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-inst
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
 echo '#!/bin/bash
-cd /var/WiFiChallenge
+cd /var/WiFiChallengeLab-docker
 
 sudo docker compose restart aps
 sudo docker compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
@@ -138,7 +127,7 @@ chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
 
 echo '#!/bin/bash
 #Update images from AP and clients
-cd /var/WiFiChallenge
+cd /var/WiFiChallengeLab-docker
 sudo docker compose pull
 sudo docker compose up --detach
 ' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
@@ -197,9 +186,9 @@ trap "rm ${PID_FILE}; exit 0" SIGINT SIGTERM SIGHUP
 echo $$ > "${PID_FILE}"
 # Loop
 GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
-ALERT1=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+ALERT1=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
 while true ; do
-  ALERT2=`cat /var/WiFiChallenge/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
+  ALERT2=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
   if [ "$ALERT1" != "$ALERT2" ] ; then
     ALERT1=$ALERT2
     notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$ALERT2"
@@ -223,7 +212,7 @@ sudo ip link set wlan60 up' > /var/aux.sh
 chmod +x /var/aux.sh
 
 # Configure GUI when user open terminal first time, then delete
-echo '#!/bin/bash
+cat << 'EOF' > /etc/configureUser.sh
 # Enable dock
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
@@ -248,42 +237,35 @@ gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 # Change icon theme to Adwaita
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
-sudo rm -rf /var/WiFiChallenge/zerofile 2> /dev/null
+# Add CA to system and firefox to TLS
+sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
 
-# Auto delete
-sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc
-' > /etc/configureUser.sh
+# Configure firefox for TLS
+firefox &
+sleep 10
+CA_CERT_PATH="/var/WiFiChallengeLab-docker/certs/ca.crt"
+PROFILE_PATH="$HOME/.mozilla/firefox"
+PROFILE_DIR=$(ls $PROFILE_PATH | grep -E '\.default-release$')
 
-echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+# Path to the Firefox cert8.db (or cert9.db for newer Firefox versions)
+CERT_DB="$PROFILE_PATH/$PROFILE_DIR/cert9.db"
 
-
-# Configure GUI when user open terminal first time, then delete in ubuntu user
-sudo tee /etc/configureUseruser.sh > /dev/null <<EOF
-# Enable dock
-gnome-extensions enable ubuntu-dock@ubuntu.com
-gnome-extensions enable ubuntu-appindicators@ubuntu.com
-gnome-extensions enable desktop-icons@csoriano
-
-# Set background
-gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
-
-# Cron to monitor mode to nzyme
-(crontab -l ; echo "* * * * * /var/aux.sh") | crontab -
-
-# Dark theme
-# Check if gnome-tweaks is installed
-if ! [ -x "$(command -v gnome-tweaks)" ]; then
-  sudo apt-get -y  install gnome-tweaks
+# Check if certutil (from the `libnss3-tools` package) is installed
+if ! command -v certutil &> /dev/null; then
+    echo "certutil not found. Installing libnss3-tools..."
+    sudo apt-get update && sudo apt-get install -y libnss3-tools
 fi
 
-# Change theme to Adwaita-dark
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
+# Add the CA certificate to Firefox
+echo "Adding CA certificate to Firefox..."
+certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:$PROFILE_PATH/$PROFILE_DIR -i "$CA_CERT_PATH"
 
-# Change icon theme to Adwaita
-gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
+sudo rm -rf /var/WiFiChallengeLab-docker/zerofile 2> /dev/null
 
 # Auto delete
-sed -i "s/bash \/etc\/configureUseruser.sh//g" /home/user/.bashrc
+sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc 2> /dev/null
+sed -i "s/bash \/etc\/configureUser.sh//g" /home/user/.bashrc 2> /dev/null
+
 
 # Add Terminal to favorites
 gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop', 'org.gnome.Terminal.desktop']"
@@ -291,12 +273,11 @@ gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell fav
 # Remove fstab info in VBox
 sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
-firefox &
-
 EOF
-#' > 
 
-echo 'bash /etc/configureUseruser.sh' >> /home/user/.bashrc
+echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+echo 'bash /etc/configureUser.sh' >> /home/user/.bashrc
+
 
 
 # Enable SSH password login
@@ -327,6 +308,64 @@ sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
     }
 }
 EOF
+
+# Add healthceck script to restart if fails
+# Define paths for scripts and service files
+SCRIPT_PATH="/usr/local/bin/monitor-health.sh"
+SERVICE_PATH="/etc/systemd/system/monitor-health.service"
+
+# 1. Create the monitor-health.sh script
+cat << 'EOF' > $SCRIPT_PATH
+#!/bin/bash
+
+# Loop to constantly monitor containers' health
+while true; do
+  for container in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
+    # Wait 30 seconds and check again if the container is still unhealthy
+    sleep 30
+    if docker ps --filter "health=unhealthy" --filter "name=$container" --format "{{.Names}}" | grep -q "$container"; then
+      echo "$(date) - Restarting unhealthy container: $container"
+      docker restart "$container"
+    fi
+  done
+
+  # Sleep before checking again
+  sleep 30
+done
+EOF
+
+# Make the monitor-health.sh script executable
+chmod +x $SCRIPT_PATH
+
+echo "monitor-health.sh script created and made executable."
+
+# 2. Create the systemd service file
+echo "Creating the systemd service file..."
+
+cat << EOF > $SERVICE_PATH
+[Unit]
+Description=Monitor Docker Health and Restart Unhealthy Containers
+After=docker.service
+
+[Service]
+ExecStart=$SCRIPT_PATH
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 3. Reload systemd, enable and start the service
+# Reload systemd to pick up the new service file
+systemctl daemon-reload
+# Enable the service to start on boot
+systemctl enable monitor-health.service
+# Start the service immediately
+systemctl start monitor-health.service
+# 4. Verify the service is running
+systemctl status monitor-health.service --no-pager
 
 
 # Disable systemd-resolved

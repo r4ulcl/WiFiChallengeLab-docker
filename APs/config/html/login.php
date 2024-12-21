@@ -1,13 +1,12 @@
 <?php
+// Start the session
+session_start();
 
-// Check if user is already logged in
-if (isset($_SESSION['UserData']['Username'])) {
-  header("Location: index.php"); // Redirect to index.php
-  exit; // Make sure to exit after redirection
+// Check if the user is already logged in
+if (isset($_SESSION['Username'])) {
+  header("Location: index.php");
+  exit;
 }
-
-session_start(); /* Starts the session */
-
 
 /* Check Login form submitted */
 if (isset($_POST['Submit'])) {
@@ -62,81 +61,64 @@ if (isset($_POST['Submit'])) {
 </head>
 
 <body>
-
-
-  <?php
-  /* Check IP from GLOBAL */
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) {
-    session_start(); /* Starts the session */
-    $Username = 'GLOBAL\GlobalAdmin';
-    $Password = 'SuperSuperSecure@!@';
-    $_SESSION['UserData']['Username'] = $Username;
-    /* Success: Set session variables USERNAME  */
-    $_SESSION['Username'] = $Username;
-    echo "Router Login";
-
-    header("location:index.php");
-    exit;
-  }
-
-  # Check IP from CONTOSOREG Relay
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) {
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
-    echo "flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}";
-    echo "<br><br>";
-    echo "<br><br>";
-  }
-
-  # Check IP from CONTOSOREG Tablets Relay
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) {
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
-    echo "flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}";
-    echo "<br><br>";
-    echo "<br><br>";
-  }
-
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { #only WEP
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
-    echo "flag{c342fe657870020a1b164f2075f447564fdd1c3d}";
-    echo "<br><br>";
-    echo "<br><br>";
-  }
-
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.14.') !== false) { #only SAE management
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
-    echo "flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}";
-    echo "<br><br>";
-    echo "<br><br>";
-  }
-
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
-    #relay user
-    echo "<br><br>";
-    echo "<br><br>";
-    echo "flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}";
-    echo "<br><br>";
-    echo "<br><br>";
-  }
-
-  if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
-    echo "<br><br>";
-    echo "Hello Global Admin:";
-    echo "<br><br>";
-    echo "Your pass is: SuperSuperSecure@!@";
-  }
-
-  ?>
-
+  <script>
+    function copyFlagToClipboard(flag) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(flag).then(() => {
+          alert('Flag copied to clipboard!');
+        }, (err) => {
+          console.error('Could not copy text: ', err);
+        });
+      } else {
+        alert(flag);
+      }
+    }
+  </script>
 
   <div class="content">
+    <?php
+    /* Check IP from GLOBAL */
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) {
+      session_start(); /* Starts the session */
+      $Username = 'GLOBAL\GlobalAdmin';
+      $Password = 'SuperSuperSecure@!@';
+      $_SESSION['UserData']['Username'] = $Username;
+      /* Success: Set session variables USERNAME  */
+      $_SESSION['Username'] = $Username;
+
+      header("location:index.php");
+      exit;
+    }
+
+    # Check IP from CONTOSOREG Relay
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) {
+      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}')\">flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}</button>";
+    }
+
+    # Check IP from CONTOSOREG Tablets Relay
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) {
+      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}')\">flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}</button>";
+    }
+
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { #only WEP
+      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{c342fe657870020a1b164f2075f447564fdd1c3d}')\">flag{c342fe657870020a1b164f2075f447564fdd1c3d}</button>";
+    }
+
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.14.') !== false) { #only SAE management
+      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}')\">flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}</button>";
+    }
+
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
+      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}')\">flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}</button>";
+    }
+
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
+      echo "Hello Global Admin:";
+      echo "<br><br>";
+      echo "Your pass is: SuperSuperSecure@!@";
+    }
+
+    ?>
 
     <?php
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPEN
