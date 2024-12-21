@@ -242,6 +242,7 @@ sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificat
 
 # Configure firefox for TLS
 firefox &
+sleep 10
 CA_CERT_PATH="/var/WiFiChallengeLab-docker/certs/ca.crt"
 PROFILE_PATH="$HOME/.mozilla/firefox"
 PROFILE_DIR=$(ls $PROFILE_PATH | grep -E '\.default-release$')
@@ -272,7 +273,6 @@ gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell fav
 # Remove fstab info in VBox
 sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
 
-firefox &
 EOF
 
 echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc

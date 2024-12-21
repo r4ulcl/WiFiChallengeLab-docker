@@ -42,8 +42,9 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - /bin/bash -c '
-          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 1; fi'
+        - ip netns exec ns-client /bin/bash -c '
+          curl -s http://localhost >/dev/null || exit 1;
+          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
       interval: 5s
       timeout: 5s
       retries: 3
