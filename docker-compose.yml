@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:dev
+    image: r4ulcl/wifichallengelab-aps:latest
     #build: ./APs/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
@@ -26,7 +26,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients:dev
+    image: r4ulcl/wifichallengelab-clients:latest
     #build: ./Clients/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
@@ -52,7 +52,7 @@ services:
 
 
   nzyme:
-    image: r4ulcl/wifichallengelab-nzyme:dev
+    image: r4ulcl/wifichallengelab-nzyme:latest
     #build: ./nzyme/
     restart: on-failure   # Automatically restart on failure
     #env_file: ./nzyme/.env

@@ -13,7 +13,7 @@ edit_config_file() {
     fi
 }
 
-DEV=True
+DEV=False
 
 # update package lists
 sudo apt-get update
