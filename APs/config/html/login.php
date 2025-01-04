@@ -13,11 +13,11 @@ if (isset($_POST['Submit'])) {
   /* Define username and associated password array */
   $logins = array(
     'GLOBAL\GlobalAdmin' => 'SuperSuperSecure@!@',
-    'CONTOSO\Administrator' => 'SuperSecure@!@',
-    'CONTOSO\juan.tr' => 'bulldogs1234',
-    'CONTOSO\test' => 'monkey',
-    'CONTOSO\ftp' => '12345678',
-    'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
+    'CONTO\Administrator' => 'SuperSecure@!@',
+    'CONTO\juan.tr' => 'bulldogs1234',
+    'CONTO\test' => 'monkey',
+    'CONTO\ftp' => '12345678',
+    'CONTOREG\luis.da' => 'u89gh68!6fcv56ed',
     'CORPO\god' => 'tommy1',
     'admin' => 'admin',
     'test1' => 'OYfDcUNQu9PCojb',
@@ -90,12 +90,12 @@ if (isset($_POST['Submit'])) {
       exit;
     }
 
-    # Check IP from CONTOSOREG Relay
+    # Check IP from CONTOREG Relay
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) {
       echo "Flag: <button onclick=\"copyFlagToClipboard('flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}')\">flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}</button>";
     }
 
-    # Check IP from CONTOSOREG Tablets Relay
+    # Check IP from CONTOREG Tablets Relay
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) {
       echo "Flag: <button onclick=\"copyFlagToClipboard('flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}')\">flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}</button>";
     }

@@ -1,3 +1,5 @@
+
+
 <?php
 if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN
     echo "flag{3b23cd3e5d462c6cacc20f52f5c92244e1188bde}";
@@ -14,3 +16,4 @@ if  (strpos($_SERVER['REMOTE_ADDR'], '192.168.10.') !== false) { //only OPN
 
 }
 ?>
+
