@@ -103,7 +103,7 @@
 #"8"*		AKA'	[2]
 
 # WPE - DO NOT REMOVE - These entries are specifically in here 
-#*		PEAP,TTLS,TLS,FAST
+*		PEAP,TTLS,TLS,FAST
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
 *	PEAP,TTLS,TLS,FAST [ver=1]
