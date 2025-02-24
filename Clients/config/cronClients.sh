@@ -62,7 +62,7 @@ do
 	fi
 
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_WPA_PSK2.1/lab.php" -c /tmp/userTest2 -b /tmp/userTest2`
-	if [ "$STATUS" -ne 200 ] ; then
+	if [ "$STATUS" -eq 302 ] ; then
 		curl -s "http://$IP_WPA_PSK2.1/login.php" --interface $WLAN_WPA_PSK2 --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=test2&Password=2q60joygCBJQuFo&Submit=Login' -c /tmp/userTest2 -b /tmp/userTest2 &
 	fi
 
