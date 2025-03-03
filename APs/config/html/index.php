@@ -44,7 +44,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 			}
 		}
 
-		if ($_SESSION["Username"] == "CONTO\Administrator") {
+		if ($_SESSION["Username"] == "CORPO\Administrator") {
 			if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT 1
 				echo "Flag: <button onclick=\"copyFlagToClipboard('flag{04e474a4826cf10ba9f60da7ce07105ea2716aac}')\">flag{04e474a4826cf10ba9f60da7ce07105ea2716aac}</button>";
 			} elseif (strpos($_SERVER['REMOTE_ADDR'], '192.168.6.') !== false) { //only MGT	2
@@ -72,7 +72,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 
 		#ALL: and strpos($_SERVER['REMOTE_ADDR'], '192.168.X.') !== false to only use users in each network
 
-		if ($_SESSION["Username"] == "CONTO\juan.tr") {
+		if ($_SESSION["Username"] == "CORPO\juan.tr") {
 			if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
 				echo "Flag: <button onclick=\"copyFlagToClipboard('flag{3407a6e0ad77965731da8357c4270ecce8b642e4}')\">flag{3407a6e0ad77965731da8357c4270ecce8b642e4}</button>";
 				echo "<br><br>";
@@ -84,7 +84,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 			}
 		}
 
-		if ($_SESSION["Username"] == 'CONTO\test') {
+		if ($_SESSION["Username"] == 'CORPO\test') {
 			if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT 1
 				echo "Flag: <button onclick=\"copyFlagToClipboard('flag{14ddfbfcc90f80bd40287537d19b0aefdb5a0058}')\">flag{14ddfbfcc90f80bd40287537d19b0aefdb5a0058}</button>";
 				echo "<br><br>";
@@ -96,7 +96,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 			}
 		}
 
-		if ($_SESSION["Username"] == 'CONTO\ftp') {
+		if ($_SESSION["Username"] == 'CORPO\ftp') {
 			if (strpos($_SERVER['REMOTE_ADDR'], '192.168.5.') !== false) { //only MGT	
 				echo "Flag: <button onclick=\"copyFlagToClipboard('flag{004b3aef9bbbf24cdd55a4e13e384a40dc996848}')\">flag{004b3aef9bbbf24cdd55a4e13e384a40dc996848}</button>";
 				echo "<br><br>";
@@ -154,7 +154,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
 		}
 
 		#relay user
-		if ($_SESSION["Username"] == "CONTOREG\luis.da") { # RELAY
+		if ($_SESSION["Username"] == "CORPOREG\luis.da") { # RELAY
 			echo "Flag: <button onclick=\"copyFlagToClipboard('flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}')\">flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}</button>";
 			echo "<br><br>";
 			echo "<br><br>";

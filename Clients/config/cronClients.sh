@@ -42,11 +42,11 @@ done &
 while :
 do
 	# MGT
-	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_MGT_MSCHAP --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CONTO%5Cjuan.tr&Password=Secret%21&Submit=Login' -c /tmp/userjuan -b /tmp/userjuan &
-	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_MGT_GTC --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CONTO%5CAdministrator&Password=SuperSecure%40%21%40&Submit=Login' -c /tmp/userAdmin -b /tmp/userAdmin &
+	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_MGT_MSCHAP --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CORPO%5Cjuan.tr&Password=Secret%21&Submit=Login' -c /tmp/userjuan -b /tmp/userjuan &
+	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_MGT_GTC --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CORPO%5CAdministrator&Password=SuperSecure%40%21%40&Submit=Login' -c /tmp/userAdmin -b /tmp/userAdmin &
 
 	# MGT Relay
-	curl -s "http://$IP_MGT_RELAY.1/login.php" --interface $WLAN_MGT_RELAY --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CONTOREG%5Cluis.da&Password=u89gh68!6fcv56ed&Submit=Login' -c /tmp/userluis -b /tmp/userluis  &
+	curl -s "http://$IP_MGT_RELAY.1/login.php" --interface $WLAN_MGT_RELAY --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=CORPOREG%5Cluis.da&Password=u89gh68!6fcv56ed&Submit=Login' -c /tmp/userluis -b /tmp/userluis  &
 
 	# MGT TLS
 	curl -s "http://$IP_TLS.1/login.php" --interface $WLAN_TLS --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=GLOBAL%5CGlobalAdmin&Password=SuperSuperSecure%40%21%40&Submit=Login' -c /tmp/userGlobal -b /tmp/userGlobal  &

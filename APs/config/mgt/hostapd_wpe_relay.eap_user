@@ -112,8 +112,8 @@
 #"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
 
 # Allow anonymous identity
-"CONTOREG\anonymous"		MSCHAPV2
-"anonymous@CONTOREG"  MSCHAPV2
+"CORPOREG\anonymous"		MSCHAPV2
+"anonymous@CORPOREG"  MSCHAPV2
 
-"CONTOREG\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
+"CORPOREG\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
 "CORPO\god"			            MSCHAPV2		hash:cbdc3e5938885b7a507775cf22d56351 [2]

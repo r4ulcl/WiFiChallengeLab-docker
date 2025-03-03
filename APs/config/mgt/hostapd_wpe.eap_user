@@ -110,13 +110,13 @@
 #"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
 
 # Allow anonymous identity
-"CONTO\anonymous"		GTC,MSCHAPV2
-"anonymous@CONTO"  GTC,MSCHAPV2
+"CORPO\anonymous"		GTC,MSCHAPV2
+"anonymous@CORPO"  GTC,MSCHAPV2
 
 
-"CONTO\Administrator"		GTC,MSCHAPV2				"SuperSecure@!@" [2]
-"CONTO\juan.tr"			MSCHAPV2		"bulldogs1234" [2]
-"CONTCONTOOSO\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
+"CORPO\Administrator"		GTC,MSCHAPV2				"SuperSecure@!@" [2]
+"CORPO\juan.tr"			MSCHAPV2		"bulldogs1234" [2]
+"CORPO\luis.da"			MSCHAPV2		"u89gh68!6fcv56ed" [2]
 
-"CONTO\test"			MSCHAPV2		"monkey" [2]
-"CONTO\ftp"			MSCHAPV2		"12345678" [2]
+"CORPO\test"			MSCHAPV2		"monkey" [2]
+"CORPO\ftp"			MSCHAPV2		"12345678" [2]
