@@ -31,4 +31,4 @@ jobs:
           context: ./nzyme
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-nzyme:dev
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-nzyme:challenge
