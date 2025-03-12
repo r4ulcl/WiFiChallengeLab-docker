@@ -52,7 +52,7 @@ services:
 
 
   nzyme:
-    image: r4ulcl/wifichallengelab-nzyme:latest
+    image: r4ulcl/wifichallengelab-nzyme:challenge
     #build: ./nzyme/
     restart: on-failure   # Automatically restart on failure
     #env_file: ./nzyme/.env
