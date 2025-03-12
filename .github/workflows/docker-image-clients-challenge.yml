@@ -49,6 +49,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ steps.set_lowercase_repo.outputs.lowercase_repo }}-clients:challenge
-            ghcr.io/${{ steps.set_lowercase_repo.outputs.lowercase_repo }}-clients:challenge
+            ${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-clients:challenge
+            ghcr.io/${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-clients:challenge
           labels: ${{ steps.meta.outputs.labels }}
