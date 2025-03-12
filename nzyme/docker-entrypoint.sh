@@ -5,6 +5,11 @@ echo Updating nzyme.conf using .env
 
 echo $DATABASE_URL
 
+# Load variables 
+if [ -e "/root/wlan_config_aps" ]; then
+    source /root/wlan_config_aps
+fi
+
 # Create data_directory if not present
 mkdir /usr/share/nzyme 2> /dev/null
 

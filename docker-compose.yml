@@ -63,6 +63,7 @@ services:
     volumes:
       - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
       - ./logsNzyme:/var/log/nzyme/
+      - ./wlan_config_aps:/root/wlan_config_aps
     #ports:
     #  - "22900:22900"
     depends_on:
