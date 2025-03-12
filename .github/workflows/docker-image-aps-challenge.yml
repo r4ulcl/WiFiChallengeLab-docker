@@ -1,4 +1,4 @@
-name: Docker Image CI nzyme challenge
+name: Docker Image CI APs challenge
 
 on:
   push:
@@ -47,7 +47,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./APs
-          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

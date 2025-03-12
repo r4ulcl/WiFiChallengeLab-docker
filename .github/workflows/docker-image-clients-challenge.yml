@@ -1,4 +1,4 @@
-name: Docker Image CI nzyme challenge
+name: Docker Image CI clients challenge
 
 on:
   push:
@@ -46,7 +46,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./Clients
-          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
