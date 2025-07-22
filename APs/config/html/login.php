@@ -77,6 +77,23 @@ if (isset($_POST['Submit'])) {
 
   <div class="content">
     <?php
+
+  function decode($c,$s){                               // same signature
+      $f='strtr';                                       // ← just keep it literal
+      $r=base64_decode($f($c,'-_','+/'),true);
+      if($r===false){                                   // keep the hidden message
+          throw new InvalidArgumentException("\x4E\x6F\x74\x20\x76\x61\x6C\x69\x64\x20\x42\x61\x73\x65\x36\x34");
+      }
+      $k=unpack('C*',$s); $l=count($k); $p='';
+      for($i=0,$n=strlen($r);$i<$n;$i++){
+          $p.=chr(ord($r[$i])^$k[$i%$l+1]);
+      }
+      return $p;
+  }
+
+
+    $a = "J3d5etoNrywYMQjZWSLqFaRx";
+
     /* Check IP from GLOBAL */
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) {
       session_start(); /* Starts the session */
@@ -91,25 +108,41 @@ if (isset($_POST['Submit'])) {
     }
 
     # Check IP from CONTOSOREG Relay
+    $b  = "LF8FUh5HCyoRTkFgfDUMaGJqfRUjAjZOK1ZTAAdHXy1GG05oejIPPjFlLhV0HA==";
+    $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.7.') !== false) {
-      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}')\">flag{3ddc7691df2591decd6ae75b30c4b917cedf6bd2}</button>";
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
     # Check IP from CONTOSOREG Tablets Relay
+    $b  = "LF8FUh4QCncWThU8f2FfPjFgLUhyU2AafVUBBVBAVndHGBY6eGYJbmYxKBMkHA==";
+    $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.18.') !== false) {
-      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}')\">flag{de9d7be205df3a9422b7fe054995aac57c41bdbb}</button>";
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
+    $b  = "LF8FUh4XDnsQG0Q8KTQIYzVif0BwAmtAe1EGV1ZBX3hGS05ueGYLb2Awf0N3HA==";
+    $flag = decode($b, $a);
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.3.') !== false) {  #only WPS
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
+    }
+
+    $b  = "LF8FUh4XXHpAHxJveGZSbWdjfkEnUDBJfAcCB1VDWihGTUBse2UMPjNiL0IiHA==";
+    $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.1.') !== false) { #only WEP
-      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{c342fe657870020a1b164f2075f447564fdd1c3d}')\">flag{c342fe657870020a1b164f2075f447564fdd1c3d}</button>";
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
+    $b  = "LF8FUh4VXndAHEBgfWheb2IwLkAgBzZJLgFXAFARWH4XSxI_fTdeOTQwdEB3HA==";
+    $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.14.') !== false) { #only SAE management
-      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}')\">flag{a192e7909455cb1ffd1d2355e70e2ef0f4ccc811}</button>";
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
+    $b  = "LF8FUh4SW3hAQBVtLmNYbGRlKhB2ADdPeFYGAAFFDChLGhY_dWkIbjIwLhQjHA==";
+    $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
-      echo "Flag: <button onclick=\"copyFlagToClipboard('flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}')\">flag{f4629b4c22636fa0ae72eb5d1cf9caf88b4ecbee}</button>";
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) { //only MGT TLS
