@@ -88,7 +88,7 @@ IP_OPN_HIDDEN='192.168.16'
 MAC_OPN_HIDDEN='F0:9F:C2:6A:88:26'
 
 # ------------------------------------------
-ESSID_MGT_MD5='wifi-corp-original'
+ESSID_MGT_MD5='wifi-corp-legacy'
 WLAN_MGT_MD5=wlan27
 IP_MGT_MD5='192.168.17'
 MAC_MGT_MD5='F0:9F:CB:3F:BC:27'

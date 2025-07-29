@@ -40,6 +40,10 @@ dhcp-range=$IP_MGTRELAY_TABLETS.2,$IP_MGTRELAY_TABLETS.100,24h
 dhcp-host=$WLAN_MGTTLS,$MAC_MGTTLS,$IP_MGTTLS.1
 dhcp-range=$IP_MGTTLS.2,$IP_MGTTLS.100,24h
 
+# MGT MD5 - Notworking due to hostapd (https://www.techtarget.com/searchnetworking/feature/Choosing-the-right-flavor-of-8021X)
+dhcp-host=$WLAN_MGT_MD5,$MAC_MGT_MD5,$IP_MGT_MD5.1
+dhcp-range=$IP_MGT_MD5.2,$IP_MGT_MD5.100,24h
+
 # Other
 #dhcp-host=wlan19,F0:9F:C2:71:22:88,192.168.9.1
 #dhcp-range=192.168.9.2,192.168.9.100,24h

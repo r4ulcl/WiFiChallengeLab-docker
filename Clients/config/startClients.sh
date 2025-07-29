@@ -184,8 +184,22 @@ LAST2=$!
 sleep 5
 
 ping $IP_OPN1.1 > /dev/nill &
-#ping -I wlan 192.168.1.1 > /dev/nill &
+ping $IP_OPN2.1 > /dev/nill &
+ping $IP_OPN3.1 > /dev/nill &
+ping $IP_MGT_MSCHAP.1 > /dev/nill &
+ping $IP_MGT_GTC.1 > /dev/nill &
+ping $IP_TLS.1 > /dev/nill &
 ping $IP_WPA_PSK.1 > /dev/nill &
+ping $IP_WPA_PSK2.1 > /dev/nill &
+ping $IP_PSK_NOAP.1 > /dev/nill &
+ping $IP_PSK_NOAP2.1 > /dev/nill &
+ping $IP_MGT_RELAY.1 > /dev/nill &
+ping $IP_TLS_PHISHING.1 > /dev/nill &
+ping $IP_DOWNGRADE.1 > /dev/nill &
+ping $IP_MGT_MD5.1 > /dev/nill &
+ping $IP_MGT_RELAY_TABLETS_W.1 > /dev/nill &
+ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
+ping $IP_WEP.1 > /dev/nill &
 
 sleep 10 && echo "ALL SET"
 
