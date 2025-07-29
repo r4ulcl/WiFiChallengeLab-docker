@@ -1,7 +1,6 @@
 services:
   aps:
     image: r4ulcl/wifichallengelab-aps:latest
-    #build: ./APs/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     #env_file: ./APs/.env
@@ -11,13 +10,14 @@ services:
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
       - ./logsAP:/root/logs/
+      - ./APs/config/wlan_config_aps:/root/wlan_config_aps
     healthcheck:
       test:
         - CMD-SHELL
         - ip netns exec ns-ap /bin/bash -c '
           curl -f -s http://localhost/login.php >/dev/null || exit 1;
           curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -ne 15 ]; then exit 3; fi'
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 17 ]; then exit 3; fi'
       interval: 5s
       timeout: 5s
       retries: 3
@@ -27,7 +27,6 @@ services:
 
   clients:
     image: r4ulcl/wifichallengelab-clients:latest
-    #build: ./Clients/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     #env_file: ./Clients/.env
@@ -35,6 +34,7 @@ services:
       - ./certs:/root/certs/:ro
       - /lib/modules:/lib/modules
       - ./logsClient:/root/logs/
+      - ./Clients/config/wlan_config_clients:/root/wlan_config_clients
     depends_on:
       - aps
     network_mode: host #NETNS
@@ -53,7 +53,6 @@ services:
 
   nzyme:
     image: r4ulcl/wifichallengelab-nzyme:latest
-    #build: ./nzyme/
     restart: on-failure   # Automatically restart on failure
     env_file:
       - ./nzyme/.env

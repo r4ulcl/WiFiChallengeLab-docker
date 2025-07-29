@@ -4,15 +4,12 @@ ssid=$ESSID_MGT_MD5
 channel=44
 hw_mode=a
 
-# 802.1X (Authenticator) + internal EAP server
 ieee8021x=1
 eap_server=1
 eap_user_file=/root/mgt/hostapd_wpe_md5.eap_user
 
-# turn privacy bit ON without static keys
-# (hostapd will try to set a dummy broadcast WEP key, fail, and continue)
-wep_key_len_broadcast=13          # 104‑bit => privacy=1
+wep_key_len_broadcast=13
 wep_key_len_unicast=13
-wep_rekey_period=600              # 10 min; long enough for demos
+wep_rekey_period=600
 
-auth_algs=1                       # open system auth
+auth_algs=1

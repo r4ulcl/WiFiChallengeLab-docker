@@ -11,9 +11,6 @@ RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 
 #RUN date
 
-#COPY var file
-COPY config/wlan_config_clients /root/
-
 #Copy config files
 COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/

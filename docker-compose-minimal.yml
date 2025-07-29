@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps
+    image: r4ulcl/wifichallengelab-aps:latest
     restart: unless-stopped
     container_name: WiFiChallengeLab-APs
     env_file: ./APs/.env
@@ -11,7 +11,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients
+    image: r4ulcl/wifichallengelab-clients:latest
     restart: unless-stopped
     container_name: WiFiChallengeLab-Clients
     env_file: ./Clients/.env
