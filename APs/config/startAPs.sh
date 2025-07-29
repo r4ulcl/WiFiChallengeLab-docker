@@ -17,7 +17,9 @@ envsubst_tmp (){
 set -a
 source /root/wlan_config_aps
 
-
+# Install mac80211_hwsim_WiFiChallenge if missing
+cd /root/mac80211_hwsim_WiFiChallenge
+sudo bash install.sh
 
 #Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
 
@@ -76,7 +78,7 @@ macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3
 #macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
 macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
-macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log # TODO
+macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
 
@@ -106,6 +108,10 @@ host_aps_apd /root/open/hostapd_open_hidden.conf > /root/logs/hostapd_open_hidde
 ip addr add $IP_PSK.1/24 dev $WLAN_PSK
 host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
 
+# PSK WPS
+ip addr add $IP_WPS.1/24 dev $WLAN_WPS
+host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
+
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
 host_aps_apd /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log &
@@ -123,6 +129,11 @@ host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_r
 # MGT TLS
 ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
 host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log &
+
+
+# MGT MD5
+ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
+host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGTTLS

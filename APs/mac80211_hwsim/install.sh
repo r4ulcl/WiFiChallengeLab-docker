@@ -1,9 +1,60 @@
-# install
-sudo make -C /lib/modules/$(uname -r)/build  M=$PWD  modules
+#!/usr/bin/env bash
+#
+# install_hwsim.sh – build a side‑by‑side mac80211_hwsim with a
+#                    fixed target version.
+#
+set -euo pipefail
 
-sudo cp mac80211_hwsim.ko \
-     /lib/modules/$(uname -r)/kernel/drivers/net/wireless/
+### ---- configuration -------------------------------------------------
+TARGET_VERSION="1.01-WiFiChallengeLab-version"
+ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
+STOCK_MODNAME="mac80211_hwsim"
+# ----------------------------------------------------------------------
+
+KVER="$(uname -r)"
+BUILD_DIR="$PWD"
+DEST_DIR="/lib/modules/${KVER}/kernel/drivers/net/wireless"
+ALT_MOD_PATH="${DEST_DIR}/${ALT_MODNAME}.ko"
+
+# helper – return MODULE_VERSION string or "none"
+modver() { modinfo -F version "$1" 2>/dev/null || echo "none"; }
+
+echo "==> Checking existing installation …"
+ALT_VER_INSTALLED="$(modver "${ALT_MOD_PATH}")"
+echo "Installed WiFiChallenge version : ${ALT_VER_INSTALLED}"
+
+if [[ "${ALT_VER_INSTALLED}" == "${TARGET_VERSION}" ]]; then
+    echo "↪  Desired version already present; nothing to do."
+    exit 0
+fi
+echo "☑  Version differs – proceeding with build/install."
+
+
+# 2. Generate a minimal Kbuild wrapper to rename the module
+cat > Kbuild <<EOF
+obj-m := ${ALT_MODNAME}.o
+${ALT_MODNAME}-objs := mac80211_hwsim.o
+EOF
+
+echo "==> Building ${ALT_MODNAME}.ko …"
+make -s -C "/lib/modules/${KVER}/build" M="${BUILD_DIR}" modules
+
+# verify version of freshly‑built binary
+NEW_VER="$(modver "./${ALT_MODNAME}.ko")"
+if [[ "${NEW_VER}" != "${TARGET_VERSION}" ]]; then
+    echo "❌  Build produced version ‘${NEW_VER}’,"
+    echo "    but script expects ‘${TARGET_VERSION}’.  Aborting."
+    exit 1
+fi
+
+echo "==> Installing to ${DEST_DIR} …"
+sudo cp -f "./${ALT_MODNAME}.ko" "${DEST_DIR}/"
+
+echo "==> Updating depmod …"
 sudo depmod -a
 
-sudo rmmod mac80211_hwsim 
-sudo modprobe mac80211_hwsim radios=2 channels=1
+echo "==> Reloading module …"
+sudo modprobe -r "${ALT_MODNAME}" 2>/dev/null || true
+#sudo insmod "${DEST_DIR}/${ALT_MODNAME}.ko" radios=2 channels=1
+
+echo "✅  Installed ${ALT_MODNAME}.ko  (version ${TARGET_VERSION})"

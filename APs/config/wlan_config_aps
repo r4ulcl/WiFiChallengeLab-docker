@@ -15,6 +15,7 @@ IP_PSK='192.168.2'
 MAC_PSK='F0:9F:C2:71:22:12'
 
 # ------------------------------------------
+ESSID_WPS="wifi-event"
 WLAN_WPS=wlan13
 IP_WPS='192.168.3'
 MAC_WPS='F0:9F:C2:71:22:13'
@@ -87,9 +88,10 @@ IP_OPN_HIDDEN='192.168.16'
 MAC_OPN_HIDDEN='F0:9F:C2:6A:88:26'
 
 # ------------------------------------------
-WLAN_MGT_LEGACY=wlan27
-IP_MGT_LEGACY='192.168.17'
-MAC_MGT_LEGACY='F0:9F:CB:3F:AA:17'
+ESSID_MGT_MD5='wifi-corp-original'
+WLAN_MGT_MD5=wlan27
+IP_MGT_MD5='192.168.17'
+MAC_MGT_MD5='F0:9F:CB:3F:BC:27'
 # ------------------------------------------
 
 ESSID_MGTRELAY_TABLETS='wifi-regional-tablets'

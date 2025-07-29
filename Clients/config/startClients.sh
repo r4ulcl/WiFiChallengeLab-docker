@@ -60,7 +60,7 @@ macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY_TABLETS_W $WLAN_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
 macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
 
-macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log
 
 macchanger -m $MAC_WPA_PSK $WLAN_WPA_PSK >> /root/logs/macchanger.log
 macchanger -m $MAC_WPA_PSK2 $WLAN_WPA_PSK2 >> /root/logs/macchanger.log
@@ -146,7 +146,7 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_LEGACY -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_MD5 -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
     wait $!
 done &
 

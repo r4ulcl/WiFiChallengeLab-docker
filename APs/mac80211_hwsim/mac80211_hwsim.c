@@ -14,6 +14,15 @@
  * - RX filtering based on filter configuration (data->rx_filter)
  */
 
+ /*
+ Changelog 1.0-WiFiChallengeLab-version
+ - Added version module (1.0-WiFiChallengeLab-version)
+ - Allowing Packet Injection on Monitor Interfaces
+ - Force ACK in Monitor Mode Radios
+ - Handling Channel Context for Monitor Mode Transmissions
+ - Allowing Transmissions from Idle Radios in Monitor Mode
+ */
+
 #include <linux/list.h>
 #include <linux/slab.h>
 #include <linux/spinlock.h>
@@ -41,6 +50,7 @@
 MODULE_AUTHOR("Jouni Malinen");
 MODULE_DESCRIPTION("Software simulator of 802.11 radio(s) for mac80211");
 MODULE_LICENSE("GPL");
+MODULE_VERSION("1.0-WiFiChallengeLab-version");
 
 static int radios = 2;
 module_param(radios, int, 0444);
@@ -785,8 +795,9 @@ DEFINE_SIMPLE_ATTRIBUTE(hwsim_fops_group,
 static netdev_tx_t hwsim_mon_xmit(struct sk_buff *skb,
 					struct net_device *dev)
 {
-	/* TODO: allow packet injection */
-	dev_kfree_skb(skb);
+	struct mac80211_hwsim_data *data = netdev_priv(dev);
+	/* fall back to the normal mac80211 transmit routine */
+	mac80211_hwsim_tx_frame(data->hw, skb, data->channel);
 	return NETDEV_TX_OK;
 }
 
@@ -935,6 +946,10 @@ static void mac80211_hwsim_addr_iter(void *data, u8 *mac,
 static bool mac80211_hwsim_addr_match(struct mac80211_hwsim_data *data,
 				      const u8 *addr)
 {
+	/* ACK if destination is our permanent MAC (even with only monitor IFs). */
+	if (ether_addr_equal(addr, data->addresses[0].addr) ||
+		ether_addr_equal(addr, data->addresses[1].addr))
+			return true;
 	struct mac80211_hwsim_addr_match_data md = {
 		.ret = false,
 	};
@@ -1375,11 +1390,21 @@ static void mac80211_hwsim_tx(struct ieee80211_hw *hw,
 	} else if (txi->hw_queue == 4) {
 		channel = data->tmp_chan;
 	} else {
-		chanctx_conf = rcu_dereference(txi->control.vif->chanctx_conf);
-		if (chanctx_conf)
-			channel = chanctx_conf->def.chan;
-		else
-			channel = NULL;
+		/* No chanctx: use current radio channel for monitor injections. */
+		if (txi->control.vif) {
+				chanctx_conf =
+						rcu_dereference(txi->control.vif->chanctx_conf);
+				if (chanctx_conf)
+						channel = chanctx_conf->def.chan;
+		}
+
+		/* Fallback for monitor / vif‑less injection. */
+		if (!channel) {
+				if (data->tmp_chan)
+						channel = data->tmp_chan;
+				else
+						channel = data->channel;
+		}
 	}
 
 	if (WARN(!channel, "TX w/o channel - queue = %d\n", txi->hw_queue)) {
@@ -1387,7 +1412,12 @@ static void mac80211_hwsim_tx(struct ieee80211_hw *hw,
 		return;
 	}
 
-	if (data->idle && !data->tmp_chan) {
+	/* Drop only if radio is idle AND the TX frame comes from a *managed*
+	* / AP / mesh interface.  Pure monitor injection has vif == NULL.*/
+	if (data->idle && !data->tmp_chan &&
+	    txi->control.vif &&
+	    txi->control.vif->type != NL80211_IFTYPE_MONITOR &&
+	    !(txi->flags & IEEE80211_TX_CTL_INJECTED)) {
 		wiphy_dbg(hw->wiphy, "Trying to TX when idle - reject\n");
 		ieee80211_free_txskb(hw, skb);
 		return;
@@ -1429,7 +1459,12 @@ static void mac80211_hwsim_tx(struct ieee80211_hw *hw,
 	/* NO wmediumd detected, perfect medium simulation */
 	data->tx_pkts++;
 	data->tx_bytes += skb->len;
-	ack = true ; //mac80211_hwsim_tx_frame_no_nl(hw, skb, channel);
+	/* deliver the frame to every hwsim radio on the same channel */
+	ack = mac80211_hwsim_tx_frame_no_nl(hw, skb, channel);
+
+	/* Forward an IEEE 802.11 ACK frame to the monitor as well */
+	if (ack)
+			mac80211_hwsim_monitor_ack(channel, hdr->addr2);
 
 	if (ack && skb->len >= 16)
 		mac80211_hwsim_monitor_ack(channel, hdr->addr2);

@@ -16,6 +16,10 @@ dhcp-range=$IP_OPN_HIDDEN.2,$IP_OPN_HIDDEN.100,24h
 dhcp-host=$WLAN_PSK,$MAC_PSK,$IP_PSK.1
 dhcp-range=$IP_PSK.2,$IP_PSK.100,24h
 
+# WPS
+dhcp-host=$WLAN_WPS,$MAC_WPS,$IP_WPS.1
+dhcp-range=$IP_WPS.2,$IP_WPS.100,24h
+
 # MGT
 dhcp-host=$WLAN_MGT,$MAC_MGT,$IP_MGT.1
 dhcp-range=$IP_MGT.2,$IP_MGT.100,24h
@@ -35,6 +39,10 @@ dhcp-range=$IP_MGTRELAY_TABLETS.2,$IP_MGTRELAY_TABLETS.100,24h
 # MGT TLS
 dhcp-host=$WLAN_MGTTLS,$MAC_MGTTLS,$IP_MGTTLS.1
 dhcp-range=$IP_MGTTLS.2,$IP_MGTTLS.100,24h
+
+# MGT MD5
+dhcp-host=$WLAN_MGT_MD5,$MAC_MGT_MD5,$IP_MGT_MD5.1
+dhcp-range=$IP_MGT_MD5.2,$IP_MGT_MD5.100,24h
 
 # Other
 #dhcp-host=wlan19,F0:9F:C2:71:22:88,192.168.9.1

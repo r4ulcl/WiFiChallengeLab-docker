@@ -1,0 +1,23 @@
+interface=$WLAN_WPS
+driver=nl80211
+ssid=$ESSID_WPS
+channel=8
+hw_mode=g
+
+# Keep WPS‑friendly security
+wpa=2
+# WPA2 only
+wpa_key_mgmt=WPA-PSK
+rsn_pairwise=CCMP
+# drop TKIP
+wpa_passphrase=@MegaPSKP@ssword!@
+
+### WPS ###
+eap_server=1
+wps_state=2
+ap_setup_locked=0
+device_name=QCA Access Point
+manufacturer=Qualcomm Atheros
+device_type=6-0050F204-1
+config_methods=label keypad push_button
+ap_pin=12345670

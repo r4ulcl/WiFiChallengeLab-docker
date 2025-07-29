@@ -16,6 +16,10 @@ dhcp-range=$IP_OPN_HIDDEN.2,$IP_OPN_HIDDEN.100,24h
 dhcp-host=$WLAN_PSK,$MAC_PSK,$IP_PSK.1
 dhcp-range=$IP_PSK.2,$IP_PSK.100,24h
 
+# WPS
+dhcp-host=$WLAN_WPS,$MAC_WPS,$IP_WPS.1
+dhcp-range=$IP_WPS.2,$IP_WPS.100,24h
+
 # MGT
 dhcp-host=$WLAN_MGT,$MAC_MGT,$IP_MGT.1
 dhcp-range=$IP_MGT.2,$IP_MGT.100,24h
