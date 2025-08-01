@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 libpcap
 
 # Entrypoint: Replace variables in config 
 COPY docker-entrypoint.sh /bin/
-COPY nzyme.conf.tmp /etc/nzyme/nzyme.conf.tmp
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]

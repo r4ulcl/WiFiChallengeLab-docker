@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Install mac80211_hwsim_WiFiChallenge if missing
+cd /root/mac80211_hwsim_WiFiChallenge
+sudo bash install.sh
+
 # TODO move to Dockerfile
 envsubst_tmp (){
     for F in ./*.tmp ; do
@@ -17,13 +21,9 @@ envsubst_tmp (){
 set -a
 source /root/wlan_config_aps
 
-# Install mac80211_hwsim_WiFiChallenge if missing
-cd /root/mac80211_hwsim_WiFiChallenge
-sudo bash install.sh
-
 #Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
 
-envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
+#envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
 envsubst < /etc/dnsmasq.conf.tmp > /etc/dnsmasq.conf
 envsubst < /etc/opennds/opennds.conf.tmp > /etc/opennds/opennds.conf
 
@@ -159,6 +159,7 @@ host_aps_apd /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.
 ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
 host_aps_apd /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
 
+# WEP
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP
 host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log &
 

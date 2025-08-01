@@ -1,35 +1,30 @@
 #!/bin/bash
 
-# Function to edit a configuration file
-edit_config_file() {
-    local file="$1"
-    local setting="$2"
-    local value="$3"
+#set -euo pipefail
 
-    if grep -q "^${setting}" "${file}"; then
-        sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "${file}"
+# ---------- helper -----------------------------------------------------------
+edit_config_file() {
+    local file="$1" setting="$2" value="$3"
+    if grep -q "^${setting}" "$file"; then
+        sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "$file"
     else
-        echo "${setting} \"${value}\";" | sudo tee -a "${file}" > /dev/null
+        echo "${setting} \"${value}\";" | sudo tee -a "$file" >/dev/null
     fi
 }
 
 DEV=False
 
-# update package lists
+# ---------- base system ------------------------------------------------------
 sudo apt-get update
-sudo apt-get full-upgrade -y
+#sudo apt-get full-upgrade -y
 
+# optional housekeeping
+sudo apt-get purge -y unattended-upgrades update-manager update-notifier
 
-sudo apt remove unattended-upgrades -y
-sudo apt remove update-manager -y
-sudo apt remove update-notifier -y
-
-
-## Install drivers modprobe 
+# kernel / driver meta‑package (still called linux-generic in 24.04)
 sudo apt-get install -y linux-generic
 
-# Create a sudo user
-# Create the user
+# ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
 echo "user:user" | sudo chpasswd
 # Add the user to the sudo group
@@ -38,382 +33,326 @@ sudo usermod -aG sudo user
 echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/user
 sudo chmod 0440 /etc/sudoers.d/user
 
+# ---------- polkit tweaks ----------------------------------------------------
 # Allow user to scan WiFi
-echo '[Allow Wifi Scan]
+cat <<'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla
+[Allow Wifi Scan]
 Identity=unix-user:*
 Action=org.freedesktop.NetworkManager.wifi.scan;org.freedesktop.NetworkManager.enable-disable-wifi;org.freedesktop.NetworkManager.settings.modify.own;org.freedesktop.NetworkManager.settings.modify.system;org.freedesktop.NetworkManager.network-control
 ResultAny=yes
 ResultInactive=yes
-ResultActive=yes' >> /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla
+ResultActive=yes
+EOF
 
-echo '[Allow Colord all Users]
+cat <<'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+[Allow Colord all Users]
 Identity=unix-user:*
 Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
 ResultAny=no
 ResultInactive=no
-ResultActive=yes' > /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+ResultActive=yes
+EOF
 
+# ---------- Docker -----------------------------------------------------------
+# NOTE: apt‑key is deprecated in noble; switch to keyring file               ### 24.04 change
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo install -m 0755 -d /etc/apt/keyrings                                 ### 24.04 change
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
+  sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg                      ### 24.04 change
+sudo chmod a+r /etc/apt/keyrings/docker.gpg                               ### 24.04 change
 
-## Install Docker
-sudo apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo apt-key fingerprint 0EBFCD88
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+echo "deb [arch=$(dpkg --print-architecture) \
+signed-by=/etc/apt/keyrings/docker.gpg] \
+https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list >/dev/null                 ### 24.04 change
+
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo apt-get install -y bridge-utils
+sudo systemctl restart docker
 
-# Fix DNS error Docker
-sudo apt-get install bridge-utils -y
-sudo service docker restart
-
-
-if [ "$DEV" == "True" ]; then
-  ## Go to WiFiChallengeFolder (git clone...)
-  cd /var
+# ---------- WiFiChallengeLab -------------------------------------------------
+cd /var
+if [ "$DEV" = "True" ]; then
   git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
-else 
-  cd /var
+else
   git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 fi
-
 cd /var/WiFiChallengeLab-docker
 
-## Install RDP server
-echo 'Install RDP server'
-sudo bash Attacker/installRDP.sh
+echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
+echo 'Install WiFi tools'; sudo bash Attacker/installTools.sh
 
-## Install hacking WiFi tools
-echo 'Install hacking WiFi tools'
-sudo bash Attacker/installTools.sh
-
-## Extract nzyme default logs (attacker)
-cd /var/WiFiChallengeLab-docker/nzyme/
-rm -r logs/ data/
+cd /var/WiFiChallengeLab-docker/nzyme
+rm -rf logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
-## Enable docker
-cd /var/WiFiChallengeLab-docker/
+cd /var/WiFiChallengeLab-docker
 sudo docker compose -f docker-compose.yml up -d
-#sudo docker compose -f docker-compose-minimal.yml up -d
+# sudo docker compose -f docker-compose-minimal.yml up -d
+
+# ---------- debloat  -------------------------
+packages=(
+  "thunderbird*"
+  "libreoffice-*"
+  "snapd"
+  "aisleriot"
+  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-todo" "gnome-robots"
+  "mahjongg"
+  "ace-of-penguins"
+  "gnomine"
+  "gbrainy"
+  "five-or-more" "four-in-a-row" "iagno" "tali" "swell-foop" "quadrapassel"
+  "cheese"
+  "shotwell"
+  "totem*"
+  "rhythmbox*"
+  "transmission-*"
+  "yelp" "yelp-xsl"
+  "gnome-user-docs" "ubuntu-docs"
+)
+
+for pkg in "${packages[@]}"; do
+  echo "Purging $pkg ..."
+  if sudo apt-get -y purge "$pkg"; then
+    echo "Removed $pkg"
+  else
+    echo "Could not remove $pkg (not installed or dependency problem)"
+  fi
+done
+
+# Clean up any orphaned dependencies that are left behind.
+sudo apt-get -y autoremove
 
 
-## remove all non-essential programs in an Ubuntu 20 minimal ISO-based Vagrant VM
-# remove all non-essential packages
-sudo apt-get --yes remove --purge `dpkg --get-selections | grep -v "^lib" | grep -v "^ubuntu-minimal" | grep -v "^tzdata" | grep -v "^gpgv" | grep -v "^gnupg" | grep -v "^apt" | grep -v "^dirmngr" | awk '{print $1}'`
-# Remove games
-sudo apt-get --yes purge aisleriot gnome-sudoku mahjongg ace-of-penguins gnomine gbrainy gnome-mines
-# Remove libreoffice
-sudo apt-get --yes purge libreoffice-core libreoffice-calc libreoffice-draw libreoffice-impress libreoffice-math libreoffice-writer
-sudo apt-get --yes purge thunderbird snapd
-# Remove transmission and cheese
-sudo apt-get --yes purge cheese transmission-* gnome-mahjongg
-# autoremove any dependencies that are no longer needed
-sudo apt-get --yes autoremove
-# clean up the package cache
+sudo apt-get -y autoremove
 sudo apt-get clean
 
-sudo apt-get -y autoremove --purge ubuntu-web-launchers landscape-client-ui-install  gnome-games-common libreoffice* empathy transmission-gtk cheese gnome-software-common gnome-software-plugin-flatpak gnome-software-plugin-snap gnome-terminal gnome-orca onboard simple-scan gnome-font-viewer gnome-calculator gnome-clocks gnome-screenshot gnome-system-log gnome-system-monitor gnome-documents gnome-music gnome-video-effects gnome-boxes gnome-dictionary gnome-photos gnome-weather gnome-maps gnome-logs gnome-clocks gnome-characters gnome-calendar aisleriot gnome-sudoku gnome-mines gnome-mahjongg thunderbird
+sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* snapd \
+  aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
+  mahjongg ace-of-penguins gnomine gbrainy \
+  five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
+  cheese shotwell totem* rhythmbox* \
+  transmission-* \
+  yelp yelp-xsl gnome-user-docs ubuntu-docs
 
-# First FLAG
+
+# ---------- flags & helper scripts ------------------------------------------
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
-echo '#!/bin/bash
+sudo tee /root/restartWiFi.sh /home/user/restartWiFi.sh >/dev/null <<'EOF'
+#!/bin/bash
 cd /var/WiFiChallengeLab-docker
-
 sudo docker compose restart aps
-sudo docker compose restart clients' | sudo tee /root/restartWiFi.sh  /home/user/restartWiFi.sh
-chmod +x /root/restartWiFi.sh  /home/user/restartWiFi.sh
+sudo docker compose restart clients
+EOF
+chmod +x /root/restartWiFi.sh /home/user/restartWiFi.sh
 
-echo '#!/bin/bash
-#Update images from AP and clients
+sudo tee /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh >/dev/null <<'EOF'
+#!/bin/bash
 cd /var/WiFiChallengeLab-docker
 sudo docker compose pull
 sudo docker compose up --detach
-' | sudo tee /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
-chmod +x /root/updateWiFiChallengeLab.sh  /home/user/updateWiFiChallengeLab.sh
+EOF
+chmod +x /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh
 
-# Fix "Your kernel does not support swap limit capabilities or the cgroup is not mounted. Memory limited without swap."
-
-grub_file="/etc/default/grub"
+# ---------- cgroup memory / swap accounting ---------------------------------
+grub_file=/etc/default/grub
 params="cgroup_enable=memory swapaccount=1"
-
-# Check if the parameters are already present
-if grep -q "$params" "$grub_file"; then
-    echo "Parameters already present in GRUB_CMDLINE_LINUX."
-else
-  # Add the parameters to GRUB_CMDLINE_LINUX
+if ! grep -q "$params" "$grub_file"; then
   sudo sed -i "/^GRUB_CMDLINE_LINUX=/ s/\"$/ $params\"/" "$grub_file"
+  sudo update-grub
 fi
-sudo update-grub
 
-#Fix password on wifi scan
-# Change the configuration file
-sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
-# Restart the network manager
-sudo service network-manager restart
-# Confirm the changes have been made
-echo "The system policy has been updated and the network manager has been restarted. Wi-Fi scans should now be allowed."
+# ---------- Wi‑Fi scan powersave tweak --------------------------------------
+sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' \
+  /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+sudo systemctl restart NetworkManager
 
-#Copy script
-sudo mkdir /opt/background/
-sudo cp WiFiChallengeLab.png /opt/background/WiFiChallengeLab.png
+# ---------- misc assets ------------------------------------------------------
+sudo mkdir -p /opt/background/
+sudo cp WiFiChallengeLab.png /opt/background/
 
-# nzyme alerts
 sudo apt-get install -y jq
-# nzyme icon for alerts
-sudo wget https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
+sudo wget -q https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
 
-echo '#!/bin/bash
-
-#check if running
+# nzyme notification loop
+sudo tee /var/nzyme-alerts.sh >/dev/null <<'EOF'
+#!/bin/bash
 PID_FILE=/var/run/nzyme-alerts.pid
-
-if [ -e "${PID_FILE}" ]; then
-    PID=$(cat "${PID_FILE}")
-    if ps -p "${PID}" > /dev/null; then
-        echo "Error: Script is already running with PID ${PID}."
-        exit 1
-    else
-        echo "Warning: PID file exists but process is not running. Deleting PID file."
-        rm "${PID_FILE}"
-    fi
+if [ -e "$PID_FILE" ] && ps -p "$(cat $PID_FILE)" >/dev/null; then
+  echo "Already running"; exit 1
 fi
+trap "rm -f $PID_FILE; exit" SIGINT SIGTERM
+echo $$ >"$PID_FILE"
 
-# Register a signal trap to remove the PID file if the script is terminated
-trap "rm ${PID_FILE}; exit 0" SIGINT SIGTERM SIGHUP
+LOG=/var/WiFiChallengeLab-docker/logsNzyme/alerts.log
+GREP="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
+LAST=$(grep -E "$GREP" "$LOG" | tail -n1 | jq .message)
 
-echo $$ > "${PID_FILE}"
-# Loop
-GREP_STRING="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
-ALERT1=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
-while true ; do
-  ALERT2=`cat /var/WiFiChallengeLab-docker/logsNzyme/alerts.log  | grep -E "$GREP_STRING" | tail -n 1 | jq .message`
-  if [ "$ALERT1" != "$ALERT2" ] ; then
-    ALERT1=$ALERT2
-    notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$ALERT2"
+while true; do
+  NOW=$(grep -E "$GREP" "$LOG" | tail -n1 | jq .message)
+  if [ "$NOW" != "$LAST" ]; then
+    LAST=$NOW
+    notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$NOW"
   fi
   sleep 0.1
 done
-' > /var/nzyme-alerts.sh
-
+EOF
 sudo chown user:user /var/nzyme-alerts.sh
 sudo chmod +x /var/nzyme-alerts.sh
 
-echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts-user.log 2>&1 &' >> /home/user/.bashrc
-echo 'nohup bash /var/nzyme-alerts.sh > /tmp/nzyme-alerts-vagrant.log 2>&1 &' >> /home/vagrant/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-user.log 2>&1 &' \
+  >> /home/user/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-vagrant.log 2>&1 &' \
+  >> /home/vagrant/.bashrc
 
-
-echo '#!/bin/bash
-#Script to set nzyme interface in monitor mode always
-sudo ip link set wlan60 down 
+# ---------- monitor‑mode helper ---------------------------------------------
+sudo tee /var/aux.sh >/dev/null <<'EOF'
+#!/bin/bash
+sudo ip link set wlan60 down
 sudo iw wlan60 set type monitor
-sudo ip link set wlan60 up' > /var/aux.sh
+sudo ip link set wlan60 up
+EOF
 chmod +x /var/aux.sh
 
-# Configure GUI when user open terminal first time, then delete
-cat << 'EOF' > /etc/configureUser.sh
-# Enable dock
+# ---------- first‑login desktop setup ---------------------------------------
+cat <<'EOF' | sudo tee /etc/configureUser.sh
+# GNOME extensions kept identical to 20.04—still present in 24.04          ### 24.04 change
 gnome-extensions enable ubuntu-dock@ubuntu.com
 gnome-extensions enable ubuntu-appindicators@ubuntu.com
 gnome-extensions enable desktop-icons@csoriano
 
-# Set background
-gsettings set org.gnome.desktop.background picture-uri file:////opt/background/WiFiChallengeLab.png
+gsettings set org.gnome.desktop.background picture-uri \
+  file:////opt/background/WiFiChallengeLab.png
 
-# Cron to monitor mode to nzyme
-(crontab -l ; echo "* * * * * bash /var/aux.sh") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * bash /var/aux.sh") | crontab -
 
-
-# Dark theme
-# Check if gnome-tweaks is installed
-if ! [ -x "$(command -v gnome-tweaks)" ]; then
-  sudo apt-get -y  install gnome-tweaks
+if ! command -v gnome-tweaks >/dev/null; then
+  sudo apt-get install -y gnome-tweaks
 fi
 
-# Change theme to Adwaita-dark
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 
-# Change icon theme to Adwaita
+gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
 
-# Add CA to system and firefox to TLS
-sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ && sudo update-ca-certificates
+sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
 
-# Configure firefox for TLS
-firefox &
-sleep 10
-CA_CERT_PATH="/var/WiFiChallengeLab-docker/certs/ca.crt"
-PROFILE_PATH="$HOME/.mozilla/firefox"
-PROFILE_DIR=$(ls $PROFILE_PATH | grep -E '\.default-release$')
-
-# Path to the Firefox cert8.db (or cert9.db for newer Firefox versions)
-CERT_DB="$PROFILE_PATH/$PROFILE_DIR/cert9.db"
-
-# Check if certutil (from the `libnss3-tools` package) is installed
-if ! command -v certutil &> /dev/null; then
-    echo "certutil not found. Installing libnss3-tools..."
-    sudo apt-get update && sudo apt-get install -y libnss3-tools
+if ! command -v firefox >/dev/null; then
+  sudo apt-get install -y firefox
 fi
 
-# Add the CA certificate to Firefox
-echo "Adding CA certificate to Firefox..."
-certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:$PROFILE_PATH/$PROFILE_DIR -i "$CA_CERT_PATH"
+firefox &
+sleep 10
+CA=/var/WiFiChallengeLab-docker/certs/ca.crt
+PROFILE_DIR=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' -print -quit)
+if [ -n "$PROFILE_DIR" ]; then
+  command -v certutil >/dev/null || sudo apt-get install -y libnss3-tools
+  certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA"
+fi
 
-sudo rm -rf /var/WiFiChallengeLab-docker/zerofile 2> /dev/null
+sudo rm -f /var/WiFiChallengeLab-docker/zerofile 2>/dev/null
+sed -i '/bash \/etc\/configureUser.sh/d' ~/.bashrc
+gsettings set org.gnome.shell favorite-apps \
+"['firefox_firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.wireshark.Wireshark.desktop', 'org.gnome.Terminal.desktop', 'gnome-control-center.desktop']"
 
-# Auto delete
-sed -i "s/bash \/etc\/configureUser.sh//g" /home/vagrant/.bashrc 2> /dev/null
-sed -i "s/bash \/etc\/configureUser.sh//g" /home/user/.bashrc 2> /dev/null
+sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
 
-
-# Add Terminal to favorites
-gsettings set org.gnome.shell favorite-apps "$(gsettings get org.gnome.shell favorite-apps | sed s/.$//), 'wireshark.desktop', 'org.gnome.Terminal.desktop']"
-
-# Remove fstab info in VBox
-sudo sed -i "/$(echo 'media_WiFiChallenge /media/WiFiChallenge vboxsf uid=1000,gid=1000,_netdev 0 0' | sudo sed -e 's/[\/&]/\\&/g')/d" /etc/fstab
+sudo apt-get autoremove --purge -y
 
 EOF
 
 echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
 echo 'bash /etc/configureUser.sh' >> /home/user/.bashrc
 
+# ---------- SSH password auth (unchanged) -----------------------------------
+sudo sed -i -E 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
 
+# ---------- Firefox policies -------------------------------------------------
+sudo mkdir -p /etc/firefox/policies
 
-# Enable SSH password login
-# Open the SSH server configuration file for editing
-sudo sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-# Add the line if it doesn't exist
-grep -q "PasswordAuthentication yes" /etc/ssh/sshd_config || echo "PasswordAuthentication yes" | sudo tee -a /etc/ssh/sshd_config > /dev/null
-# Restart the SSH server to apply the changes
-sudo service ssh restart
-
-firefox_dir="/usr/lib/firefox"
-
-# Create a new file in the Firefox installation directory
-sudo tee $firefox_dir/distribution/policies.json > /dev/null <<EOF
+sudo tee /etc/firefox/policies/policies.json >/dev/null <<'EOF'
 {
-    "policies": {
-        "Homepage": {
-            "URL": "http://127.0.0.1:22900"
-        },
-        "Auth": {
-            "Login": {
-                "nzyme - WiFi Defense System": {
-                    "username": "admin",
-                    "password": "admin"
-                }
-            }
-        }
+  "policies": {
+    "Homepage": {
+      "URL": "http://127.0.0.1:22900",
+      "StartPage": "homepage",
+      "Locked": false
     }
+  }
 }
 EOF
 
-# Add healthceck script to restart if fails
-# Define paths for scripts and service files
-SCRIPT_PATH="/usr/local/bin/monitor-health.sh"
-SERVICE_PATH="/etc/systemd/system/monitor-health.service"
+# ---------- docker health watchdog ------------------------------------------
+SCRIPT=/usr/local/bin/monitor-health.sh
+SERVICE=/etc/systemd/system/monitor-health.service
 
-# 1. Create the monitor-health.sh script
-cat << 'EOF' > $SCRIPT_PATH
+sudo tee "$SCRIPT" >/dev/null <<'EOF'
 #!/bin/bash
-
-# Loop to constantly monitor containers' health
 while true; do
-  for container in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
-    # Wait 30 seconds and check again if the container is still unhealthy
+  for c in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
     sleep 30
-    if docker ps --filter "health=unhealthy" --filter "name=$container" --format "{{.Names}}" | grep -q "$container"; then
-      echo "$(date) - Restarting unhealthy container: $container"
-      docker restart "$container"
-    fi
+    docker ps --filter "name=$c" --filter "health=unhealthy" | grep -q "$c" && {
+      echo "$(date) restarting $c"
+      docker restart "$c"
+    }
   done
-
-  # Sleep before checking again
   sleep 30
 done
 EOF
+sudo chmod +x "$SCRIPT"
 
-# Make the monitor-health.sh script executable
-chmod +x $SCRIPT_PATH
-
-echo "monitor-health.sh script created and made executable."
-
-# 2. Create the systemd service file
-echo "Creating the systemd service file..."
-
-cat << EOF > $SERVICE_PATH
+sudo tee "$SERVICE" >/dev/null <<EOF
 [Unit]
-Description=Monitor Docker Health and Restart Unhealthy Containers
+Description=Restart unhealthy Docker containers
 After=docker.service
-
 [Service]
-ExecStart=$SCRIPT_PATH
+ExecStart=$SCRIPT
 Restart=always
-User=root
-Group=root
-
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# 3. Reload systemd, enable and start the service
-# Reload systemd to pick up the new service file
-systemctl daemon-reload
-# Enable the service to start on boot
-systemctl enable monitor-health.service
-# Start the service immediately
-systemctl start monitor-health.service
-# 4. Verify the service is running
-systemctl status monitor-health.service --no-pager
+sudo systemctl daemon-reload
+sudo systemctl enable --now monitor-health.service
+
+# ---------- DNS resolver tweaks ---------------------------------------------
+sudo mkdir /etc/systemd/resolved.conf.d/
+RESOLV='/etc/systemd/resolved.conf.d/dns_servers.conf'
+sudo tee "$RESOLV" >/dev/null <<EOF
+[Resolve]
+DNS=8.8.8.8 1.1.1.1
+EOF
+sudo systemctl enable systemd-resolved
+sudo systemctl restart systemd-resolved
 
 
-# Disable systemd-resolved
-sudo sed -i 's/^DNSStubListener=yes/DNSStubListener=no/g' /etc/systemd/resolved.conf
-sudo systemctl stop systemd-resolved.service
-sudo systemctl disable systemd-resolved.service
-# Configure DNS servers
-sudo rm /etc/resolv.conf
-echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf >/dev/null
-echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf >/dev/null
-# Restart networking service
-sudo systemctl restart networking.service
-
-# Install guest additions
-# Check if system is running on VMware
-if [[ $(dmidecode | grep -i vmware) ]]; then
-    echo "Installing open-vm-tools-desktop for VMware"
-    sudo apt-get update
-    sudo apt-get install -y open-vm-tools-desktop
-# Check if system is running on VirtualBox
-elif [[ $(dmidecode | grep -i virtualbox) ]]; then
-    echo "Installing VirtualBox Guest Additions for VirtualBox"
-    sudo apt-get update
-    sudo apt-get install -y virtualbox-guest-additions-iso
-    sudo apt-get install -y virtualbox-guest-x11 
-else
-    echo "This script only supports VMware and VirtualBox virtual machines."
+# ---------- guest additions --------------------------------------------------
+if dmidecode | grep -iq vmware; then
+  sudo apt-get install -y open-vm-tools-desktop
+elif dmidecode | grep -iq virtualbox; then
+  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
 fi
 
-
-# Root acces GUI
-su -c 'xhost si:localuser:root' vagrant
-su vagrant -c 'xhost +SI:localuser:root'
-echo 'xhost si:localuser:root > /dev/null 2>&1' >> /home/vagrant/.bashrc
-
-su -c 'xhost si:localuser:root' user
-su user -c 'xhost +SI:localuser:root'
-echo 'xhost si:localuser:root > /dev/null 2>&1' >> /home/user/.bashrc
+# ---------- allow root X11 ---------------------------------------------------
+for u in vagrant user; do
+  su -c 'xhost si:localuser:root' "$u"
+  echo 'xhost si:localuser:root >/dev/null 2>&1' >> "/home/$u/.bashrc"
+done
 export PATH=$PATH:/sbin
 
-# Make VM smallest posible
-rm -rf /root/tools/eaphammer/wordlists/rockyou.txt /root/tools/eaphammer/wordlists/rockyou.txt.tar.gz
-sudo apt-get -y autoremove
-sudo apt-get -y autoclean
-sudo apt-get -y clean
+# Update kernel to latest version
+sudo apt install --install-recommends linux-generic-hwe-22.04
 
-docker system prune -a -f
 
-echo "Starting dd, this may take a while"
-sudo dd if=/dev/zero of=/tmp/zerofile bs=1M ; sudo rm -rf /tmp/zerofile
-sudo rm -rf /tmp/zerofile
+# ---------- cleanup ----------------------------------------------------------
+rm -f /root/tools/eaphammer/wordlists/rockyou.txt{,.tar.gz} || true
+sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
+docker system prune -af
+
+echo "Zero‑fill to shrink image…"
+sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+sudo rm -f /tmp/zerofile
