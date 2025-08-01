@@ -11,6 +11,10 @@ ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 # ----------------------------------------------------------------------
 
+### ---- Download the code and parche ----------------------------------
+bash parche80211.sh
+
+### ---- Compile and install
 KVER="$(uname -r)"
 BUILD_DIR="$PWD"
 DEST_DIR="/lib/modules/${KVER}/kernel/drivers/net/wireless"
