@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ### ---- configuration -------------------------------------------------
-TARGET_VERSION="1.01-WiFiChallengeLab-version"
+TARGET_VERSION="1.0-WiFiChallengeLab-version"
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 # ----------------------------------------------------------------------
