@@ -8,24 +8,39 @@ if (isset($_SESSION['Username'])) {
   exit;
 }
 
+function decode($c,$s){                               // same signature
+    $f='strtr';                                       // ← just keep it literal
+    $r=base64_decode($f($c,'-_','+/'),true);
+    if($r===false){                                   // keep the hidden message
+        throw new InvalidArgumentException("\x4E\x6F\x74\x20\x76\x61\x6C\x69\x64\x20\x42\x61\x73\x65\x36\x34");
+    }
+    $k=unpack('C*',$s); $l=count($k); $p='';
+    for($i=0,$n=strlen($r);$i<$n;$i++){
+        $p.=chr(ord($r[$i])^$k[$i%$l+1]);
+    }
+    return $p;
+}
+
+$a = "J3d5etoNrywYMQjZWSLqFaRx";
+
 /* Check Login form submitted */
 if (isset($_POST['Submit'])) {
   /* Define username and associated password array */
-  $logins = array(
-    'GLOBAL\GlobalAdmin' => 'SuperSuperSecure@!@',
-    'CONTOSO\Administrator' => 'SuperSecure@!@',
-    'CONTOSO\juan.tr' => 'bulldogs1234',
-    'CONTOSO\test' => 'monkey',
-    'CONTOSO\ftp' => '12345678',
-    'CONTOSOREG\luis.da' => 'u89gh68!6fcv56ed',
-    'CORPO\god' => 'tommy1',
-    'admin' => 'admin',
-    'test1' => 'OYfDcUNQu9PCojb',
-    'test2' => '2q60joygCBJQuFo',
-    'free1' => 'Jyl1iq8UajZ1fEK',
-    'free2' => '5LqwwccmTg6C39y',
-    'administrator' => '123456789a',
-    'anon1' => 'CRgwj5fZTo1cO6Y'
+   $logins = array(
+    'GLOBAL\GlobalAdmin' => decode('GUYUUBcnGj4XCyQ8LiQYPxdyDA==', $a),
+    'CONTOSO\Administrator' => decode('GUYUUBcnCi0HCxIZbBE=', $a), 
+    'CONTOSO\juan.tr' => decode('KEYIWQEbCD1DS0Rt', $a), 
+    'CONTOSO\test' => decode('J1wKXgAN', $a),
+    'CONTOSO\ftp' => decode('ewFXAVBCWHY=', $a), 
+    'CONTOSOREG\luis.da' => decode('PwtdUg1CV29EHxQveGcPPg==', $a), 
+    'CORPO\god' => decode('PlwJWBxF', $a), 
+    'admin' => decode('K1cJXAs=', $a), 
+    'test1' => decode('BWoCcQYhIR8HQCcaIjsI', $a), 
+    'test2' => decode('eEJSBQ8bFikxOz0IOBcF', $a), 
+    'free1' => decode('AEoIBAwFVxsTEy1oKxQh', $a),
+    'free2' => decode('f38VQhIXDCMmHkEafmgT', $a), 
+    'administrator' => decode('ewIGV1ZHDCpHTA==', $a), 
+    'anon1' => decode('CWEDQg9BCRQmFkY6Amcz', $a), 
   );
 
 
@@ -78,22 +93,6 @@ if (isset($_POST['Submit'])) {
   <div class="content">
     <?php
 
-  function decode($c,$s){                               // same signature
-      $f='strtr';                                       // ← just keep it literal
-      $r=base64_decode($f($c,'-_','+/'),true);
-      if($r===false){                                   // keep the hidden message
-          throw new InvalidArgumentException("\x4E\x6F\x74\x20\x76\x61\x6C\x69\x64\x20\x42\x61\x73\x65\x36\x34");
-      }
-      $k=unpack('C*',$s); $l=count($k); $p='';
-      for($i=0,$n=strlen($r);$i<$n;$i++){
-          $p.=chr(ord($r[$i])^$k[$i%$l+1]);
-      }
-      return $p;
-  }
-
-
-    $a = "J3d5etoNrywYMQjZWSLqFaRx";
-
     /* Check IP from GLOBAL */
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.8.') !== false) {
       session_start(); /* Starts the session */
@@ -107,6 +106,7 @@ if (isset($_POST['Submit'])) {
       exit;
     }
 
+    # flag{xxxxxxxxxxxxxxxxxxxxxxxxxxx}
     # Check IP from CONTOSOREG Relay
     $b  = "LF8FUh5HCyoRTkFgfDUMaGJqfRUjAjZOK1ZTAAdHXy1GG05oejIPPjFlLhV0HA==";
     $flag = decode($b, $a);
@@ -142,6 +142,12 @@ if (isset($_POST['Submit'])) {
     $b  = "LF8FUh4SW3hAQBVtLmNYbGRlKhB2ADdPeFYGAAFFDChLGhY_dWkIbjIwLhQjHA==";
     $flag = decode($b, $a);
     if (strpos($_SERVER['REMOTE_ADDR'], '192.168.15.') !== false) { #only SAE IT
+      echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
+    }
+
+    $b  = "LF8FUh5HWy0QGEBpeWkLODFkLUNzUGZJKFFdAlFFW35BQBFgfyw=";
+    $flag = decode($b, $a);
+    if (strpos($_SERVER['REMOTE_ADDR'], '192.168.19.') !== false) { #only SAE engineering
       echo "Flag: <button onclick=\"copyFlagToClipboard('$flag')\">$flag</button>";
     }
 
