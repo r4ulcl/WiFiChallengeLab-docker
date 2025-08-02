@@ -7,6 +7,10 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+# Install mac80211_hwsim_WiFiChallenge if missing
+cd /root/mac80211_hwsim_WiFiChallenge
+sudo bash install.sh
+
 # Returns all available interfaces, except "lo" and "veth*".
 available_interfaces()
 {

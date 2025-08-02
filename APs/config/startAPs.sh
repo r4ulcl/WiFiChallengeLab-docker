@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Install mac80211_hwsim_WiFiChallenge if missing
-cd /root/mac80211_hwsim_WiFiChallenge
-sudo bash install.sh
-
 # TODO move to Dockerfile
 envsubst_tmp (){
     for F in ./*.tmp ; do
