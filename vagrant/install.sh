@@ -93,16 +93,37 @@ sudo docker compose -f docker-compose.yml up -d
 # sudo docker compose -f docker-compose-minimal.yml up -d
 
 # ---------- debloat  -------------------------
-sudo apt-get --yes remove --purge $(dpkg --get-selections | \
-  grep -vE '^(lib|ubuntu-minimal|tzdata|gpgv|gnupg|apt|dirmngr)' | awk '{print $1}')
-sudo apt purge -y \
-  thunderbird* libreoffice-* snapd \
-  aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
-  mahjongg ace-of-penguins gnomine gbrainy \
-  five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
-  cheese shotwell totem* rhythmbox* \
-  transmission-* \
-  yelp yelp-xsl gnome-user-docs ubuntu-docs
+packages=(
+  "thunderbird*"
+  "libreoffice-*"
+  "snapd"
+  "aisleriot"
+  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-todo" "gnome-robots"
+  "mahjongg"
+  "ace-of-penguins"
+  "gnomine"
+  "gbrainy"
+  "five-or-more" "four-in-a-row" "iagno" "tali" "swell-foop" "quadrapassel"
+  "cheese"
+  "shotwell"
+  "totem*"
+  "rhythmbox*"
+  "transmission-*"
+  "yelp" "yelp-xsl"
+  "gnome-user-docs" "ubuntu-docs"
+)
+
+for pkg in "${packages[@]}"; do
+  echo "Purging $pkg ..."
+  if sudo apt-get -y purge "$pkg"; then
+    echo "Removed $pkg"
+  else
+    echo "Could not remove $pkg (not installed or dependency problem)"
+  fi
+done
+
+# Clean up any orphaned dependencies that are left behind.
+sudo apt-get -y autoremove
 
 
 sudo apt-get -y autoremove
@@ -305,6 +326,7 @@ sudo tee "$RESOLV" >/dev/null <<EOF
 [Resolve]
 DNS=8.8.8.8 1.1.1.1
 EOF
+sudo systemctl enable systemd-resolved
 sudo systemctl restart systemd-resolved
 
 
