@@ -71,6 +71,7 @@ macchanger -r $WLAN_OTHER2 >> /root/logs/macchanger.log # Other 2
 macchanger -r $WLAN_OTHER3 >> /root/logs/macchanger.log # Other 3
 macchanger -m $MAC_BRUTEFORCE $WLAN_BRUTEFORCE >> /root/logs/macchanger.log # WPA3 Bruteforce
 macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3 DOWNGRADE
+macchanger -m $MAC_6GHZ $WLAN_6GHZ >> /root/logs/macchanger.log # WPA3 6ghz
 #macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
 macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
@@ -154,6 +155,9 @@ host_aps_apd /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.
 
 ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
 host_aps_apd /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
+
+ip addr add $IP_6GHZ.1/24 dev $WLAN_6GHZ
+host_aps_apd /root/wpa3/hostapd_6ghz.conf > /root/logs/hostapd_6ghz.log &
 
 # WEP
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP

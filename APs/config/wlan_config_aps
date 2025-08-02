@@ -100,6 +100,12 @@ IP_MGTRELAY_TABLETS='192.168.18'
 MAC_MGTRELAY_TABLETS='F0:9F:C2:7A:33:28'
 
 # ------------------------------------------
+ESSID_6GHZ='wifi-engineering'
+WLAN_6GHZ=wlan29
+IP_6GHZ='192.168.19'
+MAC_6GHZ='F0:9F:C2:EA:1F:29'
+
+# ------------------------------------------
 WLAN_=wlan30
 IP_='192.168.20'
 MAC_=''

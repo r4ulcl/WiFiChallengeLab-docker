@@ -1,0 +1,24 @@
+### /etc/hostapd/hostapd.conf  – 6 GHz, WPA3-SAE ###
+interface=$WLAN_6GHZ
+driver=nl80211
+country_code=ES
+hw_mode=a
+channel=5
+op_class=131
+ieee80211ax=1
+wmm_enabled=1
+
+# SSID ------------------------------------------------------------------------
+ssid=$ESSID_6GHZ
+
+# Mandatory 6 GHz security: WPA3-Personal (SAE) -------------------------------
+wpa=2
+wpa_key_mgmt=SAE
+ieee80211w=2
+rsn_pairwise=CCMP
+sae_password=spiderman
+sae_require_mfp=1
+sae_pwe=1
+
+# (optional) group-rekey every 30 min
+wpa_group_rekey=1800
