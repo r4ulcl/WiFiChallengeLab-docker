@@ -187,11 +187,11 @@ uplinks: []
     bssids: [
       {
         address: "$MAC_MGT",
-        fingerprints: [ 80efa82dc7030f12d9c6d2b585a152a82acf54b12d69b804195b6d0be83362b7 ]
+        fingerprints: [ 296531dde9d53691e52c6a32406f5d811ee13af864df740fad53fc1238e8fc13 ]
       },
       {
         address: "$MAC_MGT2",
-        fingerprints: [ 80efa82dc7030f12d9c6d2b585a152a82acf54b12d69b804195b6d0be83362b7 ]
+        fingerprints: [ 296531dde9d53691e52c6a32406f5d811ee13af864df740fad53fc1238e8fc13 ]
       }
     ]
   },
@@ -203,7 +203,7 @@ uplinks: []
     bssids: [
       {
         address: "$MAC_MGTTLS",
-        fingerprints: [ 6bc2339da79076b7fe043a855922b06d98dcbea4c3655f59ede516998202e52a ]
+        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]
   },
@@ -215,7 +215,7 @@ uplinks: []
     bssids: [
       {
         address: "$MAC_MGTRELAY",
-        fingerprints: [ 6bc2339da79076b7fe043a855922b06d98dcbea4c3655f59ede516998202e52a ]
+        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]
   },
@@ -227,11 +227,11 @@ uplinks: []
     bssids: [
       {
         address: "$MAC_MGTRELAY_TABLETS",
-        fingerprints: [ 6bc2339da79076b7fe043a855922b06d98dcbea4c3655f59ede516998202e52a ]
+        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]
   },
-    {
+  {
     ssid: $ESSID_WEP
     channels: [3]
     security: [NONE]
@@ -243,7 +243,6 @@ uplinks: []
       }
     ]
   },
-
 ]
 
 

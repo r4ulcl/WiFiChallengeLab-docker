@@ -75,7 +75,8 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ./logsNzyme:/var/log/nzyme/
+      - ./nzyme/nzyme-logs/logs/:/var/log/nzyme/
+      - ./nzyme/nzyme.conf.tmp:/etc/nzyme/nzyme.conf.tmp
     #ports:
     #  - "22900:22900"
     depends_on:
@@ -114,7 +115,7 @@ services:
     environment:
       - TZ=Europe/Berlin
     volumes:
-      - ./nzyme/data:/var/lib/postgresql/data
+      - ./nzyme/nzyme-logs/data:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
     healthcheck:
