@@ -169,10 +169,6 @@ To recreate the Docker files with the changes made, modify the docker-compose.ym
 
 [<img src="https://import.cdn.thinkific.com/937577/eyw5HcfFRMml6M8GoFq3_FONDO%20CURSO.png">](https://academy.wifichallenge.com/courses/certified-wifichallenge-professional-cwp)
 
-### Buymeacoffee
-
-[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png">](https://www.buymeacoffee.com/r4ulcl)
-
 ## Collaborators
 
 - Raúl Sampedro (@rsrdesarrollo) - Update the Nzyme Docker configuration to support ARM architecture
