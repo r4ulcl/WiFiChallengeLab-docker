@@ -2,66 +2,103 @@ VAGRANT_COMMAND = ARGV[0]
 
 Vagrant.configure("2") do |config|
 
-
+  # ---------- Hyper-V ----------
   config.vm.define "hyper-v_vm" do |hyper_v_vm|
-    # Add other configuration options here
     hyper_v_vm.vm.box = "generic/ubuntu2204"
     hyper_v_vm.vm.define "WiFiChallengeLab HyperV"
     # hyper_v_vm.vm.network "private_network", ip: "192.168.58.10"
-    hyper_v_vm.vm.hostname  = "WiFiChallengeLab"
+    hyper_v_vm.vm.hostname = "WiFiChallengeLab"
+
     hyper_v_vm.vm.provider "hyperv" do |hv|
-      hv.vmname = "WiFiChallenge Lab v2.2"
+      hv.vmname    = "WiFiChallenge Lab v2.2"
       hv.maxmemory = 4096
-      hv.memory = 4096
-      hv.cpus = 4
+      hv.memory    = 4096
+      hv.cpus      = 4
     end
+
+    # Provisioner 1: kernel update plus reboot
+    hyper_v_vm.vm.provision "shell", inline: <<-SHELL, privileged: true
+      set -e
+      apt-get update -y
+      apt-get install --install-recommends linux-generic-hwe-22.04 -y
+      nohup bash -c "sleep 1 && reboot" >/dev/null 2>&1 &
+    SHELL
+
+    # Provisioner 2: main script
     hyper_v_vm.vm.provision :shell, path: "./install.sh", privileged: true
   end
-  
+
+  # ---------- VirtualBox ----------
   config.vm.define "virtualbox_vm" do |virtualbox_vm|
-    # Add other configuration options here
     virtualbox_vm.vm.box = "generic/ubuntu2204"
     virtualbox_vm.vm.define "WiFiChallengeLab vbox"
-    virtualbox_vm.vm.hostname  = "WiFiChallengeLab"
+    virtualbox_vm.vm.hostname = "WiFiChallengeLab"
+
     virtualbox_vm.vm.provider "virtualbox" do |vb|
       vb.memory = "4096"
-      vb.cpus = 4
-      vb.name = "WiFiChallenge Lab v2.2"
+      vb.cpus   = 4
+      vb.name   = "WiFiChallenge Lab v2.2"
     end
+
+    virtualbox_vm.vm.provision "shell", inline: <<-SHELL, privileged: true
+      set -e
+      apt-get update -y
+      apt-get install --install-recommends linux-generic-hwe-22.04 -y
+      nohup bash -c "sleep 1 && reboot" >/dev/null 2>&1 &
+    SHELL
+
     virtualbox_vm.vm.provision :shell, path: "./install.sh", privileged: true
   end
 
+  # ---------- VMware ----------
   config.vm.define "vmware_vm" do |vmware_vm|
-    # Add other configuration options here
     vmware_vm.vm.box = "generic/ubuntu2204"
     vmware_vm.vm.define "WiFiChallengeLab VMWare"
+    vmware_vm.vm.hostname = "WiFiChallengeLab"
+
     vmware_vm.vm.provider "vmware_desktop" do |v|
-      v.linked_clone = false
-      v.clone_directory = "E:/VMWare"
-      v.force_vmware_license = "workstation"  # force the licence for fix some vagrant plugin issue
-      v.gui = true
-      v.vmx["displayName"] = "WiFiChallenge Lab v2.2"
-      v.memory = "4096"
-      v.cpus = 4
+      v.linked_clone         = false
+      v.clone_directory      = "E:/VMWare"
+      v.force_vmware_license = "workstation"
+      v.gui                  = true
+      v.vmx["displayName"]   = "WiFiChallenge Lab v2.2"
+      v.memory               = "4096"
+      v.cpus                 = 4
     end
-    #vmware_vm.vm.network "private_network", ip: "192.168.57.10"
-    vmware_vm.vm.hostname  = "WiFiChallengeLab"
+    # vmware_vm.vm.network "private_network", ip: "192.168.57.10"
+
+    vmware_vm.vm.provision "shell", inline: <<-SHELL, privileged: true
+      set -e
+      apt-get update -y
+      apt-get install --install-recommends linux-generic-hwe-22.04 -y
+      nohup bash -c "sleep 1 && reboot" >/dev/null 2>&1 &
+    SHELL
+
     vmware_vm.vm.provision :shell, path: "./install.sh", privileged: true
   end
 
+  # ---------- QEMU (ARM) ----------
   config.vm.define "qemu_arm_vm" do |qemu_vm|
-    # Add other configuration options here
     qemu_vm.vm.box = "generic/ubuntu2204"
     qemu_vm.vm.define "WiFiChallengeLab QEMU"
-    qemu_vm.vm.hostname  = "WiFiChallengeLab"
+    qemu_vm.vm.hostname = "WiFiChallengeLab"
+
     qemu_vm.vm.provider "qemu" do |libvirt|
-    #qemu_vm.vm.provider :libvirt do |libvirt|
-      libvirt.memory = "4096"
-      libvirt.cpus = 4
-      libvirt.driver = "qemu"
+      libvirt.memory       = "4096"
+      libvirt.cpus         = 4
+      libvirt.driver       = "qemu"
       libvirt.machine_type = "virt"
-      libvirt.cpu_model = "cortex-a57"    
+      libvirt.cpu_model    = "cortex-a57"
     end
+    # qemu_vm.vm.provider :libvirt do |libvirt| ... end
+
+    qemu_vm.vm.provision "shell", inline: <<-SHELL, privileged: true
+      set -e
+      apt-get update -y
+      apt-get install --install-recommends linux-generic-hwe-22.04 -y
+      nohup bash -c "sleep 1 && reboot" >/dev/null 2>&1 &
+    SHELL
+
     qemu_vm.vm.provision :shell, path: "./install.sh", privileged: true
   end
 
