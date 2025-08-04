@@ -21,12 +21,10 @@ mkdir -p "${TOOLS}"
 # System update and basic utilities
 ###############################################################################
 
-apt-get update
-apt-get -y full-upgrade
 apt-get install -y wget curl git
 
 ###############################################################################
-# Wordlists – top 1 M rockyou and username shortlist
+# Wordlists – top 1 M rockyou and username shortlist
 ###############################################################################
 
 cd "${FOLDER}"
