@@ -57,7 +57,7 @@ do
 
 	# PSK, only login if cookies error
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_WPA_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
-	if [ "$STATUS" -ne 200 ] ; then
+	if [ "$STATUS" -eq 302 ] ; then
 		curl -s "http://$IP_WPA_PSK.1/login.php" --interface $WLAN_WPA_PSK --compressed -H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' --data-raw 'Username=test1&Password=OYfDcUNQu9PCojb&Submit=Login' -c /tmp/userTest1 -b /tmp/userTest1 &
 	fi
 
