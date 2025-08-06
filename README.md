@@ -50,7 +50,13 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
   - More clients
 - Monitorization and detection using nzyme WIDS.
 
+Changes after v2.0 can be found at [Changelog.md](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/Changelog.md)
+
 ## Using WiFiChallenge Lab
+
+> [!WARNING]  
+> This compose file uses `network_mode: host`, `privileged: true` , **and mounts** `/lib/modules`, giving the container direct host-network access and full kernel privileges, run it only inside a VM, **never** on your physical host.
+
 
 ### Using the Virtual Machine (VM) from the Releases or Proton Drive
 
@@ -60,8 +66,6 @@ To get started with the VM, download the appropriate version for your preferred 
 - [From Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
 ### Using Docker on a Linux Host or Custom VM with Ubuntu 20.04 (Supports x86-64 and ARM)
-
-> **⚠️ Warning:** This compose file uses `network_mode: host`, `privileged: true` , **and mounts** `/lib/modules`, giving the container direct host-network access and full kernel privileges, run it only inside a disposable Ubuntu 20.04 VM, **never** on your physical host.
 
 1. Download a Ubuntu20.04 VM
 2. Execute the following code as root
@@ -76,8 +80,6 @@ bash /var/WiFiChallengeLab-docker/vagrant/install.sh
 4. Continue in lab.wifichallenge.com
 
 ### Using Docker on a Linux Host or Custom VM like a kali linux
-
-> **⚠️ Warning:** This compose file uses `network_mode: host`, `privileged: true` , **and mounts** `/lib/modules`, giving the container direct host-network access and full kernel privileges, run it only inside a VM, **never** on your physical host.
 
 Clone the repository and set up Docker to manage Access Points (APs), clients, and nzyme for alerts:
 
