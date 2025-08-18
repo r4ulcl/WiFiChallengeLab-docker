@@ -13,6 +13,7 @@ edit_config_file() {
 }
 
 DEV=False
+DEV=True
 
 # ---------- base system ------------------------------------------------------
 sudo apt-get update
@@ -21,8 +22,7 @@ sudo apt-get update
 # optional housekeeping
 sudo apt-get purge -y unattended-upgrades update-manager update-notifier
 
-# kernel / driver meta‑package (still called linux-generic in 24.04)
-sudo apt-get install -y linux-generic
+
 
 # ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
@@ -74,69 +74,24 @@ sudo systemctl restart docker
 # ---------- WiFiChallengeLab -------------------------------------------------
 cd /var
 if [ "$DEV" = "True" ]; then
-  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
+  git clone -b dev http://10.10.20.10:3005/r4ulcl/WiFiChallengeLab-docker
 else
-  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+  git clone http://10.10.20.10:3005/r4ulcl/WiFiChallengeLab-docker
 fi
 cd /var/WiFiChallengeLab-docker
 
 echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
 echo 'Install WiFi tools'; sudo bash Attacker/installTools.sh
 
-cd /var/WiFiChallengeLab-docker/nzyme
+cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
 rm -rf logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 cd /var/WiFiChallengeLab-docker
+#sudo docker compose -f docker-compose-local.yml up -d --build
 sudo docker compose -f docker-compose.yml up -d
 # sudo docker compose -f docker-compose-minimal.yml up -d
-
-# ---------- debloat  -------------------------
-packages=(
-  "thunderbird*"
-  "libreoffice-*"
-  "snapd"
-  "aisleriot"
-  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-todo" "gnome-robots"
-  "mahjongg"
-  "ace-of-penguins"
-  "gnomine"
-  "gbrainy"
-  "five-or-more" "four-in-a-row" "iagno" "tali" "swell-foop" "quadrapassel"
-  "cheese"
-  "shotwell"
-  "totem*"
-  "rhythmbox*"
-  "transmission-*"
-  "yelp" "yelp-xsl"
-  "gnome-user-docs" "ubuntu-docs"
-)
-
-for pkg in "${packages[@]}"; do
-  echo "Purging $pkg ..."
-  if sudo apt-get -y purge "$pkg"; then
-    echo "Removed $pkg"
-  else
-    echo "Could not remove $pkg (not installed or dependency problem)"
-  fi
-done
-
-# Clean up any orphaned dependencies that are left behind.
-sudo apt-get -y autoremove
-
-
-sudo apt-get -y autoremove
-sudo apt-get clean
-
-sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* snapd \
-  aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
-  mahjongg ace-of-penguins gnomine gbrainy \
-  five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
-  cheese shotwell totem* rhythmbox* \
-  transmission-* \
-  yelp yelp-xsl gnome-user-docs ubuntu-docs
-
 
 # ---------- flags & helper scripts ------------------------------------------
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
@@ -253,6 +208,10 @@ if [ -n "$PROFILE_DIR" ]; then
   certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA"
 fi
 
+mkdir -p ~/.local/share/applications
+cp /var/lib/snapd/desktop/applications/firefox_firefox.desktop ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications/
+
 sudo rm -f /var/WiFiChallengeLab-docker/zerofile 2>/dev/null
 sed -i '/bash \/etc\/configureUser.sh/d' ~/.bashrc
 gsettings set org.gnome.shell favorite-apps \
@@ -260,7 +219,6 @@ gsettings set org.gnome.shell favorite-apps \
 
 sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
 
-sudo apt-get autoremove --purge -y
 
 EOF
 
@@ -333,10 +291,32 @@ sudo systemctl restart systemd-resolved
 # ---------- guest additions --------------------------------------------------
 if dmidecode | grep -iq vmware; then
   sudo apt-get install -y open-vm-tools-desktop
-elif dmidecode | grep -iq virtualbox; then
-  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
+#elif dmidecode | grep -iq virtualbox; then
+#  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
 fi
 
+#---------- Error wayland vbox --------------------------------------------------
+CONFIG_FILE="/etc/gdm3/custom.conf"
+BACKUP_FILE="${CONFIG_FILE}.$(date +%Y%m%d%H%M%S).bak"
+# Detect VirtualBox
+is_vbox=false
+if command -v systemd-detect-virt >/dev/null 2>&1; then
+  [[ "$(systemd-detect-virt --vm)" == "oracle" ]] && is_vbox=true
+fi
+
+if [[ $is_vbox == false && -f /sys/class/dmi/id/product_name ]]; then
+  grep -qi "VirtualBox" /sys/class/dmi/id/product_name && is_vbox=true
+fi
+
+if $is_vbox; then
+  if grep -qE '^WaylandEnable=false' "$CONFIG_FILE"; then
+    cp "$CONFIG_FILE" "$BACKUP_FILE"
+    sed -i 's/^WaylandEnable=false/#WaylandEnable=false/' "$CONFIG_FILE"
+    echo "Commented WaylandEnable=false in $CONFIG_FILE"
+  else
+    echo "Line already commented or not present, nothing to do"
+  fi
+fi
 # ---------- allow root X11 ---------------------------------------------------
 for u in vagrant user; do
   su -c 'xhost si:localuser:root' "$u"
@@ -344,14 +324,64 @@ for u in vagrant user; do
 done
 export PATH=$PATH:/sbin
 
-# Update kernel to latest version
-sudo apt install --install-recommends linux-generic-hwe-22.04
+# ---------- debloat  -------------------------
+sudo apt-mark manual wireshark firefox
 
+packages=(
+  "thunderbird*"
+  "libreoffice-*"
+  "snapd"
+  "aisleriot"
+  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-todo" "gnome-robots"
+  "mahjongg"
+  "ace-of-penguins"
+  "gnomine"
+  "gbrainy"
+  "five-or-more" "four-in-a-row" "iagno" "tali" "swell-foop" "quadrapassel"
+  "cheese"
+  "shotwell"
+  "totem*"
+  "rhythmbox*"
+  "transmission-*"
+  "yelp" "yelp-xsl"
+  "gnome-user-docs" "ubuntu-docs"
+)
+
+for pkg in "${packages[@]}"; do
+  echo "Purging $pkg ..."
+  if sudo apt-get -y purge "$pkg"; then
+    echo "Removed $pkg"
+  else
+    echo "Could not remove $pkg (not installed or dependency problem)"
+  fi
+done
+
+# Clean up any orphaned dependencies that are left behind.
+sudo apt-get -y autoremove
+
+
+sudo apt-get -y autoremove
+sudo apt-get clean
+
+sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* snapd \
+  aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
+  mahjongg ace-of-penguins gnomine gbrainy \
+  five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
+  cheese shotwell totem* rhythmbox* \
+  transmission-* \
+  yelp yelp-xsl gnome-user-docs ubuntu-docs
+
+
+# ---------- cleanup ----------------------------------------------------------
+# https://forums.virtualbox.org/viewtopic.php?start=30&t=110879
+sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
+sudo systemctl restart gdm3
 
 # ---------- cleanup ----------------------------------------------------------
 rm -f /root/tools/eaphammer/wordlists/rockyou.txt{,.tar.gz} || true
 sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
 docker system prune -af
+sudo apt-get autoremove --purge -y
 
 echo "Zero‑fill to shrink image…"
 sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true

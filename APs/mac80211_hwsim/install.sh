@@ -6,13 +6,15 @@
 set -euo pipefail
 
 ### ---- configuration -------------------------------------------------
-TARGET_VERSION="1.0-WiFiChallengeLab-version"
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 # ----------------------------------------------------------------------
 
 ### ---- Download the code and parche ----------------------------------
-bash parche80211.sh
+bash patch80211.sh
+
+TARGET_VERSION_ERROR="1.0-WiFiChallengeLab-version"
+TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install
 KVER="$(uname -r)"
