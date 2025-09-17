@@ -86,6 +86,7 @@ if [ ! -d wifi_db ]; then
   git clone https://github.com/r4ulcl/wifi_db
   cd wifi_db
   pip3 install --break-system-packages -r requirements.txt
+  pip3 install -r requirements.txt
 fi
 
 ###############################################################################
@@ -135,6 +136,7 @@ if [ ! -d hostapd-2.11 ]; then
   tar zxf hostapd-2.11.tar.gz && rm hostapd-2.11.tar.gz
   cd hostapd-2.11
   patch -p1 < ../hostapd-2.11-wpe.patch && rm ../hostapd-2.11-wpe.patch
+  cd hostapd
   make
   make install
   make wpe
@@ -175,6 +177,14 @@ if [ ! -d hashcat-6.0.0 ]; then
   ln -sf /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
+
+cd "${TOOLS}"
+sudo apt-get -y install git build-essential libssl-dev zlib1g-dev yasm pkg-config libgmp-dev libpcap-dev libbz2-dev 
+git clone https://github.com/openwall/john.git
+cd john/src
+./configure && make -s clean && make -sj4
+sudo make install
+
 
 ###############################################################################
 # Misc Wi‑Fi / RF assessment utilities (creAP, airgeddon, etc.)
