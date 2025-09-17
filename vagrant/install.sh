@@ -22,7 +22,28 @@ sudo apt-get update
 # optional housekeeping
 sudo apt-get purge -y unattended-upgrades update-manager update-notifier
 
+# Disable daily update check
+sudo systemctl disable --now apt-daily.timer apt-daily-upgrade.timer
+sudo systemctl mask apt-daily.service apt-daily-upgrade.service
 
+# Fix error black screen on restart
+bak="/etc/default/grub.$(date +%F_%H%M%S).bak"
+cp /etc/default/grub "$bak"
+
+extra=""
+[ "$1" = "--nomodeset" ] && extra=" nomodeset"
+
+cat > /etc/default/grub <<EOF
+GRUB_DEFAULT=0
+GRUB_TIMEOUT_STYLE=menu
+GRUB_TIMEOUT=1
+GRUB_DISTRIBUTOR=\`lsb_release -i -s 2> /dev/null || echo Debian\`
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0$extra"
+GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+EOF
+
+update-grub
+update-initramfs -u
 
 # ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
@@ -89,7 +110,12 @@ sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
 
 cd /var/WiFiChallengeLab-docker
-#sudo docker compose -f docker-compose-local.yml up -d --build
+sudo docker compose -f docker-compose-local.yml build
+docker tag wifichallengelab-docker-clients r4ulcl/wifichallengelab-clients
+docker tag wifichallengelab-docker-aps r4ulcl/wifichallengelab-aps
+docker tag wifichallengelab-docker-nzyme r4ulcl/wifichallengelab-nzyme
+docker image rm wifichallengelab-docker-nzyme wifichallengelab-docker-aps wifichallengelab-docker-clients
+
 sudo docker compose -f docker-compose.yml up -d
 # sudo docker compose -f docker-compose-minimal.yml up -d
 
