@@ -17,7 +17,7 @@ DEV=True
 
 # ---------- base system ------------------------------------------------------
 sudo apt-get update
-#sudo apt-get full-upgrade -y
+sudo apt-get full-upgrade -y
 
 # optional housekeeping
 sudo apt-get purge -y unattended-upgrades update-manager update-notifier
@@ -30,20 +30,25 @@ sudo systemctl mask apt-daily.service apt-daily-upgrade.service
 bak="/etc/default/grub.$(date +%F_%H%M%S).bak"
 cp /etc/default/grub "$bak"
 
-extra=""
-[ "$1" = "--nomodeset" ] && extra=" nomodeset"
 
 cat > /etc/default/grub <<EOF
 GRUB_DEFAULT=0
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR=\`lsb_release -i -s 2> /dev/null || echo Debian\`
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0$extra"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0"
 GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
 EOF
 
 update-grub
 update-initramfs -u
+
+sudo apt install lightdm
+sudo dpkg-reconfigure lightdm
+
+touch /home/user/.Xauthority
+chmod 600 /home/user/.Xauthority
+chown user:user /home/user/.Xauthority
 
 # ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
@@ -108,6 +113,9 @@ cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
 rm -rf logs/ data/
 sudo apt-get install -y p7zip-full
 7z x nzyme-logs.7z
+
+cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim/
+sudo bash install.sh
 
 cd /var/WiFiChallengeLab-docker
 sudo docker compose -f docker-compose-local.yml build
