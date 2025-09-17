@@ -18,7 +18,7 @@ services:
         - ip netns exec ns-ap /bin/bash -c '
           curl -f -s http://localhost/login.php >/dev/null || exit 1;
           curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 17 ]; then exit 3; fi'
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
       interval: 5s
       timeout: 5s
       retries: 3
@@ -63,7 +63,8 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ./logsNzyme:/var/log/nzyme/
+      - ./nzyme/nzyme-logs/logs/:/var/log/nzyme/
+      - ./nzyme/nzyme.conf.tmp:/etc/nzyme/nzyme.conf.tmp
     #ports:
     #  - "22900:22900"
     depends_on:
@@ -71,9 +72,6 @@ services:
       - db
     environment:
       - TZ=Europe/Berlin
-      - DATABASE_URL=$DATABASE_URL
-      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
-      - EXTERNAL_URL=$EXTERNAL_URL
     network_mode: host #USB Antena
     healthcheck:
       test: ["CMD-SHELL", "curl -f -s http://localhost:22900 >/dev/null || exit 1"]
@@ -104,11 +102,8 @@ services:
       - aps
     environment:
       - TZ=Europe/Berlin
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASS
     volumes:
-      - ./nzyme/data:/var/lib/postgresql/data
+      - ./nzyme/nzyme-logs/data:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
     healthcheck:

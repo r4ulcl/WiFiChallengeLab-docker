@@ -104,10 +104,10 @@ do
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-Responder | awk '{print $2}' | head -n 1`
 	# Responder ""vuln"" - 20 seconds because the SMB takes aprox 10 seconds in respond "Authentication error"
 	# In background to be sure
-	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	timeout -k 1 5s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
 	sleep 0.5
-	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
-	smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	timeout -k 1 5s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
+	timeout -k 1 5s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
 	timeout -k 1 20s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill
 done &
 

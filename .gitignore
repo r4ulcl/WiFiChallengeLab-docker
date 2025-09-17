@@ -3,3 +3,4 @@ logsClient/*
 vagrant/.vagrant/*
 vagrant/date.log
 .DS_Store
+nzyme/nzyme-logs/*
