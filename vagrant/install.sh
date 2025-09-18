@@ -53,9 +53,6 @@ chown user:user /home/user/.Xauthority
 
 sudo apt update
 sudo apt install -y $(ubuntu-drivers devices | awk '/recommended/ {print $3}') firmware-misc-nonfree mesa-utils
-#sudo apt purge libwayland-client0 libwayland-server0 libwayland-egl1 libwayland-cursor0 libwayland-bin -y
-#sudo systemctl mask weston.service
-#sudo systemctl mask wayland.service
 
 sudo systemctl disable bettercap
 
@@ -115,7 +112,7 @@ else
 fi
 cd /var/WiFiChallengeLab-docker
 
-#echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
+echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
 echo 'Install WiFi tools'; sudo bash Attacker/installTools.sh
 
 cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
@@ -357,7 +354,7 @@ fi
 if $is_vbox; then
   if grep -qE '^WaylandEnable=false' "$CONFIG_FILE"; then
     cp "$CONFIG_FILE" "$BACKUP_FILE"
-    sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$CONFIG_FILE"
+    sed -i 's/^WaylandEnable=false/#WaylandEnable=false/' "$CONFIG_FILE"
     echo "Commented WaylandEnable=false in $CONFIG_FILE"
   else
     echo "Line already commented or not present, nothing to do"
@@ -424,10 +421,6 @@ sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
 sudo systemctl restart gdm3
 
 # Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
-#sudo systemctl disable avahi-daemon
-sudo apt purge avahi-daemon -y
-sudo apt purge apport -y
-sudo apt purge whoopsie -y
 sudo apt purge gnome-calendar* -y
 sudo dpkg -l | awk '/^rc/ {print $2}' | xargs sudo apt purge -y
 sudo journalctl --vacuum-time=2d
