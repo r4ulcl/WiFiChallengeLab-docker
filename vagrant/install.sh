@@ -53,9 +53,11 @@ chown user:user /home/user/.Xauthority
 
 sudo apt update
 sudo apt install -y $(ubuntu-drivers devices | awk '/recommended/ {print $3}') firmware-misc-nonfree mesa-utils
-sudo apt purge libwayland-client0 libwayland-server0 libwayland-egl1 libwayland-cursor0 libwayland-bin -y
-sudo systemctl mask weston.service
-sudo systemctl mask wayland.service
+#sudo apt purge libwayland-client0 libwayland-server0 libwayland-egl1 libwayland-cursor0 libwayland-bin -y
+#sudo systemctl mask weston.service
+#sudo systemctl mask wayland.service
+
+sudo systemctl disable bettercap
 
 # ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
@@ -113,7 +115,7 @@ else
 fi
 cd /var/WiFiChallengeLab-docker
 
-echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
+#echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
 echo 'Install WiFi tools'; sudo bash Attacker/installTools.sh
 
 cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
@@ -422,7 +424,7 @@ sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
 sudo systemctl restart gdm3
 
 # Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
-sudo systemctl disable avahi-daemon
+#sudo systemctl disable avahi-daemon
 sudo apt purge avahi-daemon -y
 sudo apt purge apport -y
 sudo apt purge whoopsie -y
