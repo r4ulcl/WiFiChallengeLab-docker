@@ -253,6 +253,9 @@ gsettings set org.gnome.shell favorite-apps \
 
 sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
 
+# Disable black screen
+gsettings set org.gnome.desktop.session idle-delay 0
+
 
 EOF
 
