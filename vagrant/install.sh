@@ -31,13 +31,14 @@ bak="/etc/default/grub.$(date +%F_%H%M%S).bak"
 cp /etc/default/grub "$bak"
 
 
-cat > /etc/default/grub <<EOF
+# Create a clean config
+cat | sudo tee /etc/default/grub >/dev/null <<'EOF'
 GRUB_DEFAULT=0
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
-GRUB_DISTRIBUTOR=\`lsb_release -i -s 2> /dev/null || echo Debian\`
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0"
-GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+GRUB_DISTRIBUTOR=$(lsb_release -i -s 2> /dev/null || echo Debian)
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
 EOF
 
 update-grub
@@ -49,6 +50,12 @@ sudo dpkg-reconfigure lightdm
 touch /home/user/.Xauthority
 chmod 600 /home/user/.Xauthority
 chown user:user /home/user/.Xauthority
+
+sudo apt update
+sudo apt install -y $(ubuntu-drivers devices | awk '/recommended/ {print $3}') firmware-misc-nonfree mesa-utils
+sudo apt purge libwayland-client0 libwayland-server0 libwayland-egl1 libwayland-cursor0 libwayland-bin -y
+sudo systemctl mask weston.service
+sudo systemctl mask wayland.service
 
 # ---------- user -------------------------------------------------------------
 sudo useradd -m -s /bin/bash user
@@ -328,8 +335,8 @@ sudo systemctl restart systemd-resolved
 # ---------- guest additions --------------------------------------------------
 if dmidecode | grep -iq vmware; then
   sudo apt-get install -y open-vm-tools-desktop
-#elif dmidecode | grep -iq virtualbox; then
-#  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
+elif dmidecode | grep -iq virtualbox; then
+  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
 fi
 
 #---------- Error wayland vbox --------------------------------------------------
@@ -348,7 +355,7 @@ fi
 if $is_vbox; then
   if grep -qE '^WaylandEnable=false' "$CONFIG_FILE"; then
     cp "$CONFIG_FILE" "$BACKUP_FILE"
-    sed -i 's/^WaylandEnable=false/#WaylandEnable=false/' "$CONFIG_FILE"
+    sed -i 's/^#\?WaylandEnable=.*/WaylandEnable=false/' "$CONFIG_FILE"
     echo "Commented WaylandEnable=false in $CONFIG_FILE"
   else
     echo "Line already commented or not present, nothing to do"
