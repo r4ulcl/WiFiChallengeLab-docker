@@ -184,7 +184,7 @@ if [ ! -d hashcat-6.0.0 ]; then
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
 
-/usr/local/bin/hashcat -b
+timeout 120s /usr/local/bin/hashcat -b
 
 ###############################################################################
 # John
