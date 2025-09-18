@@ -40,6 +40,10 @@ apt-get install -y nmap python3 python3-pip wpagui
 # Python 2 stack (needed by several legacy tools)
 apt-get install -y python2 python2-dev
 
+# Set python to python2 to old tools
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 1
+sudo update-alternatives --set python /usr/bin/python2
+
 ###############################################################################
 # EAP_buster
 ###############################################################################
@@ -123,6 +127,8 @@ if [ ! -d eaphammer ]; then
   python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl gevent netifaces
   wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini
 fi
+sudo ln -sf /usr/bin/python3 /usr/bin/python3.8
+pip3 install aioquic
 
 ###############################################################################
 # Hostapd‑wpe (patched 2.11)
@@ -177,6 +183,12 @@ if [ ! -d hashcat-6.0.0 ]; then
   ln -sf /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
+
+/usr/local/bin/hashcat -b
+
+###############################################################################
+# John
+###############################################################################
 
 cd "${TOOLS}"
 sudo apt-get -y install git build-essential libssl-dev zlib1g-dev yasm pkg-config libgmp-dev libpcap-dev libbz2-dev 
@@ -239,16 +251,25 @@ systemctl disable --now lighttpd
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
 cd airgeddon
-sed -i 's/^AIRGEDDON_AUTO_UPDATE=.*/AIRGEDDON_AUTO_UPDATE=false/' .airgeddonrc
+
+# Disable airgeddon auto-update
+sed -i '/^AIRGEDDON_AUTO_UPDATE=/c\AIRGEDDON_AUTO_UPDATE=false' .airgeddonrc
+sed -i '/^AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=/c\AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=false' .airgeddonrc
+
+# Plugins airgeddon
 cd plugins
-if [ ! -d airgeddon-plugins ]; then
-  git clone --depth 1 https://github.com/OscarAkaElvis/airgeddon-plugins.git
-  cp airgeddon-plugins/allchars_captiveportal/allchars_captiveportal.sh .
-  cp airgeddon-plugins/wpa3_online_attack/*.{sh,py} .
-  mkdir -p wpa_supplicant_binaries
-  cp airgeddon-plugins/wpa3_online_attack/wpa_supplicant_binaries/wpa_supplicant_amd64 ./wpa_supplicant_binaries/
-  rm -rf airgeddon-plugins
-fi
+git clone --depth 1 https://github.com/OscarAkaElvis/airgeddon-plugins.git
+cp airgeddon-plugins/allchars_captiveportal/allchars_captiveportal.sh .
+cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.sh .
+cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.py .
+mkdir wpa_supplicant_binaries
+cp airgeddon-plugins/wpa3_online_attack/wpa_supplicant_binaries/wpa_supplicant_amd64 ./wpa_supplicant_binaries/
+rm -rf airgeddon-plugins
+
+git clone --depth 1 https://github.com/Janek79ax/dragon-drain-wpa3-airgeddon-plugin.git
+cp dragon-drain-wpa3-airgeddon-plugin/wpa3_dragon_drain.sh .
+cp dragon-drain-wpa3-airgeddon-plugin/wpa3_dragon_drain_attack.py .
+rm -rf dragon-drain-wpa3-airgeddon-plugin
 
 # Bully
 wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/bully_1.1.+git20190923-0kali1_amd64.deb
@@ -299,7 +320,50 @@ fi
 cd "${TOOLS}"
 [ ! -d wpa_sycophant ] && git clone https://github.com/sensepost/wpa_sycophant
 cd wpa_sycophant && make -C wpa_supplicant -j "$(nproc)"
+
+cd "${TOOLS}"
 [ ! -d "${TOOLS}/berate_ap" ] && git clone https://github.com/sensepost/berate_ap
+
+# Find OpenSSL config directory
+CONF_DIR=$(openssl version -d | awk -F'"' '{print $2}')
+OPENSSL_CNF="$CONF_DIR/openssl.cnf"
+
+if [[ ! -f "$OPENSSL_CNF" ]]; then
+    echo "OpenSSL config not found at $OPENSSL_CNF"
+    echo "Please locate it manually (e.g., /etc/pki/tls/openssl.cnf)"
+    exit 1
+fi
+
+BACKUP="$OPENSSL_CNF.bak.$(date +%s)"
+
+# Backup the original
+cp "$OPENSSL_CNF" "$BACKUP"
+
+# Append legacy provider if missing
+if grep -q "\[legacy_sect\]" "$OPENSSL_CNF"; then
+    echo "Legacy provider already enabled in $OPENSSL_CNF"
+else
+    cat <<'EOF' >> "$OPENSSL_CNF"
+
+# Added to enable OpenSSL 3 legacy provider (needed for PEAP-MSCHAPv2)
+openssl_conf = openssl_init
+
+[openssl_init]
+providers = provider_sect
+
+[provider_sect]
+default = default_sect
+legacy  = legacy_sect
+
+[default_sect]
+activate = 1
+
+[legacy_sect]
+activate = 1
+EOF
+    echo "Legacy provider enabled. Backup saved to $BACKUP"
+fi
+
 
 ###############################################################################
 # mdk4
