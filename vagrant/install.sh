@@ -414,10 +414,23 @@ sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice
 sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
 sudo systemctl restart gdm3
 
+# Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
+sudo systemctl disable avahi-daemon
+sudo apt purge avahi-daemon -y
+sudo apt purge apport -y
+sudo apt purge whoopsie -y
+sudo apt purge gnome-calendar* -y
+sudo dpkg -l | awk '/^rc/ {print $2}' | xargs sudo apt purge -y
+sudo journalctl --vacuum-time=2d
+sudo journalctl --vacuum-size=100M
+
 # ---------- cleanup ----------------------------------------------------------
+sudo apt purge linux-image-5.15.0-153-generic linux-image-5.15.0-91-generic linux-image-generic
+sudo rm -rf /var/lib/snapd/cache/*
+
 rm -f /root/tools/eaphammer/wordlists/rockyou.txt{,.tar.gz} || true
 sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
-docker system prune -af
+docker system prune -af  --volumes
 sudo apt-get autoremove --purge -y
 
 echo "Zero‑fill to shrink image…"
