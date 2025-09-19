@@ -30,6 +30,10 @@ sudo systemctl stop packagekit
 sudo systemctl disable packagekit
 sudo systemctl mask packagekit
 
+sudo apt remove fwupd
+sudo systemctl disable NetworkManager-wait-online.service
+
+
 
 # Disable daily update check
 sudo systemctl disable --now apt-daily.timer apt-daily-upgrade.timer
@@ -48,7 +52,7 @@ GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR=$(lsb_release -i -s 2> /dev/null || echo Debian)
 # Keep splash for GUI, remove 'quiet' if you want to see boot logs
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc ipv6.disable=1"
 GRUB_CMDLINE_LINUX=""
 EOF
 
@@ -273,7 +277,7 @@ sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
 
 # Disable black screen
 gsettings set org.gnome.desktop.session idle-delay 0
-
+gsettings get com.ubuntu.update-notifier no-show-notifications
 
 EOF
 
@@ -358,6 +362,33 @@ for u in vagrant user; do
 done
 export PATH=$PATH:/sbin
 
+
+# -------- Enable autologin --------------------------
+USERNAME="user"
+GDM_CONFIG="/etc/gdm3/custom.conf"
+
+# Backup first
+sudo cp "$GDM_CONFIG" "$GDM_CONFIG.bak.$(date +%F-%T)"
+
+# Enable autologin settings in [daemon] section
+sudo sed -i "/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" "$GDM_CONFIG"
+
+# Make sure duplicates don't stack up
+sudo sed -i "s/^AutomaticLoginEnable=.*/AutomaticLoginEnable=true/" "$GDM_CONFIG"
+sudo sed -i "s/^AutomaticLogin=.*/AutomaticLogin=$USERNAME/" "$GDM_CONFIG"
+
+# Ensure Wayland is disabled
+sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' "$GDM_CONFIG"
+
+# If WaylandEnable line does not exist, add it
+if ! grep -q "^WaylandEnable=false" "$GDM_CONFIG"; then
+  sudo sed -i "/^\[daemon\]/a WaylandEnable=false" "$GDM_CONFIG"
+fi
+
+echo "Autologin enabled for $USERNAME and Wayland disabled. Reboot to apply."
+# https://forums.virtualbox.org/viewtopic.php?start=30&t=110879
+
+
 # ---------- debloat  -------------------------
 sudo apt-mark manual wireshark firefox
 
@@ -415,10 +446,6 @@ sudo systemctl reset-failed
 
 
 # ---------- cleanup ----------------------------------------------------------
-# https://forums.virtualbox.org/viewtopic.php?start=30&t=110879
-sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
-sudo systemctl restart gdm3
-
 # Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
 sudo apt purge gnome-calendar* -y
 sudo journalctl --vacuum-time=2d
