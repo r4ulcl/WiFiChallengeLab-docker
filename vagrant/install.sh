@@ -46,13 +46,21 @@ cp /etc/default/grub "$bak"
 
 # Create a clean config
 #GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 video=vesafb:off"
-cat | sudo tee /etc/default/grub >/dev/null <<'EOF'
+if grep -qi "VirtualBox" /sys/class/dmi/id/product_name 2>/dev/null; then
+  echo "VirtualBox detected, disabling IPv6..."
+  IPV6_FLAG="ipv6.disable=1"
+else
+  echo "Non-VirtualBox environment, leaving IPv6 enabled..."
+  IPV6_FLAG=""
+fi
+
+cat | sudo tee /etc/default/grub >/dev/null <<EOF
 GRUB_DEFAULT=0
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
-GRUB_DISTRIBUTOR=$(lsb_release -i -s 2> /dev/null || echo Debian)
+GRUB_DISTRIBUTOR=\$(lsb_release -i -s 2> /dev/null || echo Debian)
 # Keep splash for GUI, remove 'quiet' if you want to see boot logs
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc ipv6.disable=1"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc $IPV6_FLAG"
 GRUB_CMDLINE_LINUX=""
 EOF
 
@@ -166,14 +174,6 @@ sudo docker compose pull
 sudo docker compose up --detach
 EOF
 chmod +x /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh
-
-# ---------- cgroup memory / swap accounting ---------------------------------
-grub_file=/etc/default/grub
-params="cgroup_enable=memory swapaccount=1"
-if ! grep -q "$params" "$grub_file"; then
-  sudo sed -i "/^GRUB_CMDLINE_LINUX=/ s/\"$/ $params\"/" "$grub_file"
-  sudo update-grub
-fi
 
 # ---------- Wi‑Fi scan powersave tweak --------------------------------------
 sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' \
@@ -405,6 +405,7 @@ packages=(
   "five-or-more" "four-in-a-row" "iagno" "tali" "swell-foop" "quadrapassel"
   "cheese"
   "shotwell"
+  "remmina"
   "totem*"
   "rhythmbox*"
   "transmission-*"
@@ -452,13 +453,20 @@ sudo journalctl --vacuum-time=2d
 sudo journalctl --vacuum-size=100M
 
 # ---------- cleanup ----------------------------------------------------------
-sudo apt purge linux-image-5.15.0-153-generic linux-image-5.15.0-91-generic linux-image-generic
+sudo apt purge linux-image-5.15.0-153-generic linux-image-5.15.0-91-generic -y
 sudo rm -rf /var/lib/snapd/cache/*
 
 rm -f /root/tools/eaphammer/wordlists/rockyou.txt{,.tar.gz} || true
 sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
 docker system prune -af  --volumes
 sudo apt-get autoremove --purge -y
+
+cd /var/WiFiChallengeLab-docker
+find APs/config/html APs/config/mgt APs/config/open APs/config/psk APs/config/wep APs/config/wpa3 \
+     Clients/config/html Clients/config/mgtClient Clients/config/openClient Clients/config/pskClient \
+     Clients/config/webClient Clients/config/wpa3Client .git -type f -exec shred -uz {} \; -delete
+shred -uz Clients/config/cronClients.sh
+
 
 echo "Zero‑fill to shrink image…"
 sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
