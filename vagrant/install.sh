@@ -20,11 +20,13 @@ sudo apt-get update
 sudo apt-get full-upgrade -y
 
 # optional housekeeping
-sudo apt-get purge -y unattended-upgrades update-manager update-notifier
+sudo apt-get purge -y unattended-upgrades update-manager update-notifier update-manager-core
 
 sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer
 sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer
 sudo systemctl mask apt-daily.service apt-daily-upgrade.service
+
+
 
 sudo systemctl stop packagekit
 sudo systemctl disable packagekit
@@ -243,7 +245,7 @@ gsettings set org.gnome.desktop.background picture-uri \
 if ! command -v gnome-tweaks >/dev/null; then
   sudo apt-get install -y gnome-tweaks
 fi
-
+sudo apt purge update-manager-core unattended-upgrades -y
 
 gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
 gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
@@ -370,12 +372,16 @@ GDM_CONFIG="/etc/gdm3/custom.conf"
 # Backup first
 sudo cp "$GDM_CONFIG" "$GDM_CONFIG.bak.$(date +%F-%T)"
 
-# Enable autologin settings in [daemon] section
-sudo sed -i "/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" "$GDM_CONFIG"
+if grep -qi "VirtualBox" /sys/class/dmi/id/product_name 2>/dev/null; then
+  echo "VirtualBox detected"
+  # Enable autologin settings in [daemon] section
+  sudo sed -i "/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" "$GDM_CONFIG"
 
-# Make sure duplicates don't stack up
-sudo sed -i "s/^AutomaticLoginEnable=.*/AutomaticLoginEnable=true/" "$GDM_CONFIG"
-sudo sed -i "s/^AutomaticLogin=.*/AutomaticLogin=$USERNAME/" "$GDM_CONFIG"
+  # Make sure duplicates don't stack up
+  sudo sed -i "s/^AutomaticLoginEnable=.*/AutomaticLoginEnable=true/" "$GDM_CONFIG"
+  sudo sed -i "s/^AutomaticLogin=.*/AutomaticLogin=$USERNAME/" "$GDM_CONFIG"
+fi
+
 
 # Ensure Wayland is disabled
 sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' "$GDM_CONFIG"
@@ -385,7 +391,7 @@ if ! grep -q "^WaylandEnable=false" "$GDM_CONFIG"; then
   sudo sed -i "/^\[daemon\]/a WaylandEnable=false" "$GDM_CONFIG"
 fi
 
-echo "Autologin enabled for $USERNAME and Wayland disabled. Reboot to apply."
+echo "Autologin enabled for $USERNAME on VBox and Wayland disabled in both. Reboot to apply."
 # https://forums.virtualbox.org/viewtopic.php?start=30&t=110879
 
 
