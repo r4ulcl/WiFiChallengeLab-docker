@@ -22,6 +22,15 @@ sudo apt-get full-upgrade -y
 # optional housekeeping
 sudo apt-get purge -y unattended-upgrades update-manager update-notifier
 
+sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer
+sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer
+sudo systemctl mask apt-daily.service apt-daily-upgrade.service
+
+sudo systemctl stop packagekit
+sudo systemctl disable packagekit
+sudo systemctl mask packagekit
+
+
 # Disable daily update check
 sudo systemctl disable --now apt-daily.timer apt-daily-upgrade.timer
 sudo systemctl mask apt-daily.service apt-daily-upgrade.service
@@ -32,20 +41,22 @@ cp /etc/default/grub "$bak"
 
 
 # Create a clean config
+#GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 video=vesafb:off"
 cat | sudo tee /etc/default/grub >/dev/null <<'EOF'
 GRUB_DEFAULT=0
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR=$(lsb_release -i -s 2> /dev/null || echo Debian)
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+# Keep splash for GUI, remove 'quiet' if you want to see boot logs
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 video=vesafb:off no_timer_check clocksource=tsc"
 GRUB_CMDLINE_LINUX=""
 EOF
 
 update-grub
 update-initramfs -u
 
-sudo apt install lightdm
-sudo dpkg-reconfigure lightdm
+#sudo apt install lightdm
+#sudo dpkg-reconfigure lightdm
 
 touch /home/user/.Xauthority
 chmod 600 /home/user/.Xauthority
@@ -329,6 +340,7 @@ DNS=8.8.8.8 1.1.1.1
 EOF
 sudo systemctl enable systemd-resolved
 sudo systemctl restart systemd-resolved
+sudo systemctl disable dnsmasq
 
 
 # ---------- guest additions --------------------------------------------------
@@ -413,6 +425,14 @@ sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice
   cheese shotwell totem* rhythmbox* \
   transmission-* \
   yelp yelp-xsl gnome-user-docs ubuntu-docs
+
+
+# Clean services
+sudo systemctl stop bettercap.service
+sudo systemctl disable bettercap.service
+sudo rm -f /etc/systemd/system/bettercap.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed
 
 
 # ---------- cleanup ----------------------------------------------------------
