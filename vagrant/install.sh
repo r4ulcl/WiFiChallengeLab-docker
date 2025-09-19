@@ -422,7 +422,6 @@ sudo systemctl restart gdm3
 
 # Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
 sudo apt purge gnome-calendar* -y
-sudo dpkg -l | awk '/^rc/ {print $2}' | xargs sudo apt purge -y
 sudo journalctl --vacuum-time=2d
 sudo journalctl --vacuum-size=100M
 
