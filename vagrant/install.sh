@@ -48,7 +48,7 @@ GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR=$(lsb_release -i -s 2> /dev/null || echo Debian)
 # Keep splash for GUI, remove 'quiet' if you want to see boot logs
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 video=vesafb:off no_timer_check clocksource=tsc"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc"
 GRUB_CMDLINE_LINUX=""
 EOF
 
