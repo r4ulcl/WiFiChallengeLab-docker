@@ -58,12 +58,8 @@ update-initramfs -u
 #sudo apt install lightdm
 #sudo dpkg-reconfigure lightdm
 
-touch /home/user/.Xauthority
-chmod 600 /home/user/.Xauthority
-chown user:user /home/user/.Xauthority
 
 sudo apt update
-sudo apt install -y $(ubuntu-drivers devices | awk '/recommended/ {print $3}') firmware-misc-nonfree mesa-utils
 
 sudo systemctl disable bettercap
 
@@ -76,6 +72,10 @@ sudo usermod -aG sudo user
 echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/user
 sudo chmod 0440 /etc/sudoers.d/user
 
+
+touch /home/user/.Xauthority
+chmod 600 /home/user/.Xauthority
+chown user:user /home/user/.Xauthority
 # ---------- polkit tweaks ----------------------------------------------------
 # Allow user to scan WiFi
 cat <<'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla
@@ -181,6 +181,7 @@ sudo mkdir -p /opt/background/
 sudo cp WiFiChallengeLab.png /opt/background/
 
 sudo apt-get install -y jq
+sudo apt-get install -y libnotify-bin
 sudo wget -q https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
 
 # nzyme notification loop
@@ -350,28 +351,6 @@ elif dmidecode | grep -iq virtualbox; then
   sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
 fi
 
-#---------- Error wayland vbox --------------------------------------------------
-CONFIG_FILE="/etc/gdm3/custom.conf"
-BACKUP_FILE="${CONFIG_FILE}.$(date +%Y%m%d%H%M%S).bak"
-# Detect VirtualBox
-is_vbox=false
-if command -v systemd-detect-virt >/dev/null 2>&1; then
-  [[ "$(systemd-detect-virt --vm)" == "oracle" ]] && is_vbox=true
-fi
-
-if [[ $is_vbox == false && -f /sys/class/dmi/id/product_name ]]; then
-  grep -qi "VirtualBox" /sys/class/dmi/id/product_name && is_vbox=true
-fi
-
-if $is_vbox; then
-  if grep -qE '^WaylandEnable=false' "$CONFIG_FILE"; then
-    cp "$CONFIG_FILE" "$BACKUP_FILE"
-    sed -i 's/^WaylandEnable=false/#WaylandEnable=false/' "$CONFIG_FILE"
-    echo "Commented WaylandEnable=false in $CONFIG_FILE"
-  else
-    echo "Line already commented or not present, nothing to do"
-  fi
-fi
 # ---------- allow root X11 ---------------------------------------------------
 for u in vagrant user; do
   su -c 'xhost si:localuser:root' "$u"
@@ -418,7 +397,7 @@ sudo apt-get -y autoremove
 sudo apt-get -y autoremove
 sudo apt-get clean
 
-sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* snapd \
+sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* \
   aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
   mahjongg ace-of-penguins gnomine gbrainy \
   five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
