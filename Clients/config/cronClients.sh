@@ -89,8 +89,10 @@ do
 	#dhclien-wifichallenge -r $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
 	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
-	URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
-	curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' --data-raw "username=CORPO\god&password=$PHISHING_PASS" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null
+	if [ -n "$SERVER" ]; then
+		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
+		curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' --data-raw "username=CORPO\god&password=$PHISHING_PASS" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null
+	fi
 	# avoid spam
 	sleep 1
 done &
@@ -98,17 +100,34 @@ done &
 # Responder
 while :
 do
+	echo loop
 	# TODO Responder client connect
 	#dhclien-wifichallenge -r $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
 	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge-Responder
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-Responder | awk '{print $2}' | head -n 1`
 	# Responder ""vuln"" - 20 seconds because the SMB takes aprox 10 seconds in respond "Authentication error"
 	# In background to be sure
-	timeout -k 1 5s cpulimit --foreground --limit 30 -- /usr/bin/smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" 2>/dev/null >/dev/null &
-	#timeout -k 1 5s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill &
-	sleep 0.5
-	sudo timeout -k 1 20s cpulimit --foreground --limit 30 --timeout -k 1 20s smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H $SERVER 2> /dev/nill
-	sleep 1
+    if [ -n "$SERVER" ]; then
+		echo lock
+
+        # Acquire lock and run smbmap. This blocks if another smbmap is running.
+        (
+            # open fd 9 for lockfile and acquire exclusive lock (blocks until free)
+            flock 9
+			
+			# run smbmap under cpulimit and timeout (background)
+			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" >/dev/null 2>&1 &
+
+			sleep 0.5
+            # run smbmap under cpulimit and timeout (foreground)
+            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap \
+                -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" \
+                >/dev/null 2>&1
+        ) 9>/var/lock/smbmap.lock
+
+    else
+        sleep 1
+    fi
 done &
 
 # WEP traffic

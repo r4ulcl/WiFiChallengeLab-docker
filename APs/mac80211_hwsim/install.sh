@@ -67,4 +67,4 @@ echo "==> Reloading module …"
 sudo modprobe -r "${ALT_MODNAME}" 2>/dev/null || true
 #sudo insmod "${DEST_DIR}/${ALT_MODNAME}.ko" radios=2 channels=1
 
-echo "✅  Installed ${ALT_MODNAME}.ko  (version ${TARGET_VERSION})"
+echo "Installed ${ALT_MODNAME}.ko  (version ${TARGET_VERSION})"

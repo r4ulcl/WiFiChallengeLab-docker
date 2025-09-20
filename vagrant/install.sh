@@ -164,6 +164,7 @@ echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 sudo tee /root/restartWiFi.sh /home/user/restartWiFi.sh >/dev/null <<'EOF'
 #!/bin/bash
 cd /var/WiFiChallengeLab-docker
+sudo modprobe mac80211_hwsim_WiFiChallenge -r
 sudo docker compose restart aps
 sudo docker compose restart clients
 EOF
