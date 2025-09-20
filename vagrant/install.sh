@@ -188,8 +188,8 @@ sudo mkdir -p /opt/background/
 sudo cp WiFiChallengeLab.png /opt/background/
 
 sudo apt-get install -y jq
-sudo apt-get install -y libnotify-bin
-sudo wget -q https://www.nzyme.org/favicon.ico -O /opt/background/nzyme.ico
+sudo apt-get install -y dunst libnotify-bin dbus-user-session
+sudo wget -q https://www.nzyme.org/assets/img/favicon.png -O /opt/background/nzyme.ico
 
 # nzyme notification loop
 sudo tee /var/nzyme-alerts.sh >/dev/null <<'EOF'
@@ -201,7 +201,18 @@ fi
 trap "rm -f $PID_FILE; exit" SIGINT SIGTERM
 echo $$ >"$PID_FILE"
 
-LOG=/var/WiFiChallengeLab-docker/logsNzyme/alerts.log
+URL="http://localhost:22900/assets/static/favicon-32x32.png"
+DEST="/opt/background/nzyme.ico"
+if [ "$(curl -s -o /dev/null -w "%{http_code}" "$URL")" = "200" ]; then
+    wget -q -O "$DEST" "$URL"
+    echo "Downloaded to $DEST"
+fi
+
+sudo apt update
+sudo apt-get install -y dunst libnotify-bin dbus-user-session
+systemctl --user enable --now dunst.service
+
+LOG="/var/WiFiChallengeLab-docker/nzyme/nzyme-logs/logs/alerts.log"
 GREP="MULTIPLE_SIGNAL_TRACKS|BANDIT_CONTACT|DEAUTH_FLOOD|UNEXPECTED_FINGERPRINT|UNEXPECTED_BSSID|UNEXPECTED_CHANNEL"
 LAST=$(grep -E "$GREP" "$LOG" | tail -n1 | jq .message)
 
@@ -209,7 +220,7 @@ while true; do
   NOW=$(grep -E "$GREP" "$LOG" | tail -n1 | jq .message)
   if [ "$NOW" != "$LAST" ]; then
     LAST=$NOW
-    notify-send -i /opt/background/nzyme.ico "WIDS Nzyme" "$NOW"
+    notify-send -i /opt/background/nzyme.ico "WIDS Nzyme v1" "$NOW"
   fi
   sleep 0.1
 done
