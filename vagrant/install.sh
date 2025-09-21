@@ -191,6 +191,8 @@ sudo apt-get install -y jq
 sudo apt-get install -y dunst libnotify-bin dbus-user-session
 sudo wget -q https://www.nzyme.org/assets/img/favicon.png -O /opt/background/nzyme.ico
 
+chown -R user:user /opt/background/
+
 # nzyme notification loop
 sudo tee /var/nzyme-alerts.sh >/dev/null <<'EOF'
 #!/bin/bash
@@ -292,6 +294,10 @@ sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
 # Disable black screen
 gsettings set org.gnome.desktop.session idle-delay 0
 gsettings get com.ubuntu.update-notifier no-show-notifications
+
+# Alerts
+sudo apt install -y dunst libnotify-bin dbus-user-session jq curl wget
+
 
 EOF
 
