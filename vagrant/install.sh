@@ -131,9 +131,9 @@ sudo systemctl restart docker
 # ---------- WiFiChallengeLab -------------------------------------------------
 cd /var
 if [ "$DEV" = "True" ]; then
-  git clone -b dev http://10.10.20.10:3005/r4ulcl/WiFiChallengeLab-docker
+  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
 else
-  git clone http://10.10.20.10:3005/r4ulcl/WiFiChallengeLab-docker
+  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 fi
 cd /var/WiFiChallengeLab-docker
 
