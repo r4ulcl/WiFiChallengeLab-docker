@@ -179,4 +179,4 @@ To recreate the Docker files with the changes made, modify the docker-compose.ym
 
 ## License
 
-[GNU General Public License v3.0](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE)
+[GNU General Public License v3.0](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE) 
