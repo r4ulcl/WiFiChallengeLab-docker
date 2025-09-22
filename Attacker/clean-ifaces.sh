@@ -6,6 +6,6 @@ docker-compose down
 #sudo ip -all netns delete
 
 # Disable mac80211_hwsim
-sudo modprobe mac80211_hwsim -r
+sudo modprobe mac80211_hwsim_WiFiChallenge -r
 
 sudo systemctl restart systemd-networkd

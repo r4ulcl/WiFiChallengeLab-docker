@@ -1,0 +1,15 @@
+interface=$WLAN_MGT_MD5
+driver=nl80211
+ssid=$ESSID_MGT_MD5
+channel=44
+hw_mode=a
+
+ieee8021x=1
+eap_server=1
+eap_user_file=/root/mgt/hostapd_wpe_md5.eap_user
+
+wep_key_len_broadcast=13
+wep_key_len_unicast=13
+wep_rekey_period=600
+
+auth_algs=1

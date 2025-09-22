@@ -3,7 +3,18 @@ FROM debian
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
 
-#RUN date
+
+#opennds
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli  systemd
+
+RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz \
+	; tar  -xf libmicrohttpd-0.9.71.tar.gz ; cd libmicrohttpd-0.9.71 \
+	; ./configure --disable-https ; make ; sudo rm /usr/local/lib/libmicrohttpd* \
+	; sudo make install ; sudo rm /etc/ld.so.cache ; sudo ldconfig -v ; cd ..
+
+RUN cd ; wget wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
+       ; tar -xf v9.8.0 && cd openNDS-9.8.0 ; sudo touch /dev/log \
+       ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
 
 #Copy config files
 COPY config/open/ /root/open/
@@ -11,9 +22,7 @@ COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/wep/ /root/wep/
-
-#COPY var file
-COPY config/wlan_config_aps /root/
+COPY mac80211_hwsim/ /root/mac80211_hwsim_WiFiChallenge
 
 #Copy connectINET.sh
 COPY config/connectINET.sh /root/
@@ -24,8 +33,7 @@ COPY config/cronAPs.sh /root/
 #Update certs
 #RUN cd /root/certs/ ; make install
 
-COPY config/dnsmasq.conf /etc/dnsmasq.conf.tmp
-COPY config/interfaces /etc/network/interfaces.tmp
+COPY config/dnsmasq.conf.tmp /etc/dnsmasq.conf.tmp
 
 #Copy HTML files
 COPY config/html /var/www/html/
@@ -73,17 +81,6 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 COPY config/ns-inet.sh /root/
 COPY config/startAPs.sh /root/
 
-#opennds
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli  systemd
-
-RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz \
-	; tar  -xf libmicrohttpd-0.9.71.tar.gz ; cd libmicrohttpd-0.9.71 \
-	; ./configure --disable-https ; make ; sudo rm /usr/local/lib/libmicrohttpd* \
-	; sudo make install ; sudo rm /etc/ld.so.cache ; sudo ldconfig -v ; cd ..
-
-RUN cd ; wget wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
-       ; tar -xf v9.8.0 && cd openNDS-9.8.0 ; sudo touch /dev/log \
-       ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
 
 # autoremove any dependencies that are no longer needed
 RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean

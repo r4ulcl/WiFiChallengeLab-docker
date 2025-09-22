@@ -7,6 +7,10 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+# Install mac80211_hwsim_WiFiChallenge if missing
+cd /root/mac80211_hwsim_WiFiChallenge
+sudo bash install.sh
+
 # Returns all available interfaces, except "lo" and "veth*".
 available_interfaces()
 {
@@ -74,10 +78,10 @@ ip netns add $NS
 
 #if wlan < 20 (AP wifis) no executed 
 if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; then
-   sudo modprobe mac80211_hwsim -r
+   sudo modprobe mac80211_hwsim_WiFiChallenge -r
 fi
 
-sudo modprobe mac80211_hwsim radios=61
+sudo modprobe mac80211_hwsim_WiFiChallenge radios=61
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?

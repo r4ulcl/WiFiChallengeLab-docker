@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DESTROY=true
+#DESTROY=false
 HALT=true
 #HALT=false
 

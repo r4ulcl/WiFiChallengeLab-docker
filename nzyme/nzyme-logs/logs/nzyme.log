@@ -1,0 +1,47 @@
+00:11:26.201 [main] INFO  horse.wtf.nzyme.configuration.leader.LeaderConfigurationLoader - Skipping disabled alert callback of type [email].
+00:11:26.205 [main] ERROR horse.wtf.nzyme.configuration.leader.LeaderConfigurationLoader - Skipping unknown alert callback of type [file].
+00:11:34.096 [main] INFO  horse.wtf.nzyme.dot11.networks.sentry.Sentry - Loading <0> SSIDs from database into sentry table.
+00:11:34.702 [main] INFO  horse.wtf.nzyme.systemstatus.SystemStatus - Set system status [RUNNING].
+00:11:34.702 [main] INFO  horse.wtf.nzyme.systemstatus.SystemStatus - Set system status [TRAINING].
+00:11:34.785 [main] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Registering alert callback of type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback].
+00:11:37.591 [main] INFO  horse.wtf.nzyme.NzymeLeaderImpl - Training period ends in <300> seconds.
+00:11:37.593 [main] INFO  horse.wtf.nzyme.NzymeLeaderImpl - Initializing nzyme version: 1.2.2 built at [2021-12-10T15:28:11Z].
+00:11:37.690 [main] INFO  horse.wtf.nzyme.NzymeLeaderImpl - Active alerts: [UNEXPECTED_BSSID, UNEXPECTED_SSID, CRYPTO_CHANGE, UNEXPECTED_CHANNEL, UNEXPECTED_FINGERPRINT, BEACON_RATE_ANOMALY, MULTIPLE_SIGNAL_TRACKS, PWNAGOTCHI_ADVERTISEMENT, BANDIT_CONTACT, UNKNOWN_SSID, DEAUTH_FLOOD]
+00:11:37.692 [main] INFO  horse.wtf.nzyme.ouis.OUIManager - Fetching and updating list of OUIs from [http://standards-oui.ieee.org/oui/oui.txt]. This might take a moment.
+00:11:44.888 [main] INFO  horse.wtf.nzyme.ouis.OUIManager - Done! Now <33306> OUIs in memory. Download time <1798ms>, parsing time <4s>.
+00:11:45.485 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [OUIUpdater] for every <12 HOURS> with <12 HOURS> initial delay.
+00:11:45.486 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [MeasurementsWriter] for every <1 MINUTES> with <1 MINUTES> initial delay.
+00:11:45.487 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [MeasurementsCleaner] for every <10 MINUTES> with <0 MINUTES> initial delay.
+00:11:45.488 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [BeaconRateWriter] for every <60 SECONDS> with <60 SECONDS> initial delay.
+00:11:45.488 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [BeaconRateCleaner] for every <10 MINUTES> with <0 MINUTES> initial delay.
+00:11:45.489 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [SignalIndexHistogramWriter] for every <60 SECONDS> with <60 SECONDS> initial delay.
+00:11:45.490 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [SignalIndexHistogramCleaner] for every <10 MINUTES> with <0 MINUTES> initial delay.
+00:11:45.493 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [ProbeStatusMonitor] for every <1 MINUTES> with <1 MINUTES> initial delay.
+00:11:45.794 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [VersioncheckThread] for every <60 MINUTES> with <0 MINUTES> initial delay.
+00:11:45.795 [periodicals-4] INFO  horse.wtf.nzyme.periodicals.versioncheck.VersioncheckThread - Starting to check for most recent nzyme version.
+00:11:45.797 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [BeaconRateAnomalyAlertMonitor] for every <60 SECONDS> with <60 SECONDS> initial delay.
+00:11:45.879 [main] INFO  horse.wtf.nzyme.periodicals.PeriodicalManager - Scheduling [SignalTrackMonitor] for every <60 SECONDS> with <60 SECONDS> initial delay.
+00:11:47.037 [periodicals-4] INFO  horse.wtf.nzyme.periodicals.versioncheck.VersioncheckThread - Successfully completed version check. Everything seems up to date.
+00:11:49.184 [main] INFO  horse.wtf.nzyme.NzymeLeaderImpl - Started web interface and REST API at [http://0.0.0.0:22900/]. Access it at: [http://localhost:22900]
+00:11:49.192 [probe-loop-0] INFO  horse.wtf.nzyme.dot11.probes.Dot11MonitorProbe - Commencing 802.11 frame processing on [wlan5] ... (??_?)????? ? ? pew pew
+00:11:49.497 [probe-loop-0] INFO  horse.wtf.nzyme.dot11.probes.Dot11MonitorProbe - Building PCAP handle on interface [wlan5]
+00:11:49.679 [probe-loop-0] INFO  horse.wtf.nzyme.dot11.probes.Dot11MonitorProbe - PCAP handle for [broad-monitor-wlan5] acquired. Cycling through channels <1,2,3,4,5,6,7,8,9,10,11,12,13,36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,149,153,157,161,165>.
+00:11:53.385 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:54.380 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:54.480 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:54.585 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:54.689 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:57.257 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:11:59.395 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:12:01.780 [grizzly-http-server-0] INFO  horse.wtf.nzyme.rest.resources.authentication.AuthenticationResource - Creating session for user [admin]
+00:12:04.397 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:12:04.498 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:12:04.603 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:16:37.601 [pool-11-thread-1] INFO  horse.wtf.nzyme.NzymeLeaderImpl - Training period is over!
+00:16:37.601 [pool-11-thread-1] INFO  horse.wtf.nzyme.systemstatus.SystemStatus - Unset system status [TRAINING].
+00:23:16.233 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:23:16.263 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:23:16.303 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:23:18.224 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:23:18.303 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]
+00:23:18.395 [probe-loop-0] INFO  horse.wtf.nzyme.alerts.service.AlertsService - Triggering alert callback type [horse.wtf.nzyme.alerts.service.callbacks.FileCallback]

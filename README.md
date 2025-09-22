@@ -50,7 +50,13 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
   - More clients
 - Monitorization and detection using nzyme WIDS.
 
+Changes after v2.0 can be found at [Changelog.md](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/Changelog.md)
+
 ## Using WiFiChallenge Lab
+
+> [!WARNING]  
+> This compose file uses `network_mode: host`, `privileged: true` , **and mounts** `/lib/modules`, giving the container direct host-network access and full kernel privileges, run it only inside a VM, **never** on your physical host.
+
 
 ### Using the Virtual Machine (VM) from the Releases or Proton Drive
 
@@ -80,7 +86,7 @@ Clone the repository and set up Docker to manage Access Points (APs), clients, a
 ```bash
 git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
 cd WiFiChallengeLab-docker
-docker compose up -d --file docker-compose.yml
+docker compose --file docker-compose.yml up -d
 ```
 
 ### Create your own VM using vagrant
@@ -164,10 +170,6 @@ To recreate the Docker files with the changes made, modify the docker-compose.ym
 ### Certified WiFiChallenge Professional (CWP)
 
 [<img src="https://import.cdn.thinkific.com/937577/eyw5HcfFRMml6M8GoFq3_FONDO%20CURSO.png">](https://academy.wifichallenge.com/courses/certified-wifichallenge-professional-cwp)
-
-### Buymeacoffee
-
-[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-green.png">](https://www.buymeacoffee.com/r4ulcl)
 
 ## Collaborators
 

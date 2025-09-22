@@ -2,5 +2,5 @@ logsAP/*
 logsClient/*
 vagrant/.vagrant/*
 vagrant/date.log
-*.log
 .DS_Store
+nzyme/nzyme-logs/*

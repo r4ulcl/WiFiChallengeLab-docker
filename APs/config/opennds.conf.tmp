@@ -56,9 +56,11 @@ themespec_path /usr/lib/opennds/theme_user-email-login-basic.sh
 # Control access for users after authentication.
 FirewallRuleSet authenticated-users {
 #  FirewallRule passthrough all
+    FirewallRule allow tcp port 443
 }
 
 FirewallRuleSet preauthenticated-users {
+       FirewallRule block tcp port 443
 }
 
 # FirewallRuleSet: users-to-router
@@ -73,7 +75,7 @@ FirewallRuleSet users-to-router {
  # comment these out.
    FirewallRule allow tcp port 22
    FirewallRule allow tcp port 80
-   FirewallRule allow tcp port 443
+   # FirewallRule allow tcp port 443
 }
 
 trustedmaclist 80:18:44:BF:72:47,B0:72:BF:B0:78:48,B0:72:BF:44:B0:49

@@ -1,6 +1,6 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger iw sudo libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq curl kmod make g++ libnl-3-dev libnl-genl-3-dev wpasupplicant apache2 php iproute2 net-tools iptables
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger iw sudo libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq curl kmod make g++ libnl-3-dev libnl-genl-3-dev wpasupplicant apache2 php iproute2 net-tools iptables cpulimit
 
 RUN apt-get install -y inetutils-ping isc-dhcp-client
 
@@ -10,9 +10,6 @@ RUN apt-get install -y smbmap
 RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
 
 #RUN date
-
-#COPY var file
-COPY config/wlan_config_clients /root/
 
 #Copy config files
 COPY config/mgtClient/ /root/mgtClient/

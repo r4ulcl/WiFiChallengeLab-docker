@@ -17,11 +17,9 @@ envsubst_tmp (){
 set -a
 source /root/wlan_config_aps
 
-
-
 #Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
 
-envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
+#envsubst < /etc/network/interfaces.tmp > /etc/network/interfaces
 envsubst < /etc/dnsmasq.conf.tmp > /etc/dnsmasq.conf
 envsubst < /etc/opennds/opennds.conf.tmp > /etc/opennds/opennds.conf
 
@@ -73,10 +71,11 @@ macchanger -r $WLAN_OTHER2 >> /root/logs/macchanger.log # Other 2
 macchanger -r $WLAN_OTHER3 >> /root/logs/macchanger.log # Other 3
 macchanger -m $MAC_BRUTEFORCE $WLAN_BRUTEFORCE >> /root/logs/macchanger.log # WPA3 Bruteforce
 macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3 DOWNGRADE
+macchanger -m $MAC_6GHZ $WLAN_6GHZ >> /root/logs/macchanger.log # WPA3 6ghz
 #macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
 macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
-macchanger -m $MAC_MGT_LEGACY $WLAN_MGT_LEGACY >> /root/logs/macchanger.log # TODO
+macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
 
@@ -106,6 +105,10 @@ host_aps_apd /root/open/hostapd_open_hidden.conf > /root/logs/hostapd_open_hidde
 ip addr add $IP_PSK.1/24 dev $WLAN_PSK
 host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
 
+# PSK WPS
+ip addr add $IP_WPS.1/24 dev $WLAN_WPS
+host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
+
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
 host_aps_apd /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log &
@@ -123,6 +126,11 @@ host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_r
 # MGT TLS
 ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
 host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log &
+
+
+# MGT MD5
+ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
+host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGTTLS
@@ -148,6 +156,10 @@ host_aps_apd /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.
 ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
 host_aps_apd /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
 
+ip addr add $IP_6GHZ.1/24 dev $WLAN_6GHZ
+host_aps_apd /root/wpa3/hostapd_6ghz.conf > /root/logs/hostapd_6ghz.log &
+
+# WEP
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP
 host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log &
 

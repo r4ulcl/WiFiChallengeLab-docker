@@ -1,7 +1,6 @@
 services:
   aps:
     image: r4ulcl/wifichallengelab-aps:latest
-    #build: ./APs/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     #env_file: ./APs/.env
@@ -10,14 +9,16 @@ services:
       - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
+      - /usr/src:/usr/src:ro
       - ./logsAP:/root/logs/
+      - ./APs/config/wlan_config_aps:/root/wlan_config_aps
     healthcheck:
       test:
         - CMD-SHELL
         - ip netns exec ns-ap /bin/bash -c '
           curl -f -s http://localhost/login.php >/dev/null || exit 1;
           curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -ne 15 ]; then exit 3; fi'
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
       interval: 5s
       timeout: 5s
       retries: 3
@@ -27,7 +28,6 @@ services:
 
   clients:
     image: r4ulcl/wifichallengelab-clients:latest
-    #build: ./Clients/ # uncomment to build the Docker file
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     #env_file: ./Clients/.env
@@ -35,6 +35,7 @@ services:
       - ./certs:/root/certs/:ro
       - /lib/modules:/lib/modules
       - ./logsClient:/root/logs/
+      - ./Clients/config/wlan_config_clients:/root/wlan_config_clients
     depends_on:
       - aps
     network_mode: host #NETNS
@@ -53,16 +54,17 @@ services:
 
   nzyme:
     image: r4ulcl/wifichallengelab-nzyme:latest
-    #build: ./nzyme/
     restart: on-failure   # Automatically restart on failure
-    #env_file: ./nzyme/.env
-    env_file: .env
+    env_file:
+      - ./nzyme/.env
+      - ./APs/config/wlan_config_aps    
+    #env_file: .env
     container_name: WiFiChallengeLab-nzyme
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ./nzyme/nzyme.conf:/etc/nzyme/nzyme.conf.tmp #copy in entrypoint
-      - ./logsNzyme:/var/log/nzyme/
+      - ./nzyme/nzyme-logs/logs/:/var/log/nzyme/
+      - ./nzyme/nzyme.conf.tmp:/etc/nzyme/nzyme.conf.tmp
     #ports:
     #  - "22900:22900"
     depends_on:
@@ -70,9 +72,6 @@ services:
       - db
     environment:
       - TZ=Europe/Berlin
-      - DATABASE_URL=$DATABASE_URL
-      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
-      - EXTERNAL_URL=$EXTERNAL_URL
     network_mode: host #USB Antena
     healthcheck:
       test: ["CMD-SHELL", "curl -f -s http://localhost:22900 >/dev/null || exit 1"]
@@ -103,11 +102,8 @@ services:
       - aps
     environment:
       - TZ=Europe/Berlin
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASS
     volumes:
-      - ./nzyme/data:/var/lib/postgresql/data
+      - ./nzyme/nzyme-logs/data:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
     healthcheck:

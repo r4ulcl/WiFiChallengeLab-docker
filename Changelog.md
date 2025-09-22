@@ -1,5 +1,31 @@
 # Changelog WiFiChallengeLab
 
+## Changelog: WiFiChallengeLab v2.2
+
+### New Features:
+- WPS attack with custom mac80211_hwsim
+- EAP-MD5 AP and client vulnerable
+- SAE 6GHZ network
+
+### Modifications:
+- Parche mac80211_hwsim kernel module to fix injection and WPS attack
+- Update ubuntu to 22.04 and kernel version to 6.8
+- Remove clear text flags and some passwords from code
+
+### Bug Fixes:
+- Allow not `[ver=1]` in MGT eap_users
+- Fix OpenNDS TLS bypass and curl PSK only login if redirect to login
+
+### Documentation:
+- Update README.md change compose file line
+- Add warning to avoid using the dockers outside a VM
+
+### Miscellaneous Improvements:
+- Encode flags PHP
+- Reestructure Docker files and .env 
+- Modify all script to ubuntu 22.04 instead of 20.04
+
+
 ## Changelog: WiFiChallengeLab v2.1
 
 ### New Features:
