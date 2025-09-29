@@ -3,13 +3,14 @@ driver=nl80211
 ssid=$ESSID_MGT_MD5
 channel=44
 hw_mode=a
-
+wpa=2
+wpa_key_mgmt=WPA-EAP
+wpa_pairwise=TKIP CCMP
+rsn_pairwise=TKIP CCMP
+eapol_key_index_workaround=0
 ieee8021x=1
-eap_server=1
-eap_user_file=/root/mgt/hostapd_wpe_md5.eap_user
-
-wep_key_len_broadcast=13
-wep_key_len_unicast=13
-wep_rekey_period=600
-
+eap_server=0
+auth_server_addr=127.0.0.1
+auth_server_port=1812
+auth_server_shared_secret=W1f1Ch4ll3ng3.R4d1us
 auth_algs=1
