@@ -1,5 +1,15 @@
 Vagrant.configure('2') do |config|
 
+  # ---------- Helper for conditional sync excluding .vagrant ----------
+  def sync_all_except_vagrant(vm, base_host_path, base_guest_path)
+    Dir.glob(File.join(base_host_path, '*')).each do |path|
+      next unless File.directory?(path)
+      next if File.basename(path) == '.vagrant'
+      guest_subpath = File.join(base_guest_path, File.basename(path))
+      vm.vm.synced_folder path, guest_subpath
+    end
+  end
+
   # ---------- Hyper-V ----------
   config.vm.define 'hyper-v_vm' do |hv_vm|
     hv_vm.vm.box      = 'generic/debian12'
@@ -12,7 +22,9 @@ Vagrant.configure('2') do |config|
       hv.cpus      = 4
     end
 
-    # Step 1: install HWE kernel
+    # Sync all host folders except .vagrant
+    sync_all_except_vagrant(hv_vm, "../", "/media/WiFiChallenge")
+
     hv_vm.vm.provision 'shell',
       inline: <<-SHELL,
         set -e
@@ -22,10 +34,8 @@ Vagrant.configure('2') do |config|
       privileged: true,
       run: 'once'
 
-    # Step 2: coordinated reboot
     hv_vm.vm.provision 'reload', name: 'Reboot after HWE kernel'
 
-    # Step 3: main setup script
     hv_vm.vm.provision 'shell',
       path: './install.sh',
       privileged: true
@@ -41,6 +51,9 @@ Vagrant.configure('2') do |config|
       vb.cpus   = 4
       vb.name   = 'WiFiChallenge Lab v2.3'
     end
+
+    # Sync all host folders except .vagrant
+    sync_all_except_vagrant(vb_vm, "../", "/media/WiFiChallenge")
 
     vb_vm.vm.provision 'shell',
       inline: <<-SHELL,
@@ -72,6 +85,9 @@ Vagrant.configure('2') do |config|
       v.memory               = 4096
       v.cpus                 = 4
     end
+
+    # Sync all host folders except .vagrant
+    sync_all_except_vagrant(vmw_vm, "../", "/media/WiFiChallenge")
 
     vmw_vm.vm.provision 'shell',
       inline: <<-SHELL,
