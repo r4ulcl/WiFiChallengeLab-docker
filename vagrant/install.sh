@@ -1,53 +1,67 @@
 #!/bin/bash
-
 #set -euo pipefail
 
-# ---------- helper -----------------------------------------------------------
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+export DEBCONF_NOWARNINGS=yes
+export NEEDRESTART_MODE=a
+# pick one behavior for config files during upgrades
+export UCF_FORCE_CONFFNEW=1
+
+# ======================== Debian 12 (bookworm) install.sh =====================
+
+# ---------- helpers -----------------------------------------------------------
 edit_config_file() {
-    local file="$1" setting="$2" value="$3"
-    if grep -q "^${setting}" "$file"; then
-        sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "$file"
-    else
-        echo "${setting} \"${value}\";" | sudo tee -a "$file" >/dev/null
-    fi
+  local file="$1" setting="$2" value="$3"
+  if grep -q "^${setting}" "$file"; then
+    sudo sed -i "s|^${setting}.*|${setting} \"${value}\";|" "$file"
+  else
+    echo "${setting} \"${value}\";" | sudo tee -a "$file" >/dev/null
+  fi
 }
 
-DEV=False
-DEV=True
+require_pkg() {
+  # install if missing
+  if ! dpkg -s "$1" >/dev/null 2>&1; then
+    sudo apt-get install -y "$@"
+  fi
+}
 
-# ---------- base system ------------------------------------------------------
+DEB_CODENAME="bookworm"
+DEV=False
+#DEV=True
+
+# ---------- base system -------------------------------------------------------
 sudo apt-get update
-sudo apt-get full-upgrade -y
+#sudo apt-get full-upgrade -y
 
 # optional housekeeping
-sudo apt-get purge -y unattended-upgrades update-manager update-notifier update-manager-core
+sudo apt-get purge -y unattended-upgrades update-manager-core || true
 
-sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer
-sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer
-sudo systemctl mask apt-daily.service apt-daily-upgrade.service
+# Timezone
+sudo timedatectl set-timezone Europe/Madrid
 
+# tame apt timers if present
+sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+sudo systemctl mask apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
 
+# PackageKit exists on Debian GNOME
+sudo systemctl stop packagekit 2>/dev/null || true
+sudo systemctl disable packagekit 2>/dev/null || true
+sudo systemctl mask packagekit 2>/dev/null || true
 
-sudo systemctl stop packagekit
-sudo systemctl disable packagekit
-sudo systemctl mask packagekit
+sudo apt -y remove fwupd || true
+sudo systemctl disable NetworkManager-wait-online.service 2>/dev/null || true
 
-sudo apt remove fwupd
-sudo systemctl disable NetworkManager-wait-online.service
+# disable daily update check
+sudo systemctl disable --now apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+sudo systemctl mask apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
 
-
-
-# Disable daily update check
-sudo systemctl disable --now apt-daily.timer apt-daily-upgrade.timer
-sudo systemctl mask apt-daily.service apt-daily-upgrade.service
-
-# Fix error black screen on restart
+# ---------- boot tweaks -------------------------------------------------------
 bak="/etc/default/grub.$(date +%F_%H%M%S).bak"
-cp /etc/default/grub "$bak"
+sudo cp /etc/default/grub "$bak"
 
-
-# Create a clean config
-#GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 video=vesafb:off"
 if grep -qi "VirtualBox" /sys/class/dmi/id/product_name 2>/dev/null; then
   echo "VirtualBox detected, disabling IPv6..."
   IPV6_FLAG="ipv6.disable=1"
@@ -56,43 +70,38 @@ else
   IPV6_FLAG=""
 fi
 
-cat | sudo tee /etc/default/grub >/dev/null <<EOF
+sudo tee /etc/default/grub >/dev/null <<EOF
 GRUB_DEFAULT=0
 GRUB_TIMEOUT_STYLE=menu
 GRUB_TIMEOUT=1
 GRUB_DISTRIBUTOR=\$(lsb_release -i -s 2> /dev/null || echo Debian)
-# Keep splash for GUI, remove 'quiet' if you want to see boot logs
 GRUB_CMDLINE_LINUX_DEFAULT="quiet splash net.ifnames=0 biosdevname=0 no_timer_check clocksource=tsc $IPV6_FLAG"
 GRUB_CMDLINE_LINUX=""
 EOF
 
-update-grub
-update-initramfs -u
-
-#sudo apt install lightdm
-#sudo dpkg-reconfigure lightdm
-
+sudo update-grub
+sudo update-initramfs -u
 
 sudo apt update
 
-sudo systemctl disable bettercap
+# may not exist
+sudo systemctl disable bettercap 2>/dev/null || true
 
-# ---------- user -------------------------------------------------------------
-sudo useradd -m -s /bin/bash user
-echo "user:user" | sudo chpasswd
-# Add the user to the sudo group
+# ---------- user --------------------------------------------------------------
+if ! id -u user >/dev/null 2>&1; then
+  sudo useradd -m -s /bin/bash user
+  echo "user:user" | sudo chpasswd
+fi
 sudo usermod -aG sudo user
-# Configure sudo to not prompt for a password
-echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/user
-sudo chmod 0440 /etc/sudoers.d/user
+echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/zzz-user >/dev/null
+sudo chmod 0440 /etc/sudoers.d/zzz-user
 
+sudo touch /home/user/.Xauthority
+sudo chmod 600 /home/user/.Xauthority
+sudo chown user:user /home/user/.Xauthority
 
-touch /home/user/.Xauthority
-chmod 600 /home/user/.Xauthority
-chown user:user /home/user/.Xauthority
-# ---------- polkit tweaks ----------------------------------------------------
-# Allow user to scan WiFi
-cat <<'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla
+# ---------- polkit tweaks -----------------------------------------------------
+sudo tee /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla >/dev/null <<'EOF'
 [Allow Wifi Scan]
 Identity=unix-user:*
 Action=org.freedesktop.NetworkManager.wifi.scan;org.freedesktop.NetworkManager.enable-disable-wifi;org.freedesktop.NetworkManager.settings.modify.own;org.freedesktop.NetworkManager.settings.modify.system;org.freedesktop.NetworkManager.network-control
@@ -101,7 +110,7 @@ ResultInactive=yes
 ResultActive=yes
 EOF
 
-cat <<'EOF' | sudo tee /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla
+sudo tee /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla >/dev/null <<'EOF'
 [Allow Colord all Users]
 Identity=unix-user:*
 Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
@@ -110,55 +119,52 @@ ResultInactive=no
 ResultActive=yes
 EOF
 
-# ---------- Docker -----------------------------------------------------------
-# NOTE: apt‑key is deprecated in noble; switch to keyring file               ### 24.04 change
-sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-sudo install -m 0755 -d /etc/apt/keyrings                                 ### 24.04 change
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | \
-  sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg                      ### 24.04 change
-sudo chmod a+r /etc/apt/keyrings/docker.gpg                               ### 24.04 change
+# ---------- Docker for Debian 12 ---------------------------------------------
+require_pkg apt-transport-https ca-certificates curl gpg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-echo "deb [arch=$(dpkg --print-architecture) \
-signed-by=/etc/apt/keyrings/docker.gpg] \
-https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list >/dev/null                 ### 24.04 change
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian ${DEB_CODENAME} stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-sudo apt-get install -y bridge-utils
-sudo systemctl restart docker
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+require_pkg bridge-utils
+sudo systemctl enable --now docker
 
-# ---------- WiFiChallengeLab -------------------------------------------------
+# ---------- WiFiChallengeLab --------------------------------------------------
 cd /var
 if [ "$DEV" = "True" ]; then
-  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker
+  git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker || true
 else
-  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker
+  git clone https://github.com/r4ulcl/WiFiChallengeLab-docker || true
 fi
 cd /var/WiFiChallengeLab-docker
 
-echo 'Install RDP server'; sudo bash Attacker/installRDP.sh
-echo 'Install WiFi tools'; sudo bash Attacker/installTools.sh
+echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
+#echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
 
 cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
 rm -rf logs/ data/
-sudo apt-get install -y p7zip-full
+require_pkg p7zip-full
 7z x nzyme-logs.7z
 
 cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim/
 sudo bash install.sh
 
 cd /var/WiFiChallengeLab-docker
-sudo docker compose -f docker-compose-local.yml build
-docker tag wifichallengelab-docker-clients r4ulcl/wifichallengelab-clients
-docker tag wifichallengelab-docker-aps r4ulcl/wifichallengelab-aps
-docker tag wifichallengelab-docker-nzyme r4ulcl/wifichallengelab-nzyme
-docker image rm wifichallengelab-docker-nzyme wifichallengelab-docker-aps wifichallengelab-docker-clients
-
+if [ "$DEV" = "True" ]; then
+  sudo docker compose -f docker-compose-local.yml build
+  docker tag wifichallengelab-docker-clients r4ulcl/wifichallengelab-clients || true
+  docker tag wifichallengelab-docker-aps r4ulcl/wifichallengelab-aps || true
+  docker tag wifichallengelab-docker-nzyme r4ulcl/wifichallengelab-nzyme || true
+  docker image rm wifichallengelab-docker-nzyme wifichallengelab-docker-aps wifichallengelab-docker-clients || true
+fi
 sudo docker compose -f docker-compose.yml up -d
 # sudo docker compose -f docker-compose-minimal.yml up -d
 
-# ---------- flags & helper scripts ------------------------------------------
+# ---------- flags and helper scripts -----------------------------------------
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
 sudo tee /root/restartWiFi.sh /home/user/restartWiFi.sh >/dev/null <<'EOF'
@@ -168,7 +174,8 @@ sudo modprobe mac80211_hwsim_WiFiChallenge -r
 sudo docker compose restart aps
 sudo docker compose restart clients
 EOF
-chmod +x /root/restartWiFi.sh /home/user/restartWiFi.sh
+sudo chmod +x /root/restartWiFi.sh /home/user/restartWiFi.sh
+sudo chown user:user /home/user/restartWiFi.sh
 
 sudo tee /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh >/dev/null <<'EOF'
 #!/bin/bash
@@ -176,22 +183,20 @@ cd /var/WiFiChallengeLab-docker
 sudo docker compose pull
 sudo docker compose up --detach
 EOF
-chmod +x /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh
+sudo chmod +x /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh
+sudo chown user:user /home/user/updateWiFiChallengeLab.sh
 
-# ---------- Wi‑Fi scan powersave tweak --------------------------------------
-sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' \
-  /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
-sudo systemctl restart NetworkManager
+# ---------- Wi-Fi scan powersave tweak ---------------------------------------
+sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf || true
+sudo systemctl restart NetworkManager || true
 
-# ---------- misc assets ------------------------------------------------------
+# ---------- misc assets -------------------------------------------------------
 sudo mkdir -p /opt/background/
-sudo cp WiFiChallengeLab.png /opt/background/
+sudo cp /var/WiFiChallengeLab-docker/WiFiChallengeLab.png /opt/background/ || true
 
-sudo apt-get install -y jq
-sudo apt-get install -y dunst libnotify-bin dbus-user-session
-sudo wget -q https://www.nzyme.org/assets/img/favicon.png -O /opt/background/nzyme.ico
-
-chown -R user:user /opt/background/
+require_pkg jq dunst libnotify-bin dbus-user-session
+sudo wget -q https://www.nzyme.org/assets/img/favicon.png -O /opt/background/nzyme.ico || true
+sudo chown -R user:user /opt/background/
 
 # nzyme notification loop
 sudo tee /var/nzyme-alerts.sh >/dev/null <<'EOF'
@@ -206,8 +211,8 @@ echo $$ >"$PID_FILE"
 URL="http://localhost:22900/assets/static/favicon-32x32.png"
 DEST="/opt/background/nzyme.ico"
 if [ "$(curl -s -o /dev/null -w "%{http_code}" "$URL")" = "200" ]; then
-    wget -q -O "$DEST" "$URL"
-    echo "Downloaded to $DEST"
+  wget -q -O "$DEST" "$URL"
+  echo "Downloaded to $DEST"
 fi
 
 sudo apt update
@@ -230,49 +235,95 @@ EOF
 sudo chown user:user /var/nzyme-alerts.sh
 sudo chmod +x /var/nzyme-alerts.sh
 
-echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-user.log 2>&1 &' \
-  >> /home/user/.bashrc
-echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-vagrant.log 2>&1 &' \
-  >> /home/vagrant/.bashrc
+echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-user.log 2>&1 &' >> /home/user/.bashrc
+if id -u vagrant >/dev/null 2>&1; then
+  echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-vagrant.log 2>&1 &' >> /home/vagrant/.bashrc
+fi
 
-# ---------- monitor‑mode helper ---------------------------------------------
+# ---------- monitor mode helper ----------------------------------------------
 sudo tee /var/aux.sh >/dev/null <<'EOF'
 #!/bin/bash
 sudo ip link set wlan60 down
 sudo iw wlan60 set type monitor
 sudo ip link set wlan60 up
 EOF
-chmod +x /var/aux.sh
+sudo chmod +x /var/aux.sh
 
-# ---------- first‑login desktop setup ---------------------------------------
-cat <<'EOF' | sudo tee /etc/configureUser.sh
-# GNOME extensions kept identical to 20.04—still present in 24.04          ### 24.04 change
-gnome-extensions enable ubuntu-dock@ubuntu.com
-gnome-extensions enable ubuntu-appindicators@ubuntu.com
-gnome-extensions enable desktop-icons@csoriano
+# ---------- Install Gnome ----------------------------------------------------
+sudo apt-get install -y task-gnome-desktop gnome-shell-extension-dashtodock gnome-terminal nautilus
 
-gsettings set org.gnome.desktop.background picture-uri \
-  file:////opt/background/WiFiChallengeLab.png
 
-(crontab -l 2>/dev/null; echo "* * * * * bash /var/aux.sh") | crontab -
+# ---------- first login desktop setup ----------------------------------------
+sudo tee /etc/configureUser.sh >/dev/null <<'EOF'
+#!/bin/bash
+set -e
 
-if ! command -v gnome-tweaks >/dev/null; then
-  sudo apt-get install -y gnome-tweaks
+echo "[INFO] Configuring Ubuntu-like GNOME experience..."
+
+# Wait for user DBus to be ready
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+  eval "$(dbus-launch --sh-syntax)"
 fi
-sudo apt purge update-manager-core unattended-upgrades -y
 
-gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark"
-gsettings set org.gnome.desktop.interface icon-theme "Adwaita"
+# Ensure required packages are installed
+sudo apt-get install -y gnome-shell-extension-dashtodock gnome-tweaks dconf-cli
 
-sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/
+# Background wallpaper
+sudo mkdir -p /opt/background
+sudo cp /var/WiFiChallengeLab-docker/WiFiChallengeLab.png /opt/background/ || true
+gsettings set org.gnome.desktop.background picture-uri file:///opt/background/WiFiChallengeLab.png
+
+# Dark theme and Adwaita icons
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
+gsettings set org.gnome.desktop.interface icon-theme 'Adwaita'
+
+# Disable screen blank / power saving
+gsettings set org.gnome.desktop.session idle-delay 0
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing'
+
+# Ubuntu-style dock (left side, auto-hide, large icons)
+gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
+gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
+gsettings set org.gnome.shell.extensions.dash-to-dock autohide true
+gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 48
+gsettings set org.gnome.shell.extensions.dash-to-dock show-trash true
+gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts true
+gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'focus-or-previews'
+
+# Left bar
+gnome-extensions enable dash-to-dock@micxgx.gmail.com
+gsettings set org.gnome.shell.extensions.dash-to-dock dock-fixed true
+gsettings set org.gnome.shell.extensions.dash-to-dock autohide false
+
+# Dark mode
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+# add minimze,maximize
+gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
+
+
+# Favorite apps on the dock
+gsettings set org.gnome.shell favorite-apps "[
+  'org.gnome.Terminal.desktop',
+  'firefox-esr.desktop',
+  'org.wireshark.Wireshark.desktop',
+  'org.gnome.Nautilus.desktop',
+  'gnome-control-center.desktop'
+]"
+
+# Add WiFiChallenge background and CA certificate
+sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ 2>/dev/null || true
 sudo update-ca-certificates
 
-if ! command -v firefox >/dev/null; then
-  sudo apt-get install -y firefox
+# Launch Firefox ESR once to create profile and trust certificate
+if ! command -v firefox-esr >/dev/null; then
+  sudo apt-get install -y firefox-esr
 fi
 
-firefox &
+firefox-esr & disown
 sleep 10
+
 CA=/var/WiFiChallengeLab-docker/certs/ca.crt
 PROFILE_DIR=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' -print -quit)
 if [ -n "$PROFILE_DIR" ]; then
@@ -280,38 +331,47 @@ if [ -n "$PROFILE_DIR" ]; then
   certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA"
 fi
 
+# Ensure tools are installed and appear in Activities
+sudo apt-get install -y gnome-terminal wireshark nautilus gnome-control-center
+
+# Create .desktop launchers if missing
 mkdir -p ~/.local/share/applications
-cp /var/lib/snapd/desktop/applications/firefox_firefox.desktop ~/.local/share/applications/
-update-desktop-database ~/.local/share/applications/
+update-desktop-database ~/.local/share/applications || true
 
+# Auto-run WiFiChallengeLab monitor script
+if ! grep -q "nzyme-alerts" ~/.bashrc; then
+  echo 'nohup bash /var/nzyme-alerts.sh >/tmp/nzyme-alerts-user.log 2>&1 &' >> ~/.bashrc
+fi
+
+# Set Ubuntu-like GNOME behavior
+gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
+gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.6
+gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
+gsettings set org.gnome.shell.extensions.dash-to-dock unity-backlit-items true
+
+# Ensure autologin user has privileges
+sudo usermod -aG sudo user
+
+# Clean up triggers for first login
 sudo rm -f /var/WiFiChallengeLab-docker/zerofile 2>/dev/null
-sed -i '/bash \/etc\/configureUser.sh/d' ~/.bashrc
-gsettings set org.gnome.shell favorite-apps \
-"['firefox_firefox.desktop', 'org.gnome.Nautilus.desktop', 'org.wireshark.Wireshark.desktop', 'org.gnome.Terminal.desktop', 'gnome-control-center.desktop']"
+sed -i '/bash \/etc\/configureUser.sh/d' ~/.bashrc || true
 
-sudo sed -i '/media_WiFiChallenge.*vboxsf/d' /etc/fstab
-
-# Disable black screen
-gsettings set org.gnome.desktop.session idle-delay 0
-gsettings get com.ubuntu.update-notifier no-show-notifications
-
-# Alerts
-sudo apt install -y dunst libnotify-bin dbus-user-session jq curl wget
-
-
+echo "[INFO] Ubuntu-like GNOME setup applied!"
 EOF
 
-echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
 echo 'bash /etc/configureUser.sh' >> /home/user/.bashrc
+if id -u vagrant >/dev/null 2>&1; then
+  echo 'bash /etc/configureUser.sh' >> /home/vagrant/.bashrc
+fi
 
-# ---------- SSH password auth (unchanged) -----------------------------------
+# ---------- SSH password auth -------------------------------------------------
 sudo sed -i -E 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
-sudo systemctl restart ssh
+sudo systemctl restart ssh || sudo systemctl restart sshd || true
 
-# ---------- Firefox policies -------------------------------------------------
-sudo mkdir -p /etc/firefox/policies
+# ---------- Firefox ESR policies --------------------------------------------
+sudo mkdir -p /usr/lib/firefox-esr/distribution
 
-sudo tee /etc/firefox/policies/policies.json >/dev/null <<'EOF'
+sudo tee /usr/lib/firefox-esr/distribution/policies.json >/dev/null <<'EOF'
 {
   "policies": {
     "Homepage": {
@@ -323,7 +383,8 @@ sudo tee /etc/firefox/policies/policies.json >/dev/null <<'EOF'
 }
 EOF
 
-# ---------- docker health watchdog ------------------------------------------
+
+# ---------- docker health watchdog -------------------------------------------
 SCRIPT=/usr/local/bin/monitor-health.sh
 SERVICE=/etc/systemd/system/monitor-health.service
 
@@ -332,10 +393,10 @@ sudo tee "$SCRIPT" >/dev/null <<'EOF'
 while true; do
   for c in $(docker ps --filter "health=unhealthy" --format "{{.Names}}"); do
     sleep 30
-    docker ps --filter "name=$c" --filter "health=unhealthy" | grep -q "$c" && {
+    if docker ps --filter "name=$c" --filter "health=unhealthy" --format "{{.Names}}" | grep -qx "$c"; then
       echo "$(date) restarting $c"
       docker restart "$c"
-    }
+    fi
   done
   sleep 30
 done
@@ -356,72 +417,61 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now monitor-health.service
 
-# ---------- DNS resolver tweaks ---------------------------------------------
-sudo mkdir /etc/systemd/resolved.conf.d/
+# ---------- DNS resolver tweaks ----------------------------------------------
+sudo mkdir -p /etc/systemd/resolved.conf.d/
 RESOLV='/etc/systemd/resolved.conf.d/dns_servers.conf'
 sudo tee "$RESOLV" >/dev/null <<EOF
 [Resolve]
 DNS=8.8.8.8 1.1.1.1
 EOF
-sudo systemctl enable systemd-resolved
-sudo systemctl restart systemd-resolved
-sudo systemctl disable dnsmasq
+sudo systemctl enable systemd-resolved || true
+sudo systemctl restart systemd-resolved || true
+sudo systemctl disable dnsmasq 2>/dev/null || true
 
-
-# ---------- guest additions --------------------------------------------------
-if dmidecode | grep -iq vmware; then
-  sudo apt-get install -y open-vm-tools-desktop
-elif dmidecode | grep -iq virtualbox; then
-  sudo apt-get install -y virtualbox-guest-additions-iso virtualbox-guest-x11
+# ---------- guest additions ---------------------------------------------------
+if command -v dmidecode >/dev/null 2>&1; then
+  if dmidecode | grep -iq vmware; then
+    sudo apt-get install -y open-vm-tools-desktop
+  elif dmidecode | grep -iq virtualbox; then
+    sudo apt-get install -y virtualbox-guest-utils virtualbox-guest-x11
+  fi
 fi
 
-# ---------- allow root X11 ---------------------------------------------------
+# ---------- allow root X11 ----------------------------------------------------
 for u in vagrant user; do
-  su -c 'xhost si:localuser:root' "$u"
-  echo 'xhost si:localuser:root >/dev/null 2>&1' >> "/home/$u/.bashrc"
+  if id -u "$u" >/dev/null 2>&1; then
+    su - "$u" -c 'xhost si:localuser:root' || true
+    echo 'xhost si:localuser:root >/dev/null 2>&1' >> "/home/$u/.bashrc"
+  fi
 done
 export PATH=$PATH:/sbin
 
-
-# -------- Enable autologin --------------------------
+# ---------- Autologin on VBox -------------------------------------------------
 USERNAME="user"
 GDM_CONFIG="/etc/gdm3/custom.conf"
-
-# Backup first
-sudo cp "$GDM_CONFIG" "$GDM_CONFIG.bak.$(date +%F-%T)"
+sudo cp "$GDM_CONFIG" "$GDM_CONFIG.bak.$(date +%F-%T)" 2>/dev/null || true
 
 if grep -qi "VirtualBox" /sys/class/dmi/id/product_name 2>/dev/null; then
-  echo "VirtualBox detected"
-  # Enable autologin settings in [daemon] section
   sudo sed -i "/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" "$GDM_CONFIG"
-
-  # Make sure duplicates don't stack up
   sudo sed -i "s/^AutomaticLoginEnable=.*/AutomaticLoginEnable=true/" "$GDM_CONFIG"
   sudo sed -i "s/^AutomaticLogin=.*/AutomaticLogin=$USERNAME/" "$GDM_CONFIG"
 fi
 
-
-# Ensure Wayland is disabled
 sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' "$GDM_CONFIG"
-
-# If WaylandEnable line does not exist, add it
 if ! grep -q "^WaylandEnable=false" "$GDM_CONFIG"; then
   sudo sed -i "/^\[daemon\]/a WaylandEnable=false" "$GDM_CONFIG"
 fi
 
-echo "Autologin enabled for $USERNAME on VBox and Wayland disabled in both. Reboot to apply."
-# https://forums.virtualbox.org/viewtopic.php?start=30&t=110879
+echo "Autologin enabled for $USERNAME on VBox and Wayland disabled. Reboot to apply."
 
-
-# ---------- debloat  -------------------------
-sudo apt-mark manual wireshark firefox
+# ---------- debloat -----------------------------------------------------------
+sudo apt-mark manual wireshark firefox-esr || true
 
 packages=(
   "thunderbird*"
   "libreoffice-*"
-  "snapd"
   "aisleriot"
-  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-todo" "gnome-robots"
+  "gnome-mahjongg" "gnome-mines" "gnome-sudoku" "gnome-robots"
   "mahjongg"
   "ace-of-penguins"
   "gnomine"
@@ -434,64 +484,45 @@ packages=(
   "rhythmbox*"
   "transmission-*"
   "yelp" "yelp-xsl"
-  "gnome-user-docs" "ubuntu-docs"
+  "gnome-user-docs"
 )
-
 for pkg in "${packages[@]}"; do
   echo "Purging $pkg ..."
   if sudo apt-get -y purge "$pkg"; then
     echo "Removed $pkg"
   else
-    echo "Could not remove $pkg (not installed or dependency problem)"
+    echo "Could not remove $pkg"
   fi
 done
-
-# Clean up any orphaned dependencies that are left behind.
-sudo apt-get -y autoremove
-
 
 sudo apt-get -y autoremove
 sudo apt-get clean
 
-sudo apt-get -y autoremove --purge ubuntu-web-launchers thunderbird* libreoffice-* \
-  aisleriot gnome-{mahjongg,mines,sudoku,todo,robots} \
-  mahjongg ace-of-penguins gnomine gbrainy \
-  five-or-more four-in-a-row iagno tali swell-foop quadrapassel \
-  cheese shotwell totem* rhythmbox* \
-  transmission-* \
-  yelp yelp-xsl gnome-user-docs ubuntu-docs
-
-
-# Clean services
-sudo systemctl stop bettercap.service
-sudo systemctl disable bettercap.service
-sudo rm -f /etc/systemd/system/bettercap.service
+# clean services that might exist
+sudo systemctl stop bettercap.service 2>/dev/null || true
+sudo systemctl disable bettercap.service 2>/dev/null || true
+sudo rm -f /etc/systemd/system/bettercap.service 2>/dev/null || true
 sudo systemctl daemon-reload
-sudo systemctl reset-failed
+sudo systemctl reset-failed || true
 
-
-# ---------- cleanup ----------------------------------------------------------
-# Remove unused programms - (Avahi is for mDNS, Apport is crash reporting, Whoopsie is error reporting.)
-sudo apt purge gnome-calendar* -y
+# ---------- cleanup -----------------------------------------------------------
+sudo apt purge -y gnome-calendar* || true
 sudo journalctl --vacuum-time=2d
 sudo journalctl --vacuum-size=100M
 
-# ---------- cleanup ----------------------------------------------------------
-sudo apt purge linux-image-5.15.0-153-generic linux-image-5.15.0-91-generic -y
-sudo rm -rf /var/lib/snapd/cache/*
+sudo rm -rf /var/lib/snapd/cache/* 2>/dev/null || true
 
 rm -f /root/tools/eaphammer/wordlists/rockyou.txt{,.tar.gz} || true
 sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
-docker system prune -af  --volumes
+docker system prune -af --volumes || true
 sudo apt-get autoremove --purge -y
 
-cd /var/WiFiChallengeLab-docker
+cd /var/WiFiChallengeLab-docker || exit 0
 find APs/config/html APs/config/mgt APs/config/open APs/config/psk APs/config/wep APs/config/wpa3 \
      Clients/config/html Clients/config/mgtClient Clients/config/openClient Clients/config/pskClient \
      Clients/config/webClient Clients/config/wpa3Client .git -type f -exec shred -uz {} \; -delete
-shred -uz Clients/config/cronClients.sh
+shred -uz Clients/config/cronClients.sh || true
 
-
-echo "Zero‑fill to shrink image…"
-sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+echo "Zero fill to shrink image..."
+#sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
 sudo rm -f /tmp/zerofile
