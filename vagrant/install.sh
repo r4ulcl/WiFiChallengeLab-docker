@@ -143,7 +143,7 @@ fi
 cd /var/WiFiChallengeLab-docker
 
 echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
-#echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
+echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
 
 cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
 rm -rf logs/ data/
@@ -272,6 +272,7 @@ sudo apt-get install -y gnome-shell-extension-dashtodock gnome-tweaks dconf-cli
 sudo mkdir -p /opt/background
 sudo cp /var/WiFiChallengeLab-docker/WiFiChallengeLab.png /opt/background/ || true
 gsettings set org.gnome.desktop.background picture-uri file:///opt/background/WiFiChallengeLab.png
+gsettings set org.gnome.desktop.background picture-uri-dark 'file:///opt/background/WiFiChallengeLab.png'
 
 # Dark theme and Adwaita icons
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
@@ -418,16 +419,9 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now monitor-health.service
 
 # ---------- DNS resolver tweaks ----------------------------------------------
-sudo mkdir -p /etc/systemd/resolved.conf.d/
-RESOLV='/etc/systemd/resolved.conf.d/dns_servers.conf'
-sudo tee "$RESOLV" >/dev/null <<EOF
-[Resolve]
-DNS=8.8.8.8 1.1.1.1
-EOF
-sudo systemctl enable systemd-resolved || true
-sudo systemctl restart systemd-resolved || true
-sudo systemctl disable dnsmasq 2>/dev/null || true
-
+sudo bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
+sudo bash -c 'echo "nameserver 1.1.1.1" >> /etc/resolv.conf'
+sudo systemctl  disable dnsmasq
 # ---------- guest additions ---------------------------------------------------
 if command -v dmidecode >/dev/null 2>&1; then
   if dmidecode | grep -iq vmware; then
@@ -446,23 +440,59 @@ for u in vagrant user; do
 done
 export PATH=$PATH:/sbin
 
-# ---------- Autologin on VBox -------------------------------------------------
+# ---------- Autologin with GDM3 on Debian ----------
 USERNAME="user"
-GDM_CONFIG="/etc/gdm3/custom.conf"
-sudo cp "$GDM_CONFIG" "$GDM_CONFIG.bak.$(date +%F-%T)" 2>/dev/null || true
 
-if grep -qi "VirtualBox" /sys/class/dmi/id/product_name 2>/dev/null; then
-  sudo sed -i "/^\[daemon\]/a AutomaticLoginEnable=true\nAutomaticLogin=$USERNAME" "$GDM_CONFIG"
-  sudo sed -i "s/^AutomaticLoginEnable=.*/AutomaticLoginEnable=true/" "$GDM_CONFIG"
-  sudo sed -i "s/^AutomaticLogin=.*/AutomaticLogin=$USERNAME/" "$GDM_CONFIG"
+# Primary config used by Debian
+GDM_CONF="/etc/gdm3/daemon.conf"
+sudo mkdir -p /etc/gdm3
+sudo touch "$GDM_CONF"
+
+# Backup once per run
+sudo cp "$GDM_CONF" "$GDM_CONF.bak.$(date +%F-%T)" 2>/dev/null || true
+
+# Ensure [daemon] section exists
+if ! grep -q '^\[daemon\]' "$GDM_CONF"; then
+  echo "[daemon]" | sudo tee -a "$GDM_CONF" >/dev/null
 fi
 
-sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' "$GDM_CONFIG"
-if ! grep -q "^WaylandEnable=false" "$GDM_CONFIG"; then
-  sudo sed -i "/^\[daemon\]/a WaylandEnable=false" "$GDM_CONFIG"
-fi
+# Replace settings inside [daemon] or add them if missing
+sudo awk -v user="$USERNAME" '
+BEGIN { insec=0; wrote=0 }
+{
+  if ($0 ~ /^\[daemon\]/) { print; insec=1; next }
+  if (insec && $0 ~ /^\[/) {
+    if (!wrote) {
+      print "AutomaticLoginEnable=true"
+      print "AutomaticLogin=" user
+      print "WaylandEnable=false"
+      wrote=1
+    }
+    insec=0
+  }
+  if (insec) {
+    # Drop any prior conflicting keys in the daemon section
+    if ($0 ~ /^(#\s*)?AutomaticLoginEnable\s*=/) next
+    if ($0 ~ /^(#\s*)?AutomaticLogin\s*=/) next
+    if ($0 ~ /^(#\s*)?WaylandEnable\s*=/) next
+  }
+  print
+}
+END {
+  if (insec && !wrote) {
+    print "AutomaticLoginEnable=true"
+    print "AutomaticLogin=" user
+    print "WaylandEnable=false"
+  }
+}
+' "$GDM_CONF" | sudo tee "$GDM_CONF.tmp" >/dev/null && sudo mv "$GDM_CONF.tmp" "$GDM_CONF"
 
-echo "Autologin enabled for $USERNAME on VBox and Wayland disabled. Reboot to apply."
+# Make sure GDM3 is enabled and pick Xorg
+sudo systemctl enable gdm3 || true
+# If Wayland is still active via vendor defaults, this line keeps it off
+sudo sed -i -E 's/^#?\s*WaylandEnable\s*=.*/WaylandEnable=false/' "$GDM_CONF"
+
+echo "GDM3 autologin enabled for $USERNAME and Wayland disabled. Reboot to apply."
 
 # ---------- debloat -----------------------------------------------------------
 sudo apt-mark manual wireshark firefox-esr || true
@@ -524,5 +554,5 @@ find APs/config/html APs/config/mgt APs/config/open APs/config/psk APs/config/we
 shred -uz Clients/config/cronClients.sh || true
 
 echo "Zero fill to shrink image..."
-#sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
 sudo rm -f /tmp/zerofile
