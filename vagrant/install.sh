@@ -142,9 +142,6 @@ else
 fi
 cd /var/WiFiChallengeLab-docker
 
-echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
-echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
-
 cd /var/WiFiChallengeLab-docker/nzyme/nzyme-logs/
 rm -rf logs/ data/
 require_pkg p7zip-full
@@ -515,6 +512,22 @@ packages=(
   "transmission-*"
   "yelp" "yelp-xsl"
   "gnome-user-docs"
+  "gnome-2048"
+  "gnome-chess"
+  "gnome-contacts"
+  "gnome-klotski"
+  "gnome-maps"
+  "gnome-music"
+  "gnome-nibbles"
+  "gnome-taquin"
+  "gnome-tetravex"
+  "gnome-weather"
+  "hitori"
+  "hoichess"
+  "lightsoff"
+  "simple-scan"
+  "gnome-sound-recorder"
+  "zutty"
 )
 for pkg in "${packages[@]}"; do
   echo "Purging $pkg ..."
@@ -524,6 +537,9 @@ for pkg in "${packages[@]}"; do
     echo "Could not remove $pkg"
   fi
 done
+
+echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
+echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
 
 sudo apt-get -y autoremove
 sudo apt-get clean
