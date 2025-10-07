@@ -48,6 +48,8 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 service apache2 start > /root/logs/apache2.log 2>&1 &
 
+freeradius -f -l /var/log/freeradius/radius.log &
+
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
 #F0:9F:C2:71 ubiquiti

@@ -1,7 +1,7 @@
 FROM debian
 #FROM kalilinux/kali-rolling
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget freeradius
 
 
 #opennds
@@ -23,6 +23,17 @@ COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/wep/ /root/wep/
 COPY mac80211_hwsim/ /root/mac80211_hwsim_WiFiChallenge
+
+#Copy freeradius files
+COPY config/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
+COPY config/freeradius/default /etc/freeradius/3.0/sites-enabled/default
+RUN rm -f /etc/freeradius/3.0/sites-enabled/inner-tunnel
+COPY config/freeradius/eap /etc/freeradius/3.0/mods-enabled/eap
+COPY config/freeradius/users /etc/freeradius/3.0/mods-config/files/users
+COPY config/freeradius/files /etc/freeradius/3.0/mods-available/files
+
+#Expose freeradius port
+EXPOSE 1812/udp
 
 #Copy connectINET.sh
 COPY config/connectINET.sh /root/

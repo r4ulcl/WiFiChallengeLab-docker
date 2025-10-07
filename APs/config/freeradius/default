@@ -1,0 +1,23 @@
+server default {
+	listen {
+		type = auth
+		ipv4addr = *
+		port = 0
+		limit {
+			max_connections = 16
+			lifetime = 0
+			idle_timeout = 30
+			}
+		}
+
+	authorize {
+		eap
+		files
+	}
+
+	authenticate {
+		Auth-Type EAP {
+			eap
+		}
+	}
+}
