@@ -1,24 +1,52 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:latest
-    restart: unless-stopped
+    image: r4ulcl/wifichallengelab-aps:dev
+    restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
-    env_file: ./APs/.env
+    #env_file: ./APs/.env
     volumes:
+      - ./certs:/root/certs/:ro
+      - ./certs:/root/mgt/certs/:ro
+      - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
+      - /usr/src:/usr/src:ro
       - ./logsAP:/root/logs/
+      - ./APs/config/wlan_config_aps:/root/wlan_config_aps
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ip netns exec ns-ap /bin/bash -c '
+          curl -f -s http://localhost/login.php >/dev/null || exit 1;
+          curl -s http://localhost:8080 >/dev/null || exit 2;
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     network_mode: host #NETNS
     privileged: true #NETNS
 
   clients:
     image: r4ulcl/wifichallengelab-clients:latest
-    restart: unless-stopped
+    restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
-    env_file: ./Clients/.env
+    #env_file: ./Clients/.env
     volumes:
+      - ./certs:/root/certs/:ro
       - /lib/modules:/lib/modules
       - ./logsClient:/root/logs/
+      - ./Clients/config/wlan_config_clients:/root/wlan_config_clients
     depends_on:
       - aps
     network_mode: host #NETNS
     privileged: true #NETNS
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ip netns exec ns-client /bin/bash -c '
+          curl -s http://localhost >/dev/null || exit 1;
+          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
