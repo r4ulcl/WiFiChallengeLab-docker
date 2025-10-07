@@ -9,6 +9,7 @@ services:
       - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
+      - /usr/src:/usr/src:ro
       - ./logsAP:/root/logs/
       - ./APs/config/wlan_config_aps:/root/wlan_config_aps
     healthcheck:
@@ -26,7 +27,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients:dev
+    image: r4ulcl/wifichallengelab-clients:latest
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     #env_file: ./Clients/.env
@@ -62,7 +63,8 @@ services:
     security_opt:
       - no-new-privileges:true
     volumes:
-      - ./logsNzyme:/var/log/nzyme/
+      - ./nzyme/nzyme-logs/logs/:/var/log/nzyme/
+      - ./nzyme/nzyme.conf.tmp:/etc/nzyme/nzyme.conf.tmp
     #ports:
     #  - "22900:22900"
     depends_on:
@@ -70,9 +72,6 @@ services:
       - db
     environment:
       - TZ=Europe/Berlin
-      - DATABASE_URL=$DATABASE_URL
-      - ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
-      - EXTERNAL_URL=$EXTERNAL_URL
     network_mode: host #USB Antena
     healthcheck:
       test: ["CMD-SHELL", "curl -f -s http://localhost:22900 >/dev/null || exit 1"]
@@ -103,11 +102,8 @@ services:
       - aps
     environment:
       - TZ=Europe/Berlin
-      - POSTGRES_DB=$POSTGRES_DB
-      - POSTGRES_USER=$POSTGRES_USER
-      - POSTGRES_PASSWORD=$POSTGRES_PASS
     volumes:
-      - ./nzyme/data:/var/lib/postgresql/data
+      - ./nzyme/nzyme-logs/data:/var/lib/postgresql/data
     ports:
       - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
     healthcheck:
