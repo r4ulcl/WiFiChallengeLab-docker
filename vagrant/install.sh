@@ -249,7 +249,8 @@ EOF
 sudo chmod +x /var/aux.sh
 
 # ---------- Install Gnome ----------------------------------------------------
-sudo apt-get install -y task-gnome-desktop gnome-shell-extension-dashtodock gnome-terminal nautilus
+sudo apt-get install -y task-gnome-desktop gnome-shell-extension-dashtodock gnome-terminal nautilus gnome-remote-desktop
+
 sudo apt-get install -y htop
 sudo apt-get install -y xpra
 
@@ -318,12 +319,6 @@ gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', '
 gsettings set org.gnome.desktop.input-sources xkb-options "['grp:win_space_toggle']"
 
 # RDP
-export DEBIAN_FRONTEND="noninteractive"
-
-# Make sure required GNOME packages are installed
-#sudo apt update
-sudo apt install -y gnome-remote-desktop
-
 # Enable RDP
 gsettings set org.gnome.desktop.remote-desktop.rdp enable true
 gsettings set org.gnome.desktop.remote-desktop.rdp view-only false

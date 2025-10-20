@@ -21,7 +21,7 @@ Vagrant.configure('2') do |config|
       privileged: true,
       run: 'once'
 
-    hv_vm.vm.provision 'reload', name: 'Reboot after HWE kernel'
+    hv_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     hv_vm.vm.provision 'shell',
       path: './install.sh',
@@ -49,7 +49,7 @@ Vagrant.configure('2') do |config|
       privileged: true,
       run: 'once'
 
-    vb_vm.vm.provision 'reload', name: 'Reboot after HWE kernel'
+    vb_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     vb_vm.vm.provision 'shell',
       path: './install.sh',
@@ -80,7 +80,7 @@ Vagrant.configure('2') do |config|
       privileged: true,
       run: 'once'
 
-    vmw_vm.vm.provision 'reload', name: 'Reboot after HWE kernel'
+    vmw_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     vmw_vm.vm.provision 'shell',
       path: './install.sh',
