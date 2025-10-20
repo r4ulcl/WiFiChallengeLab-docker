@@ -29,7 +29,8 @@ require_pkg() {
 
 DEB_CODENAME="bookworm"
 DEV=False
-#DEV=True
+DEV=True
+#LOCATION="local"
 
 # ---------- base system -------------------------------------------------------
 sudo apt-get update
@@ -137,6 +138,7 @@ sudo systemctl enable --now docker
 cd /var
 if [ "$DEV" = "True" ]; then
   git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker || true
+  #rsync -a --exclude='vagrant/.vagrant/' /media/WiFiChallenge/ /var/WiFiChallengeLab-docker/
 else
   git clone https://github.com/r4ulcl/WiFiChallengeLab-docker || true
 fi
@@ -151,7 +153,7 @@ cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim/
 sudo bash install.sh
 
 cd /var/WiFiChallengeLab-docker
-if [ "$DEV" = "True" ]; then
+if [ "$LOCATION" = "local" ]; then
   sudo docker compose -f docker-compose-local.yml build
   docker tag wifichallengelab-docker-clients r4ulcl/wifichallengelab-clients || true
   docker tag wifichallengelab-docker-aps r4ulcl/wifichallengelab-aps || true
@@ -248,6 +250,11 @@ sudo chmod +x /var/aux.sh
 
 # ---------- Install Gnome ----------------------------------------------------
 sudo apt-get install -y task-gnome-desktop gnome-shell-extension-dashtodock gnome-terminal nautilus
+sudo apt-get install -y htop
+sudo apt-get install -y xpra
+
+# Install RDP
+echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
 
 
 # ---------- first login desktop setup ----------------------------------------
@@ -300,6 +307,16 @@ gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 # add minimze,maximize
 gsettings set org.gnome.desktop.wm.preferences button-layout ':minimize,maximize,close'
 
+# ENG+ESP lang
+sudo apt install -y locales
+sudo sed -i '/^# *es_ES.UTF-8/s/^# *//' /etc/locale.gen
+
+# Generate the Spanish locale
+sudo locale-gen
+
+gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'es')]"
+gsettings set org.gnome.desktop.input-sources xkb-options "['grp:win_space_toggle']"
+
 
 # Favorite apps on the dock
 gsettings set org.gnome.shell favorite-apps "[
@@ -346,6 +363,7 @@ gsettings set org.gnome.shell.extensions.dash-to-dock transparency-mode 'FIXED'
 gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.6
 gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
 gsettings set org.gnome.shell.extensions.dash-to-dock unity-backlit-items true
+gsettings set org.gnome.desktop.wm.preferences audible-bell false
 
 # Ensure autologin user has privileges
 sudo usermod -aG sudo user
@@ -538,11 +556,24 @@ for pkg in "${packages[@]}"; do
   fi
 done
 
-echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
 echo 'Install WiFi tools' && sudo bash Attacker/installTools.sh
 
 sudo apt-get -y autoremove
 sudo apt-get clean
+
+
+# Disable plymouth
+sudo systemctl disable plymouth-quit-wait.service plymouth-read-write.service
+sudo systemctl mask plymouth-quit-wait.service
+sudo apt remove -y plymouth plymouth-theme-*   # optional, saves space
+sudo update-initramfs -u
+
+# load faster
+echo "MODULES=dep" | sudo tee -a /etc/initramfs-tools/initramfs.conf
+echo "COMPRESS=zstd" | sudo tee -a /etc/initramfs-tools/initramfs.conf
+sudo update-initramfs -u
+
+
 
 # clean services that might exist
 sudo systemctl stop bettercap.service 2>/dev/null || true
@@ -551,8 +582,14 @@ sudo rm -f /etc/systemd/system/bettercap.service 2>/dev/null || true
 sudo systemctl daemon-reload
 sudo systemctl reset-failed || true
 
+# Disable beep
+sudo rmmod pcspkr
+echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf
+echo "set bell-style none" >> ~/.inputrc
+
 # ---------- cleanup -----------------------------------------------------------
 sudo apt purge -y gnome-calendar* || true
+sudo apt purge -y packagekit packagekit-tools packagekit-gtk3-module  || true
 sudo journalctl --vacuum-time=2d
 sudo journalctl --vacuum-size=100M
 
