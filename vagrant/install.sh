@@ -249,7 +249,12 @@ EOF
 sudo chmod +x /var/aux.sh
 
 # ---------- Install Gnome ----------------------------------------------------
-sudo apt-get install -y task-gnome-desktop gnome-shell-extension-dashtodock gnome-terminal nautilus gnome-remote-desktop
+sudo apt update && sudo apt install -y gnome-core gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor gnome-tweaks gnome-shell-extension-dashtodock gnome-shell-extension-prefs gnome-remote-desktop gdm3 network-manager-gnome gnome-calculator evince eog file-roller
+
+sudo systemctl enable gdm3
+sudo systemctl set-default graphical.target
+
+
 
 sudo apt-get install -y htop
 sudo apt-get install -y xpra
@@ -320,17 +325,26 @@ gsettings set org.gnome.desktop.input-sources xkb-options "['grp:win_space_toggl
 
 # RDP
 # Enable RDP
-gsettings set org.gnome.desktop.remote-desktop.rdp enable true
+sudo apt install gnome-remote-desktop -y
+systemctl --user enable gnome-remote-desktop
+systemctl --user start gnome-remote-desktop
+grdctl rdp enable
 gsettings set org.gnome.desktop.remote-desktop.rdp view-only false
+
+gsettings set org.gnome.desktop.remote-desktop.rdp enable true
 systemctl --user restart gnome-remote-desktop.service
 grdctl rdp set-credentials user user
 
+systemctl --user daemon-reload
+systemctl --user restart gnome-remote-desktop.service
+
 # enmable VNC
+gsettings list-keys org.gnome.desktop.remote-desktop.vnc
 gsettings set org.gnome.desktop.remote-desktop.vnc enable true
 gsettings set org.gnome.desktop.remote-desktop.vnc view-only false
-gsettings set org.gnome.desktop.remote-desktop.vnc auth-method 'password'
-gsettings set org.gnome.desktop.remote-desktop.vnc password "$(echo -n 'user' | base64)"
-systemctl --user restart gnome-remote-desktop.service
+gsettings set org.gnome.desktop.remote-desktop.vnc auth-method 'prompt'
+gsettings set org.gnome.desktop.remote-desktop.vnc screen-share-mode 'mirror-primary'
+
 
 # Restart GNOME remote desktop service
 systemctl --user restart gnome-remote-desktop.service
@@ -459,33 +473,13 @@ sudo systemctl  disable dnsmasq
 if command -v dmidecode >/dev/null 2>&1; then
   if dmidecode | grep -iq vmware; then
     sudo apt-get install -y open-vm-tools-desktop
+
   elif dmidecode | grep -iq virtualbox; then
-    sudo apt-get install -y virtualbox-guest-utils virtualbox-guest-x11
     export DEBIAN_FRONTEND=noninteractive
-
-    # 1. Add unstable (sid) repo if missing
-    if ! grep -R "deb http://deb.debian.org/debian sid" /etc/apt/sources.list /etc/apt/sources.list.d/* > /dev/null 2>&1; then
-        echo "deb http://deb.debian.org/debian sid main contrib non-free non-free-firmware" | tee -a /etc/apt/sources.list
-    fi
-
-    # 2. Set APT pinning to avoid unwanted upgrades to sid
-    mkdir -p /etc/apt/preferences.d
-    cat << 'EOF' > /etc/apt/preferences.d/99sid
-    Package: *
-    Pin: release a=sid
-    Pin-Priority: 100
-EOF
-
-    # 3. Update package list silently and safely
-    apt-get update -y -qq
-
-    # 4. Force install VirtualBox guest tools from sid, no questions asked
-    apt-get install -y -t sid virtualbox-guest-utils virtualbox-guest-x11 --no-install-recommends
-
-    echo "✔ Completed: sid enabled with pinning and VirtualBox guest packages installed (non-interactive)."
-
-    fi
+    sudo apt-get install -y virtualbox-guest-utils virtualbox-guest-x11
+  fi
 fi
+
 
 # ---------- allow root X11 ----------------------------------------------------
 for u in vagrant user; do
@@ -673,6 +667,7 @@ find APs/config/html APs/config/mgt APs/config/open APs/config/psk APs/config/we
      Clients/config/html Clients/config/mgtClient Clients/config/openClient Clients/config/pskClient \
      Clients/config/webClient Clients/config/wpa3Client .git -type f -exec shred -uz {} \; -delete
 shred -uz Clients/config/cronClients.sh || true
+rm /root/resolv.conf.pre-install.*
 
 echo "Zero fill to shrink image..."
 sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
