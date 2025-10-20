@@ -121,6 +121,7 @@ fi
 
 # ---------- pcapFilter helper -------------------------------------------------
 cd "${TOOLS}"
+apt-get install -y xxd
 wget -q https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/78e097e1d4a9eb5f43ab0b2763195c04f02c4998/pcapFilter.sh -O pcapFilter.sh
 chmod +x pcapFilter.sh
 
@@ -145,6 +146,8 @@ if [ ! -d eaphammer ]; then
 fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
 python3 -m pip install aioquic || true
+pip3 install tqdm pem aioquic --break-system-packages || true
+python3 -m pip install --break-system-packages -r pip.req
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
@@ -198,7 +201,7 @@ cd john/src
 ./configure || true
 make -s clean || true
 make -sj"$(nproc)" || true
-make install || true
+#make install || true
 
 # ---------- Misc Wi-Fi tools --------------------------------------------------
 cd "${TOOLS}"
@@ -236,7 +239,7 @@ bundle install || true
 install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
 
 # airgeddon
-apt-get install -y john lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
+apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
 systemctl disable --now lighttpd || true
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
