@@ -107,6 +107,7 @@ do
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-Responder | awk '{print $2}' | head -n 1`
 	# Responder ""vuln"" - 20 seconds because the SMB takes aprox 10 seconds in respond "Authentication error"
 	# In background to be sure
+	echo $SERVER
     if [ -n "$SERVER" ]; then
 		echo lock
 
@@ -114,15 +115,14 @@ do
         (
             # open fd 9 for lockfile and acquire exclusive lock (blocks until free)
             flock 9
+			echo flock
 			
 			# run smbmap under cpulimit and timeout (background)
 			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" >/dev/null 2>&1 &
 
 			sleep 0.5
             # run smbmap under cpulimit and timeout (foreground)
-            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap \
-                -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" \
-                >/dev/null 2>&1
+            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d 'CORPO' -u 'god' -p "$PHISHING_PASS" -H "$SERVER" >/dev/null 2>&1
         ) 9>/var/lock/smbmap.lock
 
     else
