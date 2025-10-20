@@ -191,7 +191,7 @@ if [ ! -d hashcat-6.0.0 ]; then
   ln -sf /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat || true
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
-timeout 120s /usr/local/bin/hashcat -b || true
+timeout 60s /usr/local/bin/hashcat -b || true
 
 # ---------- John the Ripper ---------------------------------------------------
 cd "${TOOLS}"
