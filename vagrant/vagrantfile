@@ -38,19 +38,102 @@ Vagrant.configure('2') do |config|
       vb.cpus   = 4
       vb.name   = 'WiFiChallenge Lab v2.3'
       vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+      vb.check_guest_additions = false
+      vb.functional_vboxsf = false
     end
 
+    # Try to locate the GA ISO on the host and upload it to the guest
+    host_ga_iso =
+      if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
+        'C:/Program Files/Oracle/VirtualBox/VBoxGuestAdditions.iso'
+      elsif RUBY_PLATFORM =~ /darwin/
+        '/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso'
+      else
+        File.exist?('/usr/share/virtualbox/VBoxGuestAdditions.iso') ?
+          '/usr/share/virtualbox/VBoxGuestAdditions.iso' :
+          '/usr/lib/virtualbox/additions/VBoxGuestAdditions.iso'
+      end
+
+    vb_vm.vm.provision 'file',
+      source: host_ga_iso,
+      destination: '/tmp/VBoxGuestAdditions.iso',
+      run: 'always'
+
+
+    config.vm.boot_timeout = 600
+
+    # 1) Upgrade kernel and headers
     vb_vm.vm.provision 'shell',
       inline: <<-SHELL,
         set -e
+        export DEBIAN_FRONTEND=noninteractive
         apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+        apt-get full-upgrade -y
       SHELL
       privileged: true,
       run: 'once'
 
-    vb_vm.vm.provision 'reload', name: 'Reboot after update kernel'
+    # Reboot after kernel upgrade
+    vb_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
 
+    # 2) Install Guest Additions from the uploaded ISO
+    vb_vm.vm.provision 'shell',
+    inline: <<-'SHELL'
+      set -e
+      mkdir -p /mnt/vbga
+
+      # Sanity checks
+      if [ ! -s /tmp/VBoxGuestAdditions.iso ]; then
+        echo "Guest Additions ISO missing or empty at /tmp/VBoxGuestAdditions.iso"
+        ls -l /tmp || true
+        exit 1
+      fi
+      file /tmp/VBoxGuestAdditions.iso || true
+
+      # Make sure loop support is available
+      apt-get update -y
+      apt-get install -y kmod util-linux
+      modprobe loop || true
+      modprobe isofs || true
+
+      # Create a loop device for the ISO
+      losetup -fP /tmp/VBoxGuestAdditions.iso
+      LOOPDEV="$(losetup -j /tmp/VBoxGuestAdditions.iso | awk -F: '{print $1}')"
+      if [ -z "$LOOPDEV" ]; then
+        echo "Could not attach loop device"
+        losetup -a || true
+        exit 1
+      fi
+
+      # Mount the ISO read-only as iso9660
+      mount -t iso9660 -o ro "$LOOPDEV" /mnt/vbga || {
+        echo "Mount failed. Dumping loop devices"
+        losetup -a || true
+        exit 1
+      }
+
+      if [ ! -x /mnt/vbga/VBoxLinuxAdditions.run ]; then
+        echo "VBoxLinuxAdditions.run not found on ISO"
+        umount /mnt/vbga
+        losetup -d "$LOOPDEV"
+        exit 1
+      fi
+
+      # Run installer. It may return nonzero when X11 parts are skipped on servers
+      sh /mnt/vbga/VBoxLinuxAdditions.run --nox11 || true
+
+      umount /mnt/vbga || true
+      losetup -d "$LOOPDEV" || true
+
+      # Build for all installed kernels and reload
+      /sbin/rcvboxadd quicksetup all || true
+      /sbin/rcvboxadd reload || true
+    SHELL
+
+    # Final reboot so the running modules match the newly built ones
+    vb_vm.vm.provision 'reload', name: 'Reboot after GA install'
+
+    # 3) Your app install
     vb_vm.vm.provision 'shell',
       path: './install.sh',
       privileged: true
