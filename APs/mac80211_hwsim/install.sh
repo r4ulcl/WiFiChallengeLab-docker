@@ -34,10 +34,10 @@ ALT_VER_INSTALLED="$(modver "${ALT_MOD_PATH}")"
 echo "Installed WiFiChallenge version : ${ALT_VER_INSTALLED}"
 
 if [[ "${ALT_VER_INSTALLED}" == "${TARGET_VERSION}" ]]; then
-    echo "↪  Desired version already present; nothing to do."
+    echo "Desired version already present; nothing to do."
     exit 0
 fi
-echo "☑  Version differs – proceeding with build/install."
+echo "Version differs – proceeding with build/install."
 
 
 # 2. Generate a minimal Kbuild wrapper to rename the module
