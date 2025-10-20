@@ -145,7 +145,7 @@ done &
 # MGT Legacy MD5 .17
 while :
 do
-    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    TIMEOUT=$(( ( RANDOM % 60 )  + 30 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_MD5 -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
     wait $!
 done &
