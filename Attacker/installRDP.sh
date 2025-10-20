@@ -1,26 +1,20 @@
 #!/bin/bash
 set -e
 
-sudo apt-get update
+export DEBIAN_FRONTEND="noninteractive"
 
-# Debian desktop
-# Use task-gnome-desktop for a full GNOME environment or gnome-core for a lighter set
-if ! dpkg -s task-gnome-desktop >/dev/null 2>&1 && ! dpkg -s gnome-core >/dev/null 2>&1; then
-  sudo apt-get -y install task-gnome-desktop || sudo apt-get -y install gnome-core
-fi
+# Make sure required GNOME packages are installed
+#sudo apt update
+sudo apt install -y gnome-remote-desktop
 
-sudo apt-get -y install xrdp gnome-shell-extension-prefs
+# Enable RDP
+gsettings set org.gnome.desktop.remote-desktop.rdp enable true
+gsettings set org.gnome.desktop.remote-desktop.rdp view-only false
 
-# xrdp tweaks
-sudo sed -i 's/^new_cursors=true/new_cursors=false/g' /etc/xrdp/xrdp.ini || true
-# Use the systemd unit that runs GNOME on Debian rather than an Ubuntu specific target
-sudo sed -i 's/^startwm=.*/startwm=default/g' /etc/xrdp/xrdp.ini || true
+systemctl --user restart gnome-remote-desktop.service
 
-{
-  echo "resolution=0"
-  echo "width=1920"
-  echo "height=1080"
-} | sudo tee -a /etc/xrdp/xrdp.ini >/dev/null
+grdctl rdp set-credentials user user
 
-sudo systemctl enable xrdp
-sudo systemctl restart xrdp
+
+# Restart GNOME remote desktop service
+systemctl --user restart gnome-remote-desktop.service

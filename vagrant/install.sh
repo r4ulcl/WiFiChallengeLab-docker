@@ -254,7 +254,7 @@ sudo apt-get install -y htop
 sudo apt-get install -y xpra
 
 # Install RDP
-echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
+#echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
 
 
 # ---------- first login desktop setup ----------------------------------------
@@ -316,6 +316,29 @@ sudo locale-gen
 
 gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'es')]"
 gsettings set org.gnome.desktop.input-sources xkb-options "['grp:win_space_toggle']"
+
+# RDP
+export DEBIAN_FRONTEND="noninteractive"
+
+# Make sure required GNOME packages are installed
+#sudo apt update
+sudo apt install -y gnome-remote-desktop
+
+# Enable RDP
+gsettings set org.gnome.desktop.remote-desktop.rdp enable true
+gsettings set org.gnome.desktop.remote-desktop.rdp view-only false
+systemctl --user restart gnome-remote-desktop.service
+grdctl rdp set-credentials user user
+
+# enmable VNC
+gsettings set org.gnome.desktop.remote-desktop.vnc enable true
+gsettings set org.gnome.desktop.remote-desktop.vnc view-only false
+gsettings set org.gnome.desktop.remote-desktop.vnc auth-method 'password'
+gsettings set org.gnome.desktop.remote-desktop.vnc password "$(echo -n 'user' | base64)"
+systemctl --user restart gnome-remote-desktop.service
+
+# Restart GNOME remote desktop service
+systemctl --user restart gnome-remote-desktop.service
 
 
 # Favorite apps on the dock
@@ -443,7 +466,30 @@ if command -v dmidecode >/dev/null 2>&1; then
     sudo apt-get install -y open-vm-tools-desktop
   elif dmidecode | grep -iq virtualbox; then
     sudo apt-get install -y virtualbox-guest-utils virtualbox-guest-x11
-  fi
+    export DEBIAN_FRONTEND=noninteractive
+
+    # 1. Add unstable (sid) repo if missing
+    if ! grep -R "deb http://deb.debian.org/debian sid" /etc/apt/sources.list /etc/apt/sources.list.d/* > /dev/null 2>&1; then
+        echo "deb http://deb.debian.org/debian sid main contrib non-free non-free-firmware" | tee -a /etc/apt/sources.list
+    fi
+
+    # 2. Set APT pinning to avoid unwanted upgrades to sid
+    mkdir -p /etc/apt/preferences.d
+    cat << 'EOF' > /etc/apt/preferences.d/99sid
+    Package: *
+    Pin: release a=sid
+    Pin-Priority: 100
+EOF
+
+    # 3. Update package list silently and safely
+    apt-get update -y -qq
+
+    # 4. Force install VirtualBox guest tools from sid, no questions asked
+    apt-get install -y -t sid virtualbox-guest-utils virtualbox-guest-x11 --no-install-recommends
+
+    echo "✔ Completed: sid enabled with pinning and VirtualBox guest packages installed (non-interactive)."
+
+    fi
 fi
 
 # ---------- allow root X11 ----------------------------------------------------
@@ -586,6 +632,33 @@ sudo systemctl reset-failed || true
 sudo rmmod pcspkr
 echo "blacklist pcspkr" | sudo tee /etc/modprobe.d/nobeep.conf
 echo "set bell-style none" >> ~/.inputrc
+
+# Add README
+
+echo '# WiFiChallengeLab VM
+## Overview
+
+WiFiChallenge Lab provides a controlled environment to study, test, and improve WiFi security skills. This VM uses Docker to deploy all required services, offering a simple, portable, and reproducible setup.
+
+## Project Resources
+
+  - Repository: https://github.com/r4ulcl/WiFiChallengeLab-docker
+  - Official Website: https://lab.wifichallenge.com
+
+## Learn More – Course and Certification (CWP)
+
+To deepen your knowledge and practice WiFi security professionally, you can enroll in the official course and earn the Certified Wireless Pentester (CWP) certification.  
+The course provides structured learning, practical challenges, and an internationally recognized certification.
+
+More information available at:  
+https://academy.wifichallenge.com/courses/certified-wifichallenge-professional-cwp
+
+## Author
+
+- Raúl Calvo Laorden (r4ulcl)
+' > /home/user/README.md
+chown user:user /home/user/README.md
+
 
 # ---------- cleanup -----------------------------------------------------------
 sudo apt purge -y gnome-calendar* || true
