@@ -23,7 +23,7 @@ echo "Using target user: $USER_NAME ($USER_HOME)"
 
 echo "Updating apt and installing packages..."
 apt-get update -y
-apt-get install -y xrdp xorgxrdp gnome-session network-manager
+apt-get install -y xrdp xorgxrdp gnome-session gnome-shell dbus-x11 network-manager
 
 # Groups required for xrdp and Wi-Fi control
 adduser xrdp ssl-cert >/dev/null 2>&1 || true
@@ -115,3 +115,19 @@ fi
 
 # Optional firewall open
 if need_cmd ufw; then ufw allow 3389/tcp || true; fi
+
+# Dynamic window
+sudo sed -i 's/^\s*allow_channels=.*/allow_channels=true/' /etc/xrdp/xrdp.ini
+sudo sed -i 's/^\s*max_bpp=.*/max_bpp=32/' /etc/xrdp/xrdp.ini
+
+# Ensure the Channels section allows drdynvc
+sudo awk '
+  BEGIN{p=0}
+  /^\[Channels\]/{p=1}
+  p && /^drdynvc=/{found=1}
+  END{if(!found) exit 1}
+' /etc/xrdp/xrdp.ini || sudo bash -c 'cat >>/etc/xrdp/xrdp.ini <<EOF
+
+[Channels]
+drdynvc=true
+EOF'
