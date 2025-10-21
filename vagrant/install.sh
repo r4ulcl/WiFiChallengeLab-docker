@@ -260,7 +260,7 @@ sudo apt-get install -y htop
 sudo apt-get install -y xpra
 
 # Install RDP
-#echo 'Install RDP server' && sudo bash Attacker/installRDP.sh
+echo 'Install RDP server' && sudo bash Attacker/installRDP.sh user
 
 
 # ---------- first login desktop setup ----------------------------------------
@@ -322,33 +322,6 @@ sudo locale-gen
 
 gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'es')]"
 gsettings set org.gnome.desktop.input-sources xkb-options "['grp:win_space_toggle']"
-
-# RDP
-# Enable RDP
-sudo apt install gnome-remote-desktop -y
-systemctl --user enable gnome-remote-desktop
-systemctl --user start gnome-remote-desktop
-grdctl rdp enable
-gsettings set org.gnome.desktop.remote-desktop.rdp view-only false
-
-gsettings set org.gnome.desktop.remote-desktop.rdp enable true
-systemctl --user restart gnome-remote-desktop.service
-grdctl rdp set-credentials user user
-
-systemctl --user daemon-reload
-systemctl --user restart gnome-remote-desktop.service
-
-# enmable VNC
-gsettings list-keys org.gnome.desktop.remote-desktop.vnc
-gsettings set org.gnome.desktop.remote-desktop.vnc enable true
-gsettings set org.gnome.desktop.remote-desktop.vnc view-only false
-gsettings set org.gnome.desktop.remote-desktop.vnc auth-method 'prompt'
-gsettings set org.gnome.desktop.remote-desktop.vnc screen-share-mode 'mirror-primary'
-
-
-# Restart GNOME remote desktop service
-systemctl --user restart gnome-remote-desktop.service
-
 
 # Favorite apps on the dock
 gsettings set org.gnome.shell favorite-apps "[
