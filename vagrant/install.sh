@@ -160,7 +160,12 @@ if [ "$LOCATION" = "local" ]; then
   docker tag wifichallengelab-docker-nzyme r4ulcl/wifichallengelab-nzyme || true
   docker image rm wifichallengelab-docker-nzyme wifichallengelab-docker-aps wifichallengelab-docker-clients || true
 fi
-sudo docker compose -f docker-compose.yml up -d
+
+if [ "$DEV" = "True" ]; then
+  sudo docker compose -f docker-compose-dev.yml up -d
+else
+  sudo docker compose -f docker-compose.yml up -d
+fi
 # sudo docker compose -f docker-compose-minimal.yml up -d
 
 # ---------- flags and helper scripts -----------------------------------------
