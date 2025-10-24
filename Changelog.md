@@ -1,5 +1,30 @@
 # Changelog WiFiChallengeLab
 
+## Changelog: WiFiChallengeLab v2.3
+
+### Modifications
+
+* Switched base OS to **Debian 12** for improved stability and smaller image size
+* Replaced **legacy MD5 authentication** with **FreeRADIUS** (@OscarAkaElvis #17)
+* Added **Spanish keyboard** (GUI and keyboard, toggle with `CTRL + Space`)
+* Improved **Vagrant file**, **cron responder loop**, and install scripts
+* Recreated **RDP service** using **GNOME with XRDP**
+* Removed `ctrl_interface` configuration for cleaner network setup
+
+### Bug Fixes
+
+* Fixed **autologin**, **DNS**, and **installTools** issues
+* Resolved **background image** scaling problems
+* Corrected **VBox Guest Additions** and **display configuration**
+* Fixed **Vagrant loop** logging and tool installation order
+
+### Miscellaneous Improvements
+
+* Reduced image size and improved boot performance
+* Simplified **tool installation** and reduced setup errors
+* Enhanced **multilingual support** (ESP and ENG)
+* General cleanup and performance optimizations
+
 ## Changelog: WiFiChallengeLab v2.2
 
 ### New Features:
