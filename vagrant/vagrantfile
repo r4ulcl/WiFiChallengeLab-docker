@@ -1,5 +1,8 @@
 Vagrant.configure('2') do |config|
 
+  # Default: $env:DEV = "false" ; $env:LOCATION = "remote"
+  # DEV: $env:DEV = "true" ; $env:LOCATION = "local" ; vagrant up
+
   # ---------- Hyper-V ----------
   config.vm.define 'hyper-v_vm' do |hv_vm|
     hv_vm.vm.box      = 'generic/debian12'
@@ -25,6 +28,7 @@ Vagrant.configure('2') do |config|
 
     hv_vm.vm.provision 'shell',
       path: './install.sh',
+      args: [ENV['DEV'], ENV['LOCATION']],
       privileged: true
   end
 
@@ -136,6 +140,7 @@ Vagrant.configure('2') do |config|
     # 3) Your app install
     vb_vm.vm.provision 'shell',
       path: './install.sh',
+      args: [ENV['DEV'], ENV['LOCATION']],
       privileged: true
   end
 
@@ -167,6 +172,7 @@ Vagrant.configure('2') do |config|
 
     vmw_vm.vm.provision 'shell',
       path: './install.sh',
+      args: [ENV['DEV'], ENV['LOCATION']],
       privileged: true
   end
 

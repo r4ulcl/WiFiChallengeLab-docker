@@ -1,6 +1,10 @@
 #!/bin/bash
 #set -euo pipefail
 
+# Read positional arguments or set defaults
+DEV=${1:-false}
+LOCATION=${2:-remote}
+
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 export DEBCONF_NOWARNINGS=yes
@@ -8,6 +12,7 @@ export NEEDRESTART_MODE=a
 # pick one behavior for config files during upgrades
 export UCF_FORCE_CONFFNEW=1
 
+DEB_CODENAME="bookworm"
 # ======================== Debian 12 (bookworm) install.sh =====================
 
 # ---------- helpers -----------------------------------------------------------
@@ -26,11 +31,6 @@ require_pkg() {
     sudo apt-get install -y "$@"
   fi
 }
-
-DEB_CODENAME="bookworm"
-DEV=False
-DEV=True
-#LOCATION="local"
 
 # ---------- base system -------------------------------------------------------
 sudo apt-get update
@@ -136,7 +136,7 @@ sudo systemctl enable --now docker
 
 # ---------- WiFiChallengeLab --------------------------------------------------
 cd /var
-if [ "$DEV" = "True" ]; then
+if [ "$DEV" = "true" ]; then
   git clone -b dev https://github.com/r4ulcl/WiFiChallengeLab-docker || true
   #rsync -a --exclude='vagrant/.vagrant/' /media/WiFiChallenge/ /var/WiFiChallengeLab-docker/
 else
