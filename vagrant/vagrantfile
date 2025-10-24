@@ -137,10 +137,12 @@ Vagrant.configure('2') do |config|
     # Final reboot so the running modules match the newly built ones
     vb_vm.vm.provision 'reload', name: 'Reboot after GA install'
 
-    # 3) Your app install
     vb_vm.vm.provision 'shell',
       path: './install.sh',
-      args: [ENV['DEV'], ENV['LOCATION']],
+      env: {
+        'DEV' => (ENV['DEV'] || 'false'),
+        'LOCATION' => (ENV['LOCATION'] || 'remote')
+      },
       privileged: true
   end
 
@@ -172,7 +174,10 @@ Vagrant.configure('2') do |config|
 
     vmw_vm.vm.provision 'shell',
       path: './install.sh',
-      args: [ENV['DEV'], ENV['LOCATION']],
+      env: {
+        'DEV' => (ENV['DEV'] || 'false'),
+        'LOCATION' => (ENV['LOCATION'] || 'remote')
+      },
       privileged: true
   end
 
