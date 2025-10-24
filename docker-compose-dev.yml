@@ -27,7 +27,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients:latest
+    image: r4ulcl/wifichallengelab-clients:dev
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     #env_file: ./Clients/.env
