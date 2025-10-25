@@ -112,6 +112,7 @@ if [ ! -f hcxtools_6.0.2-1+b1_amd64.deb ]; then
 fi
 
 # ---------- wifi_db -----------------------------------------------------------
+apt-get install -y sqlitebrowser
 cd "${TOOLS}"
 if [ ! -d wifi_db ]; then
   git clone https://github.com/r4ulcl/wifi_db
