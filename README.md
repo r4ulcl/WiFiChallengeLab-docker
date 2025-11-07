@@ -24,7 +24,7 @@
 
 [![Docker Image APs](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-aps) [![Docker Image Clients](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-clients)
 
-Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Ubuntu virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks.
+Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Debian virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks.
 
 ## CTFd Lab
 
@@ -43,7 +43,7 @@ The principal changes from version 1.0.5 to 2.0.3 are the following.
   - Real captive portal evasion (instead of just MAC filtering)
   - Phishing client with fake website.
 - Eliminating the WPS pin attack as it is outdated, unrealistic, and overly simplistic.
-- Use Ubuntu as SO instead of Debian
+- Use Ubuntu as SO instead of Debian (Debian again in version 2.3).
 - Use vagrant to create the VM to be easy to replicate
 - More Virtual WiFi adapters
   - More APs
@@ -131,7 +131,7 @@ vagrant up hyper-v_vm --provider=hyperv
 
 ### Create the VM manually (M1, M2, etc recommended)
 
-- Download a Ubuntu20.04 VM
+- Download a Debian 12 VM
 - Execute the following code as root
 
 ```bash
@@ -142,7 +142,7 @@ bash /var/WiFiChallengeLab-docker/vagrant/install.sh
 
 ## Usage
 
-### Attack from Ubuntu VM
+### Attack from Debian VM
 
 - The tools are installed and can be found in the tools folder of the root home.
 - There are 7 antennas available, wlan0 to wlan6.
