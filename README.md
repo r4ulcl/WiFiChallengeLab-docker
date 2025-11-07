@@ -65,9 +65,9 @@ To get started with the VM, download the appropriate version for your preferred 
 - [From GitHub releases](https://github.com/r4ulcl/WiFiChallengeLab-docker/releases)
 - [From Proton Drive](https://drive.proton.me/urls/Q4WPB23W7R#Qk4nxMH8Q4oQ)
 
-### Using Docker on a Linux Host or Custom VM with Ubuntu 20.04 (Supports x86-64 and ARM)
+### Using Docker on a Linux Host or Custom VM with Debian 12 (Supports x86-64 and ARM)
 
-1. Download a Ubuntu20.04 VM
+1. Download a Debian 12 VM
 2. Execute the following code as root
 
 ``` bash
