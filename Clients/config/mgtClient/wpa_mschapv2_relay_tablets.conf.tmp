@@ -2,13 +2,13 @@
 # wifi-regional-tablets is vuln to relay and can login to wifi-regional-tablets and wifi-regional
   
 network={
-    ssid="wifi-regional-tablets"
+    ssid="$ESSID_MGT_RELAY_TABLETS"
     scan_ssid=1
     key_mgmt=WPA-EAP
     eap=PEAP
-    anonymous_identity="CONTOSOREG\anonymous"
-    identity="CONTOSOREG\luis.da"
-    password="u89gh68!6fcv56ed"
+    anonymous_identity="$ANON_IDENTITY_MGT_RELAY_TABLETS"
+    identity="$IDENTITY_MGT_RELAY_TABLETS"
+    password="$PASS_MGT_RELAY_TABLETS_CLEAR"
     phase1="peapver=1"
     phase2="auth=MSCHAPV2"
     ieee80211w=0

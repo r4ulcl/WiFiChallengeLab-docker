@@ -1,20 +1,20 @@
 
   
 network={
-    ssid="AP_router"
-    psk="874285738"
+    ssid="$ESSID_MGT_MSCHAP_EXTRA"
+    psk="$PASS_MGT_MSCHAP_EXTRA_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2
 }
 
 network={
-    ssid="wifi-corp"
+    ssid="$ESSID_MGT_MSCHAP"
     scan_ssid=1
     key_mgmt=WPA-EAP
     eap=PEAP
-    identity="CONTOSO\juan.tr"
-    password="bulldogs1234"
+    identity="$IDENTITY_MGT_MSCHAP"
+    password="$PASS_MGT_MSCHAP_CLEAR"
     phase1="peapver=1"
     phase2="auth=MSCHAPV2"
 }

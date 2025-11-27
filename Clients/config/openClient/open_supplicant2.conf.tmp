@@ -1,7 +1,7 @@
 
 
 network={
-        ssid="wifi-guest"
+        ssid="$ESSID_OPN2"
         key_mgmt=NONE
         scan_ssid=1
 }

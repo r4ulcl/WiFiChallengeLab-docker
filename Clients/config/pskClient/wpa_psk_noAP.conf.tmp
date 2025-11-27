@@ -1,8 +1,8 @@
 
   
 network={
-    ssid="wifi-offices"
-    psk="password1"
+    ssid="$ESSID_PSK_NOAP"
+    psk="$PASS_PSK_NOAP_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2
@@ -12,8 +12,8 @@ network={
 
 
 network={
-    ssid="Jason"
-    psk="14353576"
+    ssid="$ESSID_PSK_NOAP_EXTRA"
+    psk="$PASS_PSK_NOAP_EXTRA_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2
