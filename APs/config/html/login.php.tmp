@@ -1,0 +1,153 @@
+<?php
+/* 
+   WiFiChallenge by r4ulcl 
+*/
+
+session_start();
+
+if (isset($_SESSION['Username'])) {
+  header("Location: index.php");
+  exit;
+}
+
+function decode($c,$s){
+    $f='strtr';
+    $r=base64_decode($f($c,'-_','+/'),true);
+    if($r===false){
+        throw new InvalidArgumentException("Not valid Base64");
+    }
+    $k=unpack('C*',$s); $l=count($k); $p='';
+    for($i=0,$n=strlen($r);$i<$n;$i++){
+        $p.=chr(ord($r[$i])^$k[$i%$l+1]);
+    }
+    return $p;
+}
+
+$a = '${KEY_J3D5ETO}';
+
+$logins = array(
+    '${USER_GLOBALADMIN}'      => decode('${PASS_GLOBALADMIN}', $a),
+    '${USER_CONTOSOADMIN}'     => decode('${PASS_CONTOSOADMIN}', $a),
+    '${USER_JUANTR}'           => decode('${PASS_JUANTR}', $a),
+    '${USER_CONTOSOTEST}'      => decode('${PASS_CONTOSOTEST}', $a),
+    '${USER_CONTOSOFTP}'       => decode('${PASS_CONTOSOFTP}', $a),
+    '${USER_LUISDA}'           => decode('${PASS_LUISDA}', $a),
+    '${USER_CORPOGOD}'         => decode('${PASS_CORPOGOD}', $a),
+    '${USER_ADMIN}'            => decode('${PASS_ADMIN}', $a),
+    '${USER_TEST1}'            => decode('${PASS_TEST1}', $a),
+    '${USER_TEST2}'            => decode('${PASS_TEST2}', $a),
+    '${USER_FREE1}'            => decode('${PASS_FREE1}', $a),
+    '${USER_FREE2}'            => decode('${PASS_FREE2}', $a),
+    '${USER_ADMINISTRATOR}'    => decode('${PASS_ADMINISTRATOR}', $a),
+    '${USER_ANON1}'            => decode('${PASS_ANON1}', $a)
+);
+
+if (isset($_POST['Submit'])) {
+
+  $Username = $_POST['Username'] ?? '';
+  $Password = $_POST['Password'] ?? '';
+
+  if (isset($logins[$Username]) && $logins[$Username] == $Password) {
+
+    $_SESSION['UserData']['Username'] = $logins[$Username];
+    $_SESSION['Username'] = $Username;
+
+    header("location:index.php");
+    exit;
+  } else {
+    $msg = "<span style='color:red'>Invalid Login Details</span>";
+  }
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WiFi Router Configuration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script>
+function copyFlagToClipboard(flag) {
+  navigator.clipboard.writeText(flag).then(()=>alert('Flag copied to clipboard!'));
+}
+</script>
+
+<div class="content">
+<?php
+
+# AUTO-LOGIN FOR GLOBAL ADMIN
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTTLS}.') !== false) {
+  $_SESSION['UserData']['Username'] = ${USER_GLOBALADMIN}';
+  $_SESSION['Username'] = '${USER_GLOBALADMIN}';
+  header("location:index.php");
+  exit;
+}
+
+# ALL FLAGS (replaced by envsubst)
+$flag_mgtrelay_tls        = decode('${FLAG_MGTRELAY_1}', $a);
+$flag_mgtrelay_tablets    = decode('${FLAG_MGTRELAY_TABLETS}', $a);
+$flag_wps                 = decode('${FLAG_WPS}', $a);
+$flag_wep                 = decode('${FLAG_WEP}', $a);
+$flag_bruteforce          = decode('${FLAG_BRUTEFORCE}', $a);
+$flag_downgrade           = decode('${FLAG_DOWNGRADE}', $a);
+$flag_6ghz                = decode('${FLAG_6GHZ}', $a);
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTRELAY}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_mgtrelay_tls')\">$flag_mgtrelay_tls</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTRELAY_TABLETS}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_mgtrelay_tablets')\">$flag_mgtrelay_tablets</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WPS}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wps')\">$flag_wps</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WEP}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wep')\">$flag_wep</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_BRUTEFORCE}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_bruteforce')\">$flag_bruteforce</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_downgrade')\">$flag_downgrade</button>";
+
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') !== false)
+  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_6ghz')\">$flag_6ghz</button>";
+
+?>
+
+<!-- LOGIN UI -->
+<form action="" method="post" name="Login_Form">
+  <table width="400" border="0" align="center" cellpadding="5" cellspacing="1" class="Table">
+    <?php if (isset($msg)) { ?>
+    <tr><td colspan="2" align="center"><?php echo $msg; ?></td></tr><?php } ?>
+
+    <tr><td colspan="2"><h3>Login</h3></td></tr>
+
+    <tr><td align="right">Username</td>
+    <td><input name="Username" type="text" class="Input"></td></tr>
+
+    <tr><td align="right">Password</td>
+    <td><input name="Password" type="password" class="Input"></td></tr>
+
+    <tr><td></td><td><input name="Submit" type="submit" value="Login" class="Button3"></td></tr>
+
+  </table>
+</form>
+
+<!-- FOOTER COPYRIGHT -->
+<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
+  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
+    WiFiChallenge ${WIFICHALLENGE_VERSION} 
+  </a>
+  © 
+  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
+    <?php echo date('Y'); ?> r4ulcl
+  </a>
+</div>
+
+
+
+</div>
+</body>
+</html>

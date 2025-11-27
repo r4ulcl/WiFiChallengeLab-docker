@@ -23,13 +23,14 @@ COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/wep/ /root/wep/
 COPY mac80211_hwsim/ /root/mac80211_hwsim_WiFiChallenge
+COPY config/decode_passwords.sh /root/decode_passwords.sh
 
 #Copy freeradius files
 COPY config/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
 COPY config/freeradius/default /etc/freeradius/3.0/sites-enabled/default
 RUN rm -f /etc/freeradius/3.0/sites-enabled/inner-tunnel
 COPY config/freeradius/eap /etc/freeradius/3.0/mods-enabled/eap
-COPY config/freeradius/users /etc/freeradius/3.0/mods-config/files/users
+COPY config/freeradius/users.tmp /etc/freeradius/3.0/mods-config/files/users.tmp
 COPY config/freeradius/files /etc/freeradius/3.0/mods-available/files
 
 #Expose freeradius port

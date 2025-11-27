@@ -1,0 +1,16 @@
+<?php
+    session_start(); /* Starts the session */
+    session_destroy(); /* Destroy started session */
+    header("location:login.php");  /* Redirect to login page */
+    exit;
+?>
+
+<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
+  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
+    WiFiChallenge ${WIFICHALLENGE_VERSION} 
+  </a>
+  © 
+  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
+    <?php echo date('Y'); ?> r4ulcl
+  </a>
+</div>

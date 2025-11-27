@@ -2,7 +2,7 @@ interface=$WLAN_OPN_HIDDEN
 driver=nl80211
 
 hw_mode=g
-channel=11
+channel=$CHANNEL_OPN_HIDDEN
 ssid=$ESSID_OPN_HIDDEN
 
 wpa=0

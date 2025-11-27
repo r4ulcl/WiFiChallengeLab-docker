@@ -1,0 +1,44 @@
+<?php
+/* 
+   WiFiChallenge by r4ulcl 
+*/
+
+session_start();
+
+if (!isset($_SESSION['UserData']['Username'])) {
+    header("location:login.php");
+    exit;
+}
+
+$user = $_SESSION['UserData']['Username'];
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiFi Router Configuration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="content">
+
+<?php
+echo "Welcome {$user}<br><br>";
+?>
+
+<p>Congratulations! You have logged into a protected area.</p>
+<p><a href="index.php">Go to index.php to obtain the flag</a></p>
+
+<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
+  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
+    WiFiChallenge <?php echo "${WIFICHALLENGE_VERSION}"; ?>
+  </a>
+  © 
+  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
+    <?php echo date('Y'); ?> r4ulcl
+  </a>
+</div>
+
+</div>
+</body>
+</html>
