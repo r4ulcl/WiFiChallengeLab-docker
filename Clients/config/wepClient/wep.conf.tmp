@@ -1,0 +1,6 @@
+network={
+    ssid="$ESSID_WEP"
+    key_mgmt=NONE
+    wep_tx_keyidx=0
+    wep_key0=$PASS_WEP_CLEAR
+}

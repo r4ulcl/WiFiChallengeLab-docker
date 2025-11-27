@@ -1,16 +1,16 @@
 
 
 network={
-    ssid="AP_router"
-    psk="874285738"
+    ssid="$ESSID_WPA_PSK_EXTRA"
+    psk="$PASS_WPA_PSK_EXTRA_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2
 }
 
 network={
-    ssid="wifi-mobile"
-    psk="starwars1"
+    ssid="$ESSID_WPA_PSK"
+    psk="$PASS_WPA_PSK_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2

@@ -1,13 +1,21 @@
 #!/bin/bash -x
 
-envsubst_tmp (){
-    for F in ./*.tmp ; do
-        echo $F
-        NEW=`basename $F .tmp`
-        envsubst < $F > $NEW
-        rm $F
+# TODO move to Dockerfile
+envsubst_tmp () {
+    VARS=$(printf '${%s} ' \
+        KEY_J3D5ETO \
+        WIFICHALLENGE_VERSION \
+        $(compgen -e | grep -E '^(USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_)') \
+    )
+
+    for F in ./*.tmp; do
+        [ "$F" = './*.tmp' ] && continue
+        NEW=$(basename "$F" .tmp)
+        envsubst "$VARS" < "$F" > "$NEW"
+        rm "$F" 2>/dev/null
     done
 }
+
 
 function retry { 
     $1 && echo "success" || (echo "fail" && retry $1) 
@@ -43,10 +51,30 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
-source /root/wlan_config_clients
+source /root/wlan_config_aps
 
-#cd /root/open/
-#envsubst_tmp
+bash /root/decode_passwords.sh /root/wlan_config_aps
+source /root/wlan_config_aps.clear
+
+cd /root/
+envsubst_tmp
+
+cd /root/openClient/
+envsubst_tmp
+
+cd /root/wepClient/
+envsubst_tmp
+
+cd /root/pskClient/
+envsubst_tmp
+
+cd /root/wpa3Client/
+envsubst_tmp
+
+cd /root/mgtClient/
+envsubst_tmp
+
+rm /root/wlan_config_aps.clear
 
 #sleep 5
 
@@ -121,6 +149,7 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
+
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
     wait $!
@@ -161,9 +190,9 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP -c  /root/pskClient
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP2 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP2.log &
 
 # OPEN .0
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN1 -c /root/openClient/open_supplicant.conf > /root/logs/supplicantOpen1.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN2 -c /root/openClient/open_supplicant.conf > /root/logs/supplicantOpen2.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN3 -c /root/openClient/open_supplicant.conf > /root/logs/supplicantOpen3.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN1 -c /root/openClient/open_supplicant1.conf > /root/logs/supplicantOpen1.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN2 -c /root/openClient/open_supplicant2.conf > /root/logs/supplicantOpen2.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN3 -c /root/openClient/open_supplicant3.conf > /root/logs/supplicantOpen3.log &
 
 # WPA3 .52
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Client/downgrade_psk.conf > /root/logs/supplicantWPA3Downgrade.log &
