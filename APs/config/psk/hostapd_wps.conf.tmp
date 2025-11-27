@@ -1,7 +1,7 @@
 interface=$WLAN_WPS
 driver=nl80211
 ssid=$ESSID_WPS
-channel=8
+channel=$CHANNEL_WPS
 hw_mode=g
 
 # Keep WPS‑friendly security
@@ -10,7 +10,7 @@ wpa=2
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 # drop TKIP
-wpa_passphrase=@MegaPSKP@ssword!@
+wpa_passphrase=$PASS_WPS
 
 ### WPS ###
 eap_server=1
