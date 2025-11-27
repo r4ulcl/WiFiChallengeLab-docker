@@ -1,0 +1,9 @@
+network={
+    ssid="$ESSID_MGT_MD5"
+    key_mgmt=WPA-EAP
+    scan_ssid=1
+    eap=MD5
+    proto=WPA2
+    identity="$IDENTITY_MGT_MD5"
+    password="$PASS_MGT_MD5_CLEAR"
+}

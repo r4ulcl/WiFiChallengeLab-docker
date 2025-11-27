@@ -55,6 +55,8 @@ envsubst_tmp
 cd /etc/freeradius/3.0/mods-config/files/
 envsubst_tmp
 
+rm /root/wlan_config_aps.clear
+
 cd
 
 date
