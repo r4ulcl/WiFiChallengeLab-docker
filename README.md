@@ -3,26 +3,27 @@
 </p>
 
 <p align="center">
-   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/releases">
-    <img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker" alt="GitHub releases">
-  </a>
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers">
-    <img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub stars">
-  </a>
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network">
-    <img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub forks">
-  </a>
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues">
-    <img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub issues">
-  </a>
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub license">
-  </a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/releases"><img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker" alt="GitHub releases"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers"><img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub stars"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network"><img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub forks"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues"><img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub issues"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub license"></a>
 </p>
 
-# WiFiChallengeLab-docker
+<p align="center">
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg" alt="APs CI"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg" alt="Clients CI"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml/badge.svg" alt="nzyme CI"></a>
+</p>
 
-[![Docker Image APs](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-aps) [![Docker Image Clients](https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg)](https://hub.docker.com/r/r4ulcl/wifichallengelab-clients)
+<p align="center">
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml/badge.svg" alt="APs DEV CI"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml/badge.svg" alt="Clients DEV CI"></a>&nbsp;&nbsp;
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml/badge.svg" alt="nzyme DEV CI"></a>
+</p>
+
+<h1 align="left">WiFiChallengeLab-docker</h1>
+
 
 Docker version of WiFiChallenge Lab with modifications in the challenges and improved stability. Debian virtual machine with virtualized networks and clients to perform WiFi attacks on OPN, WPA2, WPA3 and Enterprise networks.
 
