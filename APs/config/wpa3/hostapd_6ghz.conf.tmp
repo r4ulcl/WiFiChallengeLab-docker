@@ -16,7 +16,7 @@ wpa=2
 wpa_key_mgmt=SAE
 ieee80211w=2
 rsn_pairwise=CCMP
-sae_password=$PASS_6GHZ
+sae_password="$PASS_6GHZ_CLEAR"
 sae_require_mfp=1
 sae_pwe=1
 

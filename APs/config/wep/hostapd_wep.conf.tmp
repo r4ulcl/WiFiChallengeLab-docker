@@ -13,4 +13,4 @@ ssid=$ESSID_WEP
 
 auth_algs=1
 wep_default_key=0
-wep_key0=$PASS_WEP
+wep_key0=$PASS_WEP_CLEAR
