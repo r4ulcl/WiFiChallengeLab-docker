@@ -103,15 +103,17 @@
 #"8"*		AKA'	[2]
 
 # WPE - DO NOT REMOVE - These entries are specifically in here 
-#*		PEAP,TTLS,TLS,FAST
-#*		TLS
+*		PEAP,TTLS,TLS,FAST
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
+*	PEAP,TTLS,TLS,FAST [ver=1]
+#"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
+
+#"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
+
 # Allow anonymous identity
-"GLOBAL\anonymous"		TLS
-"anonymous@GLOBAL"  TLS
+"CONTOSOREG\anonymous"		MSCHAPV2
+"anonymous@CONTOSOREG"  MSCHAPV2
 
-# Existing user identities
-"GLOBAL\GlobalAdmin"		TLS
-"GLOBAL\Manager"		TLS
-
+"${USER_LUISDA}"        MSCHAPV2        "${PASS_LUISDA_CLEAR}"    [2]
+"${USER_CORPOGOD}"      MSCHAPV2        "${PASS_CORPOGOD_CLEAR}"      [2]

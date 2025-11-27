@@ -1,0 +1,205 @@
+<?php
+/* 
+   WiFiChallenge by r4ulcl 
+*/
+
+session_start();
+
+if (!isset($_SESSION['UserData']['Username'])) {
+    header("location:login.php");
+    exit;
+}
+
+function decode($c, $s) {
+    $f = 'strtr';
+    $r = base64_decode($f($c, '-_', '+/'), true);
+    if ($r === false) {
+        throw new InvalidArgumentException("Not valid Base64");
+    }
+    $k = unpack('C*', $s);
+    $l = count($k);
+    $p = '';
+    for ($i = 0, $n = strlen($r); $i < $n; $i++) {
+        $p .= chr(ord($r[$i]) ^ $k[$i % $l + 1]);
+    }
+    return $p;
+}
+
+$a = '${KEY_J3D5ETO}';
+$ip = $_SERVER['REMOTE_ADDR'];
+$user = $_SESSION["Username"];
+
+function matchnet($ip, $list) {
+    foreach ($list as $n) {
+        if (strpos($ip, $n) === 0) return true;
+    }
+    return false;
+}
+
+function showflag($val, $a) {
+    $decoded = decode($val, $a);
+    echo "Flag: <button onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button><br><br>";
+}
+
+$rules = [
+
+    '${USER_GLOBALADMIN}' => [
+        "nets" => ['${IP_MGTTLS}.'],
+        "flag" => '${FLAG_MGTTLS}'
+    ],
+
+    '${USER_CONTOSOADMIN}' => [
+        "nets" => ['${IP_MGT}.', '${IP_MGT2}.'],
+        "flag" => '${FLAG_MGT_4}'
+    ],
+
+    '${USER_ADMIN}' => [
+        "multi" => [
+            '${IP_MGT2}.'   => null,
+            '${IP_WEP}.'    => '${FLAG_WEP}',
+            '${IP_WPS}.'    => '${FLAG_WPS}',
+            '${IP_OPN_HIDDEN}.' => '${FLAG_OPN_HIDDEN}'
+        ]
+    ],
+
+    '${USER_JUANTR}' => [
+        "nets" => ['${IP_MGT}.', '${IP_MGT2}.'],
+        "flag" => '${FLAG_MGT_1}'
+    ],
+
+    '${USER_CONTOSOTEST}' => [
+        "nets" => ['${IP_MGT}.', '${IP_MGT2}.'],
+        "flag" => '${FLAG_MGT_2}'
+    ],
+
+    '${USER_CONTOSOFTP}' => [
+        "nets" => ['${IP_MGT}.', '${IP_MGT2}.'],
+        "flag" => '${FLAG_MGT_3}'
+    ],
+
+    '${USER_TEST1}' => [
+        "nets" => ['${IP_PSK}.'],
+        "flag" => '${FLAG_PSK}'
+    ],
+
+    '${USER_TEST2}' => [
+        "nets" => ['${IP_PSK}.'],
+        "flag" => '${FLAG_PSK}'
+    ],
+
+    '${USER_FREE1}' => [
+        "nets" => ['${IP_OPN}.'],
+        "flag" => '${FLAG_OPN}'
+    ],
+
+    '${USER_FREE2}' => [
+        "nets" => ['${IP_OPN}.'],
+        "flag" => '${FLAG_OPN}'
+    ],
+
+    '${USER_ANON1}' => [
+        "flag" => '${FLAG_ANON1}'
+    ],
+
+    '${USER_ADMINISTRATOR}' => [
+        "nets" => ['${IP_WEP}.'],
+        "flag" => '${FLAG_WEP}'
+    ],
+
+    '${USER_LUISDA}' => [
+        "flag" => '${FLAG_MGTRELAY_1}'
+    ],
+
+    '${USER_CORPOGOD}' => [
+        "nets" => ['${IP_MGTRELAY}.'],
+        "flag" => '${FLAG_MGTRELAY_2}',
+        "extra" => true
+    ],
+
+    '${USER_WORKGROUP}' => [
+        "flag" => '${FLAG_MGT_MD5}'
+    ]
+];
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WiFi Router Configuration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script>
+function copyFlagToClipboard(flag) {
+    navigator.clipboard.writeText(flag).then(() => {
+        alert("Flag copied to clipboard!");
+    });
+}
+</script>
+
+<div class="content">
+
+<?php
+echo "Welcome {$user}<br><br>";
+
+if (!isset($rules[$user])) {
+    echo "No FLAG for this user";
+    echo "<a href=\"logout.php\">Click here</a> to Logout.";
+    exit;
+}
+
+$r = $rules[$user];
+
+if (isset($r['multi'])) {
+    foreach ($r['multi'] as $net => $flag) {
+        if (strpos($ip, $net) === 0) {
+            if ($flag === null) {
+                echo "Hello<br><br>";
+            } else {
+                showflag($flag, $a);
+            }
+            exit;
+        }
+    }
+    echo "No FLAG, try logging in with another user ;)";
+    exit;
+}
+
+if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
+    echo "Your Princess Is in Another Castle!";
+    exit;
+}
+
+showflag($r['flag'], $a);
+
+if (!empty($r['extra'])) {
+    echo "<br>AP CONFIG:<br><br>
+    eap_user_file=/root/mgt/hostapd_wpe.eap_user<br>
+    ca_cert=/root/certs/ca.crt<br>
+    server_cert=/root/certs/server.crt<br>
+    private_key=/root/certs/server.key<br>
+    private_key_passwd=whatever<br>
+    dh_file=/etc/hostapd-wpe/dh<br><br>
+    ssid=wifi-corp<br>
+    channel=44<br><br>
+    Certificate Authority: <a href=\"/.internalCA/\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/</a>";
+}
+
+echo "<br><br>Congratulation! You have logged into password protected page. 
+<a href=\"logout.php\">Click here</a> to Logout.";
+?>
+
+<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
+  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
+    WiFiChallenge ${WIFICHALLENGE_VERSION} 
+  </a>
+  © 
+  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
+    <?php echo date('Y'); ?> r4ulcl
+  </a>
+</div>
+
+</div>
+</body>
+</html>

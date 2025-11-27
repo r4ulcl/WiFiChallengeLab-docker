@@ -3,7 +3,7 @@ interface=$WLAN_6GHZ
 driver=nl80211
 country_code=ES
 hw_mode=a
-channel=5
+channel=$CHANNEL_6GHZ
 op_class=131
 ieee80211ax=1
 wmm_enabled=1
@@ -16,7 +16,7 @@ wpa=2
 wpa_key_mgmt=SAE
 ieee80211w=2
 rsn_pairwise=CCMP
-sae_password=spiderman
+sae_password=$PASS_6GHZ
 sae_require_mfp=1
 sae_pwe=1
 

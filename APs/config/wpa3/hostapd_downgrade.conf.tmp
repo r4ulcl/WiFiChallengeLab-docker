@@ -8,7 +8,7 @@ ctrl_interface=/var/run/hostapd
 ctrl_interface_group=0
 ssid=$ESSID_DOWNGRADE
 hw_mode=g
-channel=11
+channel=$CHANNEL_DOWNGRADE
 beacon_int=100
 dtim_period=2
 max_num_sta=255
@@ -42,7 +42,7 @@ eapol_key_index_workaround=0
 eap_server=0
 own_ip_addr=127.0.0.1
 wpa=2
-wpa_passphrase=bubblegum
+wpa_passphrase=$PASS_DOWNGRADE
 wpa_key_mgmt=SAE WPA-PSK
 
 rsn_pairwise=CCMP

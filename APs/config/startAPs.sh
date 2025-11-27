@@ -1,21 +1,28 @@
 #!/bin/bash
 
 # TODO move to Dockerfile
-envsubst_tmp (){
-    for F in ./*.tmp ; do
-        #DO it only first time
-        if [ "$F" != '/*.tmp' ]; then 
-            #echo $F
-            NEW=`basename $F .tmp`
-            envsubst < $F > $NEW
-            rm $F 2> /dev/nil
-        fi
+envsubst_tmp () {
+    VARS=$(printf '${%s} ' \
+        KEY_J3D5ETO \
+        WIFICHALLENGE_VERSION \
+        $(compgen -e | grep -E '^(USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_)') \
+    )
+
+    for F in ./*.tmp; do
+        [ "$F" = './*.tmp' ] && continue
+        NEW=$(basename "$F" .tmp)
+        envsubst "$VARS" < "$F" > "$NEW"
+        rm "$F" 2>/dev/null
     done
 }
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
 source /root/wlan_config_aps
+
+bash /root/decode_passwords.sh /root/wlan_config_aps
+source /root/wlan_config_aps.clear
+
 
 #Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
 
@@ -38,6 +45,14 @@ cd /root/mgt/
 envsubst_tmp
 #WEP
 cd /root/wep/
+envsubst_tmp
+
+# WEB
+cd /var/www/html/
+envsubst_tmp
+
+# Freeradius
+cd /etc/freeradius/3.0/mods-config/files/
 envsubst_tmp
 
 cd
