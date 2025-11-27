@@ -8,4 +8,4 @@ ssid=$ESSID_OTHER1
 wpa=2
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP CCMP
-wpa_passphrase="$PASS_OTHER1"
+wpa_passphrase="$PASS_OTHER1_CLEAR"
