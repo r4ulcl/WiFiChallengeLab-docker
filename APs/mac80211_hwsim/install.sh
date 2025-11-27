@@ -3,16 +3,16 @@
 # install_hwsim.sh – build a side‑by‑side mac80211_hwsim with a
 #                    fixed target version.
 #
-set -euo pipefail
+# set -euo pipefail
 
 ### ---- configuration -------------------------------------------------
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 # ----------------------------------------------------------------------
 
-sudo apt update -y
-sudo apt install linux-headers-$(uname -r) -y
-sudo apt-get install -y gcc-12 g++-12 build-essential
+sudo apt update -y || true
+sudo apt install linux-headers-$(uname -r) -y || true
+sudo apt-get install -y gcc-12 g++-12 build-essential || true
 
 ### ---- Download the code and parche ----------------------------------
 bash patch80211.sh
