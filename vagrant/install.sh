@@ -31,6 +31,16 @@ require_pkg() {
     sudo apt-get install -y "$@"
   fi
 }
+# ---------- Change MODULES to MOST (for qemu) -------------------------------------------------------
+# Update MODULES setting only if needed
+CONF="/etc/initramfs-tools/initramfs.conf"
+if grep -q '^MODULES=dep' "$CONF"; then
+  sudo sed -i 's/^MODULES=dep/MODULES=most/' "$CONF"
+  sudo update-initramfs -u -k all
+  echo "Initramfs rebuilt with MODULES=most"
+else
+  echo "MODULES already set to most"
+fi
 
 # ---------- base system -------------------------------------------------------
 sudo apt-get update
