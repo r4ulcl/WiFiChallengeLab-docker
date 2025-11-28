@@ -5,7 +5,7 @@ envsubst_tmp () {
     VARS=$(printf '${%s} ' \
         KEY_J3D5ETO \
         WIFICHALLENGE_VERSION \
-        $(compgen -e | grep -E '^(USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_)') \
+        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
     )
 
     for F in ./*.tmp; do

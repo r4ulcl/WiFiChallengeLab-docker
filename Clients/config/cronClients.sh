@@ -159,7 +159,7 @@ do
 		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
 		curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' \
 			--data-urlencode "username=$IDENTITY_MGT_PHISHING_GOD_DOMAIN\\$IDENTITY_MGT_PHISHING_GOD_USER" \
-			--data-urlencode "password=$PHISHING_PASS_CLEAR" \
+			--data-urlencode "password=$PASS_PHISHING_CLEAR" \
 			-c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null
 	fi
 
@@ -187,11 +187,11 @@ do
 			echo flock
 			
 			# run smbmap under cpulimit and timeout (background)
-			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "$IDENTITY_MGT_PHISHING_GOD_USER" -p "$PHISHING_PASS_CLEAR" -H "$SERVER" >/dev/null 2>&1 &
+			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "$IDENTITY_MGT_PHISHING_GOD_USER" -p "$PASS_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1 &
 
 			sleep 0.5
             # run smbmap under cpulimit and timeout (foreground)
-            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "IDENTITY_MGT_PHISHING_GOD_USER" -p "$PHISHING_PASS_CLEAR" -H "$SERVER" >/dev/null 2>&1
+            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "IDENTITY_MGT_PHISHING_GOD_USER" -p "$PASS_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1
         ) 9>/var/lock/smbmap.lock
 
     else
