@@ -51,10 +51,10 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
-source /root/wlan_config_aps
+source /root/wlan_config_clients
 
-bash /root/decode_passwords.sh /root/wlan_config_aps
-source /root/wlan_config_aps.clear
+bash /root/decode_passwords.sh /root/wlan_config_clients
+source /root/wlan_config_clients.clear
 
 cd /root/
 envsubst_tmp
@@ -74,7 +74,7 @@ envsubst_tmp
 cd /root/mgtClient/
 envsubst_tmp
 
-rm /root/wlan_config_aps.clear
+rm /root/wlan_config_clients.clear
 
 #sleep 5
 
