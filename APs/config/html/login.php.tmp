@@ -78,7 +78,7 @@ function copyFlagToClipboard(flag) {
 
 # AUTO-LOGIN FOR GLOBAL ADMIN
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTTLS}.') !== false) {
-  $_SESSION['UserData']['Username'] = ${USER_GLOBALADMIN}';
+  $_SESSION['UserData']['Username'] = '${USER_GLOBALADMIN}';
   $_SESSION['Username'] = '${USER_GLOBALADMIN}';
   header("location:index.php");
   exit;
