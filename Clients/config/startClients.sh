@@ -1,21 +1,14 @@
 #!/bin/bash -x
 
 # TODO move to Dockerfile
-envsubst_tmp () {
-    VARS=$(printf '${%s} ' \
-        KEY_J3D5ETO \
-        WIFICHALLENGE_VERSION \
-        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
-    )
-
-    for F in ./*.tmp; do
-        [ "$F" = './*.tmp' ] && continue
-        NEW=$(basename "$F" .tmp)
-        envsubst "$VARS" < "$F" > "$NEW"
-        rm "$F" 2>/dev/null
+envsubst_tmp (){
+    for F in ./*.tmp ; do
+        echo $F
+        NEW=`basename $F .tmp`
+        envsubst < $F > $NEW
+        rm $F
     done
 }
-
 
 function retry { 
     $1 && echo "success" || (echo "fail" && retry $1) 
@@ -55,9 +48,6 @@ source /root/wlan_config_clients
 
 bash /root/decode_passwords.sh /root/wlan_config_clients
 source /root/wlan_config_clients.clear
-
-cd /root/
-envsubst_tmp
 
 cd /root/openClient/
 envsubst_tmp
