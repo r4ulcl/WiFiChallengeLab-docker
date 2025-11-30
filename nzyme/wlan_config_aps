@@ -35,15 +35,15 @@ WLAN_MGT2=wlan16
 IP_MGT2='192.168.6'
 MAC_MGT2='F0:9F:C2:71:22:1A'
 
-ESSID_MGTRELAY='wifi-regional'
+ESSID_MGT_RELAY='wifi-regional'
 WLAN_MGTRELAY=wlan17
 IP_MGTRELAY='192.168.7'
 MAC_MGTRELAY='F0:9F:C2:71:22:16'
 
-ESSID_MGTTLS='wifi-global'
-WLAN_MGTTLS=wlan18
-IP_MGTTLS='192.168.8'
-MAC_MGTTLS='F0:9F:C2:71:22:17'
+ESSID_MGT_TLS='wifi-global'
+WLAN_MGT_TLS=wlan18
+IP_MGT_TLS='192.168.8'
+MAC_MGT_TLS='F0:9F:C2:71:22:17'
 
 # ------------------------------------------
 WLAN_PMKID=wlan19
@@ -92,7 +92,7 @@ IP_MGT_MD5='192.168.17'
 MAC_MGT_MD5='F0:9F:CB:3F:AA:17'
 # ------------------------------------------
 
-ESSID_MGTRELAY_TABLETS='wifi-regional-tablets'
+ESSID_MGT_RELAY_TABLETS='wifi-regional-tablets'
 WLAN_MGTRELAY_TABLETS=wlan28
 IP_MGTRELAY_TABLETS='192.168.18'
 MAC_MGTRELAY_TABLETS='F0:9F:C2:7A:33:28'

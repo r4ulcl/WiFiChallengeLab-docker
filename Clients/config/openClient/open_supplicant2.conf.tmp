@@ -1,7 +1,7 @@
 
 
 network={
-        ssid="$ESSID_OPN2"
+        ssid="$ESSID_OPN"
         key_mgmt=NONE
         scan_ssid=1
 }

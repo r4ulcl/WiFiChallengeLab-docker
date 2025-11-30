@@ -37,8 +37,8 @@ dhcp-host=$WLAN_MGTRELAY_TABLETS,$MAC_MGTRELAY_TABLETS,$IP_MGTRELAY_TABLETS.1
 dhcp-range=$IP_MGTRELAY_TABLETS.2,$IP_MGTRELAY_TABLETS.100,24h
 
 # MGT TLS
-dhcp-host=$WLAN_MGTTLS,$MAC_MGTTLS,$IP_MGTTLS.1
-dhcp-range=$IP_MGTTLS.2,$IP_MGTTLS.100,24h
+dhcp-host=$WLAN_MGT_TLS,$MAC_MGT_TLS,$IP_MGT_TLS.1
+dhcp-range=$IP_MGT_TLS.2,$IP_MGT_TLS.100,24h
 
 # MGT MD5 - Notworking due to hostapd (https://www.techtarget.com/searchnetworking/feature/Choosing-the-right-flavor-of-8021X)
 dhcp-host=$WLAN_MGT_MD5,$MAC_MGT_MD5,$IP_MGT_MD5.1

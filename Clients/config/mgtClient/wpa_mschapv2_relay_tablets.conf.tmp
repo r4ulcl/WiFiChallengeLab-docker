@@ -6,9 +6,9 @@ network={
     scan_ssid=1
     key_mgmt=WPA-EAP
     eap=PEAP
-    anonymous_identity="$ANON_IDENTITY_MGT_RELAY_TABLETS"
-    identity="$IDENTITY_MGT_RELAY_TABLETS"
-    password="$PASS_MGT_RELAY_TABLETS_CLEAR"
+    anonymous_identity="$ANON_IDENTITY_MGT_RELAY"
+    identity="$IDENTITY_MGT_RELAY"
+    password="$PASS_MGT_RELAY_CLEAR"
     phase1="peapver=1"
     phase2="auth=MSCHAPV2"
     ieee80211w=0

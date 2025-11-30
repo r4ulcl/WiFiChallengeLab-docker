@@ -82,7 +82,7 @@ macchanger -m $MAC_MGT2 $WLAN_MGT2 >> /root/logs/macchanger.log # MGT 2
 macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY >> /root/logs/macchanger.log # MGT Relay
 macchanger -m $MAC_MGTRELAY_TABLETS $WLAN_MGTRELAY_TABLETS >> /root/logs/macchanger.log # MGT Relay tablets
 
-macchanger -m $MAC_MGTTLS $WLAN_MGTTLS >> /root/logs/macchanger.log # MGT TLS
+macchanger -m $MAC_MGT_TLS $WLAN_MGT_TLS >> /root/logs/macchanger.log # MGT TLS
 
 macchanger -r $WLAN_OTHER0  >> /root/logs/macchanger.log # Other 0
 macchanger -r $WLAN_OTHER1 >> /root/logs/macchanger.log # Other 1
@@ -143,7 +143,7 @@ ip addr add $IP_MGTRELAY_TABLETS.1/24 dev $WLAN_MGTRELAY_TABLETS
 host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_relay_tablets.log &
 
 # MGT TLS
-ip addr add $IP_MGTTLS.1/24 dev $WLAN_MGTTLS
+ip addr add $IP_MGT_TLS.1/24 dev $WLAN_MGT_TLS
 host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log &
 
 
@@ -152,7 +152,7 @@ ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
 host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log &
 
 #TODO
-#ip addr add $IP_8.1/24 dev $WLAN_MGTTLS
+#ip addr add $IP_8.1/24 dev $WLAN_MGT_TLS
 
 
 # PSK Other

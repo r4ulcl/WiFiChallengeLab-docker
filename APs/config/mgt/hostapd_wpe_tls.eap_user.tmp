@@ -112,5 +112,5 @@
 "anonymous@GLOBAL"  TLS
 
 # Existing user identities
-"${USER_GLOBALADMIN}"      TLS
+"${IDENTITY_MGT_TLS}"      TLS
 "${USER_GLOBALMANAGER}"    TLS
