@@ -1,7 +1,7 @@
 # Configuration file for hostapd-wpe
 
 # Interface - Probably wlan0 for 802.11, eth0 for wired
-interface=$WLAN_MGTTLS
+interface=$WLAN_MGT_TLS
 
 # May have to change these depending on build location
 eap_user_file=/root/mgt/hostapd_wpe_tls.eap_user
@@ -12,8 +12,8 @@ private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 
 # 802.11 Options
-ssid=$ESSID_MGTTLS
-channel=$CHANNEL_MGTTLS
+ssid=$ESSID_MGT_TLS
+channel=$CHANNEL_MGT_TLS
 
 # WPE Options - Dont need to change these to make it all work 
 #

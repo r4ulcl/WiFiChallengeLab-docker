@@ -1,27 +1,57 @@
 ############################################################
-# 2.4/5/6 GHz WiFi Networks — ESSID / WLAN / IP / MAC / FLAG
+# NZYME
 ############################################################
+POSTGRES_DB='nzyme'
+POSTGRES_USER='nzyme'
+POSTGRES_PASSWORD='6iQ8TeFVPQE12ToyyEjf'
 
-WIFICHALLENGE_VERSION='v2.4'
 
-############################
-# OPEN NETWORK (Guest)
-############################
+############################################################
+# OPEN NETWORK — wifi-guest (AP)
+############################################################
 ESSID_OPN='wifi-guest'
 WLAN_OPN='wlan10'
 IP_OPN='192.168.10'
 MAC_OPN='F0:9F:C2:71:22:10'
 CHANNEL_OPN='6'
 
-USER_FREE1='free1'
-PASS_FREE1='AEoIBAwFVxsTEy1oKxQh'
-USER_FREE2='free2'
-PASS_FREE2='f38VQhIXDCMmHkEafmgT'
+USER_WEB_OPN1='free1'
+PASS_WEB_OPN1='AEoIBAwFVxsTEy1oKxQh'
+
+USER_WEB_OPN2='free2'
+PASS_WEB_OPN2='f38VQhIXDCMmHkEafmgT'
+
 FLAG_OPN='LF8FUh5BWX9CSUM8fjdePDNqKhRwVWIdKVBUVlFFXi8RSkZrdDBeP2drekN_HA=='
 
-############################
-# WEP NETWORK (Legacy)
-############################
+
+############ CLIENTS ############
+
+WLAN_OPN1=wlan47
+MAC_OPN1='80:18:44:BF:72:47'
+IP_OPN='192.168.10'
+ESSID_OPN='wifi-guest'
+USER_WEB_OPN1='free1'
+PASS_WEB_OPN1='AEoIBAwFVxsTEy1oKxQh'
+
+WLAN_OPN2=wlan48
+MAC_OPN2='B0:72:BF:B0:78:48'
+IP_OPN='192.168.10'
+ESSID_OPN='wifi-guest'
+USER_WEB_OPN2='free2'
+PASS_WEB_OPN2='f38VQhIXDCMmHkEafmgT'
+
+WLAN_OPN3=wlan49
+MAC_OPN3='B0:72:BF:44:B0:49'
+IP_OPN='192.168.10'
+ESSID_OPN='wifi-guest'
+USER_WEB_OPN3='free1'
+PASS_WEB_OPN3='AEoIBAwFVxsTEy1oKxQh'
+
+
+
+############################################################
+# WEP NETWORK — wifi-old (AP)
+############################################################
 ESSID_WEP='wifi-old'
 WLAN_WEP='wlan11'
 IP_WEP='192.168.1'
@@ -29,14 +59,22 @@ MAC_WEP='F0:9F:C2:71:22:11'
 PASS_WEP='ewIGV1ZHDCpHTA=='
 CHANNEL_WEP='3'
 
-USER_ADMINISTRATOR='administrator'
-PASS_ADMINISTRATOR='ewIGV1ZHDCpHTA=='
 FLAG_WEP='LF8FUh4XXHpAHxJveGZSbWdjfkEnUDBJfAcCB1VDWihGTUBse2UMPjNiL0IiHA=='
 
 
-############################
-# WPA2-PSK (Mobile)
-############################
+############ CLIENTS ############
+
+WLAN_WEP=wlan56
+MAC_WEP='64:32:A8:56:32:56'
+IP_WEP='192.168.1'
+ESSID_WEP='wifi-old'
+PASS_WEP='ewIGV1ZHDCpHTA=='
+
+
+
+############################################################
+# WPA2-PSK MOBILE — wifi-mobile (AP)
+############################################################
 ESSID_PSK='wifi-mobile'
 WLAN_PSK='wlan12'
 IP_PSK='192.168.2'
@@ -44,28 +82,73 @@ MAC_PSK='F0:9F:C2:71:22:12'
 PASS_PSK='OUcFRxIVHT1D'
 CHANNEL_PSK='6'
 
-USER_TEST1='test1'
-PASS_TEST1='BWoCcQYhIR8HQCcaIjsI'
-USER_TEST2='test2'
-PASS_TEST2='eEJSBQ8bFikxOz0IOBcF'
+USER_PSK1='test1'
+PASS_PSK1='BWoCcQYhIR8HQCcaIjsI'
+
+USER_PSK2='test2'
+PASS_PSK2='eEJSBQ8bFikxOz0IOBcF'
 
 FLAG_PSK='LF8FUh5GC3tLSkY_fmVYOWdgeBBxBGscfAoCDFISCnxBHUZqfGNbYm5rLhJ-HA=='
 
-############################
-# WPS (Event WiFi)
-############################
+
+############ CLIENTS ############
+
+WLAN_WPA_PSK=wlan43
+MAC_WPA_PSK='28:6C:07:6F:F9:43'
+IP_PSK='192.168.2'
+ESSID_PSK="wifi-mobile"
+PASS_PSK="OUcFRxIVHT1D"
+ESSID_PSK_EXTRA="AP_router"
+PASS_PSK_EXTRA="cgRQB11BWH1K"
+USER_PSK1='test1'
+PASS_PSK1='BWoCcQYhIR8HQCcaIjsI'
+
+WLAN_WPA_PSK2=wlan44
+MAC_WPA_PSK2='28:6C:07:6F:F9:44'
+IP_PSK='192.168.2'
+USER_PSK2='test2'
+PASS_PSK2='eEJSBQ8bFikxOz0IOBcF'
+
+
+
+############################################################
+# OPEN HIDDEN — wifi-free (AP)
+############################################################
+ESSID_OPN_HIDDEN='wifi-free'
+WLAN_OPN_HIDDEN='wlan26'
+IP_OPN_HIDDEN='192.168.16'
+MAC_OPN_HIDDEN='F0:9F:C2:6A:88:26'
+CHANNEL_OPN_HIDDEN='11'
+FLAG_OPN_HIDDEN='LF8FUh5CV34XHxY4e2MMbTJqeUIlU2ZOfARWDVBFWH1FSEY7LmcIOGE3fxcgHA=='
+
+
+############ CLIENTS ############
+# none
+
+
+
+############################################################
+# WPS EVENT — wifi-event (AP)
+############################################################
 ESSID_WPS='wifi-event'
 WLAN_WPS='wlan13'
 IP_WPS='192.168.3'
 MAC_WPS='F0:9F:C2:71:22:13'
 PASS_WPS='Cn4BUgQkPAUiOQQqOj4YPnYT'
 CHANNEL_WPS='8'
+
 FLAG_WPS='LF8FUh5MWn4XT0Q_fGIMbDRmKUgnVWBLfARUA1JFDn5KG05ofzJdYjEyKBJ_HA=='
 FLAG_WPS2='LF8FUh4XDnsQG0Q8KTQIYzVif0BwAmtAe1EGV1ZBX3hGS05ueGYLb2Awf0N3HA=='
 
-############################
-# KRACK LAB NETWORK
-############################
+
+############ CLIENTS ############
+# none
+
+
+
+############################################################
+# KRACK LAB NETWORK (AP)
+############################################################
 WLAN_KRACK='wlan14'
 IP_KRACK='192.168.4'
 MAC_KRACK='F0:9F:C2:71:22:14'
@@ -73,19 +156,20 @@ PASS_KRACK=''
 CHANNEL_KRACK=''
 FLAG_KRACK=''
 
-############################################################
-# ENTERPRISE / CORPORATE / RADIUS WLANs
-############################################################
 
-############################
-# MGT — Corporate WiFi (EAP)
-############################
+############ CLIENTS ############
+# none
+
+
+
+############################################################
+# CORPORATE WIFI — wifi-corp (AP)
+############################################################
+# MGT AP 1
 ESSID_MGT='wifi-corp'
 WLAN_MGT='wlan15'
 IP_MGT='192.168.5'
 MAC_MGT='F0:9F:C2:71:22:15'
-USER1_MGT=''
-PASS1_MGT=''
 CHANNEL_MGT='44'
 
 USER_JUANTR='CONTOSO\juan.tr'
@@ -96,73 +180,224 @@ USER_CONTOSOTEST='CONTOSO\test'
 PASS_CONTOSOTEST='J1wKXgAN'
 FLAG_MGT_2='LF8FUh5FWyoWHxU_LjJTajFrfBMiVWJKcgRRBlIQXncQSRY8KzUIbzZjfER-HA=='
 
-
 USER_CONTOSOFTP='CONTOSO\ftp'
 PASS_CONTOSOFTP='ewFXAVBCWHY='
 FLAG_MGT_3='LF8FUh5EX3oQShY8K2gIODU1fkUlBTZNf1JQUFRHCn1KTRZtfTUJY25ldEV-HA=='
 
-USER_CONTOSOADMIN='CONTOSO\Administrator'
-PASS_CONTOSOADMIN='GUYUUBcnCi0HCxIZbBE='
+IDENTITY_MGT_GTC='CONTOSO\Administrator'
+PASS_MGT_GTC='GUYUUBcnCi0HCxIZbBE='
 FLAG_MGT_4='LF8FUh5EWytGTkM4eWlYbDQ1fUEkAGsefAMAVFIXCn5FSEdsKDBYbWZlLRAlHA=='
 
 
-############################
-# MGT2 — Corporate WiFi (2nd AP)
-############################
+# MGT AP 2
 ESSID_MGT2='wifi-corp'
 WLAN_MGT2='wlan16'
 IP_MGT2='192.168.6'
 MAC_MGT2='F0:9F:C2:71:22:1A'
-USER1_MGT2=''
-PASS1_MGT2=''
 CHANNEL_MGT2='44'
 FLAG_MGT2='LF8FUh5EX3oQShY8K2gIODU1fkUlBTZNf1JQUFRHCn1KTRZtfTUJY25ldEV-HA=='
 
-############################
-# REGIONAL MGT Relay
-############################
-ESSID_MGTRELAY='wifi-regional'
+
+############ CLIENTS ############
+
+# MSCHAP
+WLAN_MGT_MSCHAP=wlan40
+MAC_MGT_MSCHAP='64:32:A8:07:6C:40'
+IP_MGT='192.168.5.'
+ESSID_MGT_MSCHAP='wifi-corp'
+ANON_IDENTITY_MGT=''
+IDENTITY_MGT_MSCHAP='CONTOSO\juan.tr'
+PASS_MGT_MSCHAP='KEYIWQEbCD1DS0Rt'
+ESSID_MGT_MSCHAP_EXTRA='AP_router'
+PASS_MGT_MSCHAP_EXTRA='cgRQB11BWH1K'
+
+# GTC
+WLAN_MGT_GTC=wlan41
+MAC_MGT_GTC='64:32:A8:BA:6C:41'
+IP_MGT='192.168.5'
+ESSID_MGT='wifi-corp'
+ANON_IDENTITY_MGT='CONTOSO\anonymous'
+IDENTITY_MGT_GTC='CONTOSO\Administrator'
+PASS_MGT_GTC='GUYUUBcnCi0HCxIZbBE='
+
+
+
+############################################################
+# REGIONAL CORPORATE — wifi-regional (AP)
+############################################################
+ESSID_MGT_RELAY='wifi-regional'
 WLAN_MGTRELAY='wlan17'
 IP_MGTRELAY='192.168.7'
 MAC_MGTRELAY='F0:9F:C2:71:22:16'
 CHANNEL_MGTRELAY='44'
 
-USER_LUISDA='CONTOSOREG\luis.da'
-PASS_LUISDA='PwtdUg1CV29EHxQveGcPPg=='
-FLAG_MGTRELAY_1='LF8FUh5HCyoRTkFgfDUMaGJqfRUjAjZOK1ZTAAdHXy1GG05oejIPPjFlLhV0HA=='
+IDENTITY_MGT_RELAY='CONTOSOREG\luis.da'
+PASS_MGT_RELAY='PwtdUg1CV29EHxQveGcPPg=='
+FLAG_MGT_RELAY_1='LF8FUh5HCyoRTkFgfDUMaGJqfRUjAjZOK1ZTAAdHXy1GG05oejIPPjFlLhV0HA=='
 
-USER_CORPOGOD='CORPO\god'
-PASS_CORPOGOD='PlwJWBxF'
-FLAG_MGTRELAY_2='LF8FUh5EWyxDTBNodGcOYjZrdRV3BzZLeFZTAAEVCS0WGhE9eWIPazVneUl-HA=='
+IDENTITY_MGT_RELAY_PHISHING='CORPO\god'
+PASS_MGT_RELAY_PHISHING='PlwJWBxF'
+FLAG_MGT_RELAY_2='LF8FUh5EWyxDTBNodGcOYjZrdRV3BzZLeFZTAAEVCS0WGhE9eWIPazVneUl-HA=='
 
 
-############################
-# GLOBAL / HQ TLS WiFi
-############################
-ESSID_MGTTLS='wifi-global'
-WLAN_MGTTLS='wlan18'
-IP_MGTTLS='192.168.8'
-MAC_MGTTLS='F0:9F:C2:71:22:17'
-USER1_MGTTLS=''
-PASS1_MGTTLS=''
-CHANNEL_MGTTLS='44'
+############ CLIENTS ############
 
-USER_GLOBALADMIN='GLOBAL\GlobalAdmin'
-PASS_GLOBALADMIN='GUYUUBcnGj4XCyQ8LiQYPxdyDA=='
-FLAG_MGTTLS='LF8FUh5NW3YXT084fWRaa2Y3dEZ1UjBOLwtUBlVEWn1KGkE4LzIOOWVjKRMiHA=='
+# Relay client
+WLAN_MGT_RELAY=wlan50
+MAC_MGT_RELAY='64:32:A8:AC:53:50'
+IP_MGTRELAY='192.168.6'
+ESSID_MGT_RELAY='wifi-regional'
+ANON_IDENTITY_MGT_RELAY='CONTOSOREG\anonymous'
+IDENTITY_MGT_RELAY='CONTOSOREG\luis.da'
+PASS_MGT_RELAY='PwtdUg1CV29EHxQveGcPPg=='
 
-############################
-# PMKID Research AP
-############################
-WLAN_PMKID='wlan19'
-IP_PMKID='192.168.9'
-MAC_PMKID='F0:9F:C2:72:33:19'
-PASS_PMKID=''
-CHANNEL_PMKID=''
-FLAG_PMKID=''
+# Tablets
+WLAN_MGT_RELAY_TABLETS_W=wlan54
+MAC_MGT_RELAY_TABLETS_W='64:32:A8:BD:64:54'
+IP_MGTRELAY_TABLETS='192.168.18'
+ESSID_MGT_RELAY_TABLETS='wifi-regional-tablets'
+ANON_IDENTITY_MGT_RELAY='CONTOSOREG\anonymous'
+IDENTITY_MGT_RELAY='CONTOSOREG\luis.da'
+PASS_MGT_RELAY='PwtdUg1CV29EHxQveGcPPg=='
+
+WLAN_MGT_RELAY_TABLETS=wlan55
+MAC_MGT_RELAY_TABLETS='64:32:A8:A9:DE:55'
+IP_MGTRELAY_TABLETS='192.168.18'
+ESSID_MGT_RELAY_TABLETS='wifi-regional-tablets'
+ANON_IDENTITY_MGT_RELAY='CONTOSOREG\anonymous'
+IDENTITY_MGT_RELAY='CONTOSOREG\luis.da'
+PASS_MGT_RELAY='PwtdUg1CV29EHxQveGcPPg=='
+
+
 
 ############################################################
-# HOME / RANDOM / ISP ROUTERS
+# GLOBAL TLS — wifi-global (AP)
+############################################################
+ESSID_MGT_TLS='wifi-global'
+WLAN_MGT_TLS='wlan18'
+IP_MGT_TLS='192.168.8'
+MAC_MGT_TLS='F0:9F:C2:71:22:17'
+CHANNEL_MGT_TLS='44'
+
+IDENTITY_MGT_TLS='GLOBAL\GlobalAdmin'
+PASS_MGT_TLS='GUYUUBcnGj4XCyQ8LiQYPxdyDA=='
+FLAG_MGT_TLS='LF8FUh5NW3YXT084fWRaa2Y3dEZ1UjBOLwtUBlVEWn1KGkE4LzIOOWVjKRMiHA=='
+
+
+############ CLIENTS ############
+
+WLAN_TLS=wlan42
+MAC_TLS='64:32:A8:BA:18:42'
+IP_MGT_TLS='192.168.7'
+ESSID_MGT_TLS='wifi-global'
+ANON_IDENTITY_MGT_TLS='GLOBAL\anonymous'
+IDENTITY_MGT_TLS='GLOBAL\GlobalAdmin'
+PASS_MGT_TLS=''
+
+WLAN_TLS_PHISHING=wlan51
+MAC_TLS_PHISHING='64:32:A8:BC:53:51'
+IP_MGT_TLS='192.168.7'
+ESSID_MGT_TLS='wifi-global'
+ANON_IDENTITY_MGT_TLS='GLOBAL\anonymous'
+IDENTITY_MGT_PHISHING='GLOBAL\Manager'
+PASS_MGT_PHISHING=''
+ESSID_MGT_TLS_EXTRA1='open-wifi'
+ESSID_MGT_TLS_EXTRA2='home-WiFi'
+PASS_MGT_PHISHING_EXTRA2='ewFXAVBCWHY='
+ESSID_MGT_TLS_EXTRA3='WiFi-Restaurant'
+
+IDENTITY_MGT_PHISHING_USER='god'
+IDENTITY_MGT_PHISHING_DOMAIN='CORPO'
+PASS_MGT_PHISHING='PlwJWBxF'
+
+
+
+############################################################
+# IT NETWORK — wifi-IT (AP)
+############################################################
+ESSID_DOWNGRADE='wifi-IT'
+WLAN_DOWNGRADE='wlan25'
+IP_DOWNGRADE='192.168.15'
+MAC_DOWNGRADE='F0:9F:C2:1A:CA:25'
+PASS_DOWNGRADE='KEYGVwkRCDsf'
+CHANNEL_DOWNGRADE='11'
+FLAG_DOWNGRADE='LF8FUh4SW3hAQBVtLmNYbGRlKhB2ADdPeFYGAAFFDChLGhY_dWkIbjIwLhQjHA=='
+
+
+############ CLIENTS ############
+
+WLAN_DOWNGRADE=wlan52
+MAC_DOWNGRADE='10:F9:6F:AC:53:52'
+IP_DOWNGRADE='192.168.15'
+ESSID_DOWNGRADE='wifi-IT'
+PASS_DOWNGRADE='KEYGVwkRCDsf'
+USER_WEB_DOWNGRADE='manager1'
+PASS_WEB_DOWNGRADE='C1IFB1YQKXoA'
+
+
+
+############################################################
+# MANAGEMENT NETWORK — wifi-management (AP)
+############################################################
+ESSID_BRUTEFORCE='wifi-management'
+WLAN_BRUTEFORCE='wlan24'
+IP_BRUTEFORCE='192.168.14'
+MAC_BRUTEFORCE='F0:9F:C2:11:0A:24'
+PASS_BRUTEFORCE='KVsLVgoYDjoXSA=='
+CHANNEL_BRUTEFORCE='11'
+FLAG_BRUTEFORCE='LF8FUh4VXndAHEBgfWheb2IwLkAgBzZJLgFXAFARWH4XSxI_fTdeOTQwdEB3HA=='
+
+
+############ CLIENTS ############
+# none
+
+
+
+############################################################
+# LEGACY MD5 CORP NETWORK — wifi-corp-legacy (AP)
+############################################################
+ESSID_MGT_MD5='wifi-corp-legacy'
+WLAN_MGT_MD5='wlan27'
+IP_MGT_MD5='192.168.17'
+MAC_MGT_MD5='F0:9F:CB:3F:BC:27'
+CHANNEL_MGT_MD5='44'
+
+IDENTITY_MGT_MD5='WORKGROUP\administrator'
+PASS_MGT_MD5='OloKXgMYADcWTg=='
+FLAG_MGT_MD5='LF8FUh5DW3pCT0Y7f2BQaGNmKUIuUzZPf11QBlZEXnhEGkU5LzMPb2RkKRUjHA=='
+
+
+############ CLIENTS ############
+
+WLAN_MGT_MD5=wlan53
+MAC_MGT_MD5='64:32:A8:AD:AB:53'
+IP_MGT_MD5='192.168.16'
+ESSID_MGT_MD5='wifi-corp-legacy'
+ANON_IDENTITY_MGT_MD5=''
+IDENTITY_MGT_MD5='WORKGROUP\administrator'
+PASS_MGT_MD5='OloKXgMYADcWTg=='
+
+
+
+############################################################
+# ENGINEERING 6GHz — wifi-engineering (AP)
+############################################################
+ESSID_6GHZ='wifi-engineering'
+WLAN_6GHZ='wlan29'
+IP_6GHZ='192.168.19'
+MAC_6GHZ='F0:9F:C2:EA:1F:29'
+PASS_6GHZ='OUMNUQAGAi8c'
+CHANNEL_6GHZ='5'
+FLAG_6GHZ='LF8FUh5HWy0QGEBpeWkLODFkLUNzUGZJKFFdAlFFW35BQBFgfyw='
+
+
+############ CLIENTS ############
+# none
+
+
+
+############################################################
+# OTHER NETWORKS (router ISP)
 ############################################################
 
 ESSID_OTHER0='MOVISTAR_JYG2'
@@ -179,7 +414,6 @@ IP_OTHER1='192.168.11'
 MAC_OTHER1='88:15:44:BC:FA:C1'
 PASS_OTHER1='O0QBRxENX3s='
 CHANNEL_OTHER1='11'
-FLAG_OTHER1='LF8FUh4RX3oSTUY9e2IMaDFmLUVwVWZJfFZQAFJFWX5EG0I6LzYPb2ZuKBJ7HA=='
 
 ESSID_OTHER2='vodafone7123'
 WLAN_OTHER2='wlan22'
@@ -187,80 +421,19 @@ IP_OTHER2='192.168.12'
 MAC_OTHER2='88:15:44:BF:99:A2'
 PASS_OTHER2='O0QBRxENX3s='
 CHANNEL_OTHER2='9'
-FLAG_OTHER2='LF8FUh4RX3oSTUY9e2IMaDFmLUVwVWZJfFZQAFJFWX5EG0I6LzYPb2ZuKBJ7HA=='
 
 ESSID_OTHER3='MiFibra-5-D6G3'
 WLAN_OTHER3='wlan23'
 IP_OTHER3='192.168.13'
 MAC_OTHER3='88:15:44:78:8A:F3'
-PASS_OTHER3='O0QBRxENX3g='
+PASS_OTHER3='O0QBRxENX3s='
 CHANNEL_OTHER3='6'
-FLAG_OTHER3='LF8FUh4RX3oSTUY9e2IMaDFmLUVwVWZJfFZQAFJFWX5EG0I6LzYPb2ZuKBJ7HA=='
+
+
 
 ############################################################
-# SPECIAL SECURITY NETWORKS
+# UNSPECIFIED / RESERVE AP
 ############################################################
-
-ESSID_BRUTEFORCE='wifi-management'
-WLAN_BRUTEFORCE='wlan24'
-IP_BRUTEFORCE='192.168.14'
-MAC_BRUTEFORCE='F0:9F:C2:11:0A:24'
-PASS_BRUTEFORCE='KVsLVgoYDjoXSA=='
-CHANNEL_BRUTEFORCE='11'
-FLAG_BRUTEFORCE='LF8FUh4VXndAHEBgfWheb2IwLkAgBzZJLgFXAFARWH4XSxI_fTdeOTQwdEB3HA=='
-
-ESSID_DOWNGRADE='wifi-IT'
-WLAN_DOWNGRADE='wlan25'
-IP_DOWNGRADE='192.168.15'
-MAC_DOWNGRADE='F0:9F:C2:1A:CA:25'
-PASS_DOWNGRADE='KEYGVwkRCDsf'
-CHANNEL_DOWNGRADE='11'
-FLAG_DOWNGRADE='LF8FUh4SW3hAQBVtLmNYbGRlKhB2ADdPeFYGAAFFDChLGhY_dWkIbjIwLhQjHA=='
-
-ESSID_OPN_HIDDEN='wifi-free'
-WLAN_OPN_HIDDEN='wlan26'
-IP_OPN_HIDDEN='192.168.16'
-MAC_OPN_HIDDEN='F0:9F:C2:6A:88:26'
-CHANNEL_OPN_HIDDEN='11'
-FLAG_OPN_HIDDEN='LF8FUh5CV34XHxY4e2MMbTJqeUIlU2ZOfARWDVBFWH1FSEY7LmcIOGE3fxcgHA=='
-
-############################
-# LEGACY MD5 CORP WIFI (no-flag)
-############################
-ESSID_MGT_MD5='wifi-corp-legacy'
-WLAN_MGT_MD5='wlan27'
-IP_MGT_MD5='192.168.17'
-MAC_MGT_MD5='F0:9F:CB:3F:BC:27'
-CHANNEL_MGT_MD5='44'
-
-USER_WORKGROUP='WORKGROUP\administrator'
-PASS_WORKGROUP='OloKXgMYADcWTg=='
-FLAG_MGT_MD5='LF8FUh5DW3pCT0Y7f2BQaGNmKUIuUzZPf11QBlZEXnhEGkU5LzMPb2RkKRUjHA=='
-
-############################
-# REGIONAL TABLETS WiFi
-############################
-ESSID_MGTRELAY_TABLETS='wifi-regional-tablets'
-WLAN_MGTRELAY_TABLETS='wlan28'
-IP_MGTRELAY_TABLETS='192.168.18'
-MAC_MGTRELAY_TABLETS='F0:9F:C2:7A:33:28'
-CHANNEL_MGTRELAY_TABLETS='44'
-FLAG_MGTRELAY_TABLETS='LF8FUh4QCncWThU8f2FfPjFgLUhyU2AafVUBBVBAVndHGBY6eGYJbmYxKBMkHA=='
-
-############################
-# 6GHz ENGINEERING WiFi
-############################
-ESSID_6GHZ='wifi-engineering'
-WLAN_6GHZ='wlan29'
-IP_6GHZ='192.168.19'
-MAC_6GHZ='F0:9F:C2:EA:1F:29'
-PASS_6GHZ='OUMNUQAGAi8c'
-CHANNEL_6GHZ='5'
-FLAG_6GHZ='LF8FUh5HWy0QGEBpeWkLODFkLUNzUGZJKFFdAlFFW35BQBFgfyw='
-
-############################
-# Unspecified / Reserve AP
-############################
 WLAN_20='wlan30'
 IP_20='192.168.20'
 MAC_20=''
@@ -268,20 +441,40 @@ PASS_20=''
 CHANNEL_20=''
 FLAG_20=''
 
+
+
 ############################################################
-# 
+# INTERNAL SYSTEM KEY + LOGIN USERS
 ############################################################
+
 KEY_J3D5ETO='J3d5etoNrywYMQjZWSLqFaRx'
-
-############################################################
-# USERS + PASSWORDS FOR LOGIN SYSTEM (encoded)
-############################################################
-
 
 USER_ADMIN='admin'
 PASS_ADMIN='K1cJXAs='
 FLAG_ADMIN=''
 
-USER_ANON1='anon1'
-PASS_ANON1='CWEDQg9BCRQmFkY6Amcz'
+USER_PSK_NOAP='anon1'
+PASS_PSK_NOAP='CWEDQg9BCRQmFkY6Amcz'
 FLAG_ANON1='LF8FUh5HW3tETkA6fWcPa2RlKkAqUjFOf1dSA1BFWH9FGkA8LzQOa2RzKRUlHA=='
+
+
+############################################################
+# UNUSED / EMPTY CLIENT PLACEHOLDERS
+############################################################
+
+WLAN_=wlan57
+MAC_=''
+IP_=''
+
+WLAN_=wlan58
+MAC_=''
+IP_=''
+
+WLAN_=wlan59
+MAC_=''
+IP_=''
+
+ESSID_MGT_=''
+ANON_IDENTITY_MGT_=''
+IDENTITY_MGT_=''
+PASS_MGT_=''

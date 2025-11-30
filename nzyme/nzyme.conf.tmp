@@ -196,19 +196,19 @@ uplinks: []
     ]
   },
   {
-    ssid: $ESSID_MGTTLS
+    ssid: $ESSID_MGT_TLS
     channels: [44]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
       {
-        address: "$MAC_MGTTLS",
+        address: "$MAC_MGT_TLS",
         fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]
   },
   {
-    ssid: $ESSID_MGTRELAY
+    ssid: $ESSID_MGT_RELAY
     channels: [44]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
@@ -220,7 +220,7 @@ uplinks: []
     ]
   },
   {
-    ssid: $ESSID_MGTRELAY_TABLETS
+    ssid: $ESSID_MGT_RELAY_TABLETS
     channels: [44]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760

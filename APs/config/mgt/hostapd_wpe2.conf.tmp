@@ -12,7 +12,7 @@ private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 
 # 802.11 Options
-ssid=$ESSID_MGT2
+ssid=$ESSID_MGT
 channel=$CHANNEL_MGT2
 
 # WPE Options - Dont need to change these to make it all work 

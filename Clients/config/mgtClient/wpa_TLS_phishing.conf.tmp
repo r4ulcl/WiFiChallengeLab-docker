@@ -1,13 +1,13 @@
 # Cleaned up example, see original wpa_supplicant.conf for comments.
 
 network={
-        ssid="$ESSID_MGT_PHISHING_EXTRA1"
+        ssid="$ESSID_MGT_TLS_EXTRA1"
         key_mgmt=NONE
 		scan_ssid=1
 }
 
 network={
-        ssid="$ESSID_MGT_PHISHING_EXTRA2"
+        ssid="$ESSID_MGT_TLS_EXTRA2"
 	    psk="$PASS_MGT_PHISHING_EXTRA2_CLEAR"
 	    scan_ssid=1
     	key_mgmt=WPA-PSK
@@ -16,20 +16,20 @@ network={
 
 
 network={
-        ssid="$ESSID_MGT_PHISHING_EXTRA3"
+        ssid="$ESSID_MGT_TLS_EXTRA3"
         key_mgmt=NONE
 		scan_ssid=1
 }
 
 network={
-	ssid="$ESSID_MGT_PHISHING"
+	ssid="$ESSID_MGT_TLS"
 	scan_ssid=1
 	mode=0
 	proto=RSN
 	key_mgmt=WPA-EAP
 	auth_alg=OPEN
 	eap=TLS
-    anonymous_identity="$ANON_IDENTITY_MGT_PHISHING"
+    anonymous_identity="$ANON_IDENTITY_MGT_TLS"
 	identity="$IDENTITY_MGT_PHISHING"
 	ca_cert="/root/certs/ca.crt"
 	client_cert="/root/certs/client.crt"

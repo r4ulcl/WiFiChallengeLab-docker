@@ -56,7 +56,7 @@ do
 		-c /tmp/userAdmin -b /tmp/userAdmin &
 
 	# MGT Relay
-	curl -s "http://$IP_MGT_RELAY.1/login.php" --interface $WLAN_MGT_RELAY --compressed \
+	curl -s "http://$IP_MGTRELAY.1/login.php" --interface $WLAN_MGT_RELAY --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_RELAY" \
 		--data-urlencode "Password=$PASS_MGT_RELAY_CLEAR" \
@@ -64,7 +64,7 @@ do
 		-c /tmp/userluis -b /tmp/userluis &
 
 	# MGT TLS
-	curl -s "http://$IP_TLS.1/login.php" --interface $WLAN_TLS --compressed \
+	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_TLS --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_TLS" \
 		--data-urlencode "Password=$PASS_MGT_TLS_CLEAR" \
@@ -72,7 +72,7 @@ do
 		-c /tmp/userGlobal -b /tmp/userGlobal &
 
 	# MGT TLS PHISHING
-	curl -s "http://$IP_TLS_PHISHING.1/login.php" --interface $WLAN_TLS_PHISHING --compressed \
+	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_TLS_PHISHING --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_PHISHING" \
 		--data-urlencode "Password=$PASS_MGT_PHISHING_CLEAR" \
@@ -80,22 +80,22 @@ do
 		-c /tmp/userPhishing -b /tmp/userPhishing &
 
 	# WPA PSK (login only if redirect)
-	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_WPA_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
+	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
 	if [ "$STATUS" -eq 302 ] ; then
-		curl -s "http://$IP_WPA_PSK.1/login.php" --interface $WLAN_WPA_PSK --compressed \
+		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_WPA_PSK --compressed \
 			-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
-			--data-urlencode "Username=$USER_WEB_WPA_PSK" \
-			--data-urlencode "Password=$PASS_WEB_WPA_PSK_CLEAR" \
+			--data-urlencode "Username=$USER_PSK1" \
+			--data-urlencode "Password=$PASS_PSK1_CLEAR" \
 			--data-urlencode "Submit=Login" \
 			-c /tmp/userTest1 -b /tmp/userTest1 &
 	fi
 
-	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_WPA_PSK2.1/lab.php" -c /tmp/userTest2 -b /tmp/userTest2`
+	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_PSK.1/lab.php" -c /tmp/userTest2 -b /tmp/userTest2`
 	if [ "$STATUS" -eq 302 ] ; then
-		curl -s "http://$IP_WPA_PSK2.1/login.php" --interface $WLAN_WPA_PSK2 --compressed \
+		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_WPA_PSK2 --compressed \
 			-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
-			--data-urlencode "Username=$USER_WEB_WPA_PSK2" \
-			--data-urlencode "Password=$PASS_WEB_WPA_PSK2_CLEAR" \
+			--data-urlencode "Username=$USER_PSK2" \
+			--data-urlencode "Password=$PASS_PSK2_CLEAR" \
 			--data-urlencode "Submit=Login" \
 			-c /tmp/userTest2 -b /tmp/userTest2 &
 	fi
@@ -110,27 +110,27 @@ do
 
 	curl -s "http://$WLAN_PSK_NOAP2.1/login.php" --interface $WLAN_PSK_NOAP2 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
-		--data-urlencode "Username=$USER_WEB_WPA_PSK_NOAP" \
-		--data-urlencode "Password=$PASS_WEB_WPA_PSK_NOAP_CLEAR" \
+		--data-urlencode "Username=$USER_PSK_NOAP" \
+		--data-urlencode "Password=$PASS_PSK_NOAP_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userAnon11 -b /tmp/userAnon11 &
 
 	# OPEN (kept literal because you have no variables defined)
-	curl -s "http://$IP_OPN1.1/login.php" --interface $WLAN_OPN1 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN1 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN1" \
 		--data-urlencode "Password=$PASS_WEB_OPN1_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userFree1 -b /tmp/userFree1 &
 
-	curl -s "http://$IP_OPN2.1/login.php" --interface $WLAN_OPN2 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN2 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN2" \
 		--data-urlencode "Password=$PASS_WEB_OPN2_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userFree2 -b /tmp/userFree2 &
 
-	curl -s "http://$IP_OPN3.1/login.php" --interface $WLAN_OPN3 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN3 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN3" \
 		--data-urlencode "Password=$PASS_WEB_OPN3_CLEAR" \
@@ -158,8 +158,8 @@ do
 	if [ -n "$SERVER" ]; then
 		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
 		curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' \
-			--data-urlencode "username=$IDENTITY_MGT_PHISHING_GOD_DOMAIN\\$IDENTITY_MGT_PHISHING_GOD_USER" \
-			--data-urlencode "password=$PASS_PHISHING_CLEAR" \
+			--data-urlencode "username=$IDENTITY_MGT_PHISHING_DOMAIN\\$IDENTITY_MGT_PHISHING_USER" \
+			--data-urlencode "password=$PASS_MGT_PHISHING_CLEAR" \
 			-c /tmp/userTLSPhishing -b /tmp/userTLSPhishing > /dev/null
 	fi
 
@@ -187,11 +187,11 @@ do
 			echo flock
 			
 			# run smbmap under cpulimit and timeout (background)
-			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "$IDENTITY_MGT_PHISHING_GOD_USER" -p "$PASS_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1 &
+			timeout -k 1 10s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_DOMAIN" -u "$IDENTITY_MGT_PHISHING_USER" -p "$PASS_MGT_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1 &
 
 			sleep 0.5
             # run smbmap under cpulimit and timeout (foreground)
-            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_GOD_DOMAIN" -u "IDENTITY_MGT_PHISHING_GOD_USER" -p "$PASS_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1
+            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_DOMAIN" -u "IDENTITY_MGT_PHISHING_USER" -p "$PASS_MGT_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1
         ) 9>/var/lock/smbmap.lock
 
     else

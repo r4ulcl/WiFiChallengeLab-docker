@@ -25,12 +25,12 @@ function retry {
 function opnConnect {
     WLAN=$1
     IP=$2
-    IP_OPN1=192.168.10
+    IP_OPN=192.168.10
 	echo "Starting $WLAN"
 	retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
 
     sleep 10
-    curl --silent http://$IP_OPN1.1 -L
+    curl --silent http://$IP_OPN.1 -L
 
 
 	# Remove IP to avoid Ip conflict
@@ -204,30 +204,30 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WEP -c /root/wepClient/wep.c
 sleep 10
 
 #OPN GET IP and accept captive portal
-opnConnect $WLAN_OPN1 $IP_OPN1.100 > /root/logs/OPNClients$WLAN_OPN1.log 2>&1 &
-opnConnect $WLAN_OPN2 $IP_OPN1.101 > /root/logs/OPNClients$WLAN_OPN2.log 2>&1 &
-opnConnect $WLAN_OPN3 $IP_OPN1.102 > /root/logs/OPNClients$WLAN_OPN3.log 2>&1 &
+opnConnect $WLAN_OPN1 $IP_OPN.100 > /root/logs/OPNClients$WLAN_OPN1.log 2>&1 &
+opnConnect $WLAN_OPN2 $IP_OPN.101 > /root/logs/OPNClients$WLAN_OPN2.log 2>&1 &
+opnConnect $WLAN_OPN3 $IP_OPN.102 > /root/logs/OPNClients$WLAN_OPN3.log 2>&1 &
 
 LAST2=$!
 
 sleep 5
 
-ping $IP_OPN1.1 > /dev/nill &
-ping $IP_OPN2.1 > /dev/nill &
-ping $IP_OPN3.1 > /dev/nill &
-ping $IP_MGT_MSCHAP.1 > /dev/nill &
-ping $IP_MGT_GTC.1 > /dev/nill &
-ping $IP_TLS.1 > /dev/nill &
-ping $IP_WPA_PSK.1 > /dev/nill &
-ping $IP_WPA_PSK2.1 > /dev/nill &
+ping $IP_OPN.1 > /dev/nill &
+ping $IP_OPN.1 > /dev/nill &
+ping $IP_OPN.1 > /dev/nill &
+ping $IP_MGT.1 > /dev/nill &
+ping $IP_MGT.1 > /dev/nill &
+ping $IP_MGT_TLS.1 > /dev/nill &
+ping $IP_PSK.1 > /dev/nill &
+ping $IP_PSK.1 > /dev/nill &
 ping $IP_PSK_NOAP.1 > /dev/nill &
-ping $IP_PSK_NOAP2.1 > /dev/nill &
-ping $IP_MGT_RELAY.1 > /dev/nill &
-ping $IP_TLS_PHISHING.1 > /dev/nill &
+ping $IP_PSK_NOAP.1 > /dev/nill &
+ping $IP_MGTRELAY.1 > /dev/nill &
+ping $IP_MGT_TLS.1 > /dev/nill &
 ping $IP_DOWNGRADE.1 > /dev/nill &
 ping $IP_MGT_MD5.1 > /dev/nill &
-ping $IP_MGT_RELAY_TABLETS_W.1 > /dev/nill &
-ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
+ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
+ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
 ping $IP_WEP.1 > /dev/nill &
 
 sleep 10 && echo "ALL SET"

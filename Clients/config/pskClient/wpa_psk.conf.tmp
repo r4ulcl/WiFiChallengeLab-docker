@@ -1,16 +1,16 @@
 
 
 network={
-    ssid="$ESSID_WPA_PSK_EXTRA"
-    psk="$PASS_WPA_PSK_EXTRA_CLEAR"
+    ssid="$ESSID_PSK_EXTRA"
+    psk="$PASS_PSK_EXTRA_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2
 }
 
 network={
-    ssid="$ESSID_WPA_PSK"
-    psk="$PASS_WPA_PSK_CLEAR"
+    ssid="$ESSID_PSK"
+    psk="$PASS_PSK_CLEAR"
     scan_ssid=1
     key_mgmt=WPA-PSK
     proto=WPA2

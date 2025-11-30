@@ -1,1 +1,1 @@
-$USER_WORKGROUP Cleartext-Password := "$PASS_WORKGROUP_CLEAR"
+$IDENTITY_MGT_MD5 Cleartext-Password := "$PASS_MGT_MD5_CLEAR"
