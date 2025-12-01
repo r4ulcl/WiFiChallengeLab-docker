@@ -40,16 +40,20 @@ DECODE() {
 }
 
 OUT="${CONFIG_FILE}.clear"
-
 echo '# AUTO-GENERATED DO NOT EDIT' > "$OUT"
 
-# Find PASS_ variables
-for VAR in $(grep -oE '^PASS_[A-Za-z0-9_]+' "$CONFIG_FILE"); do
-    ENC=$(grep "^$VAR=" "$CONFIG_FILE" | sed -E "s/^[^']*'([^']*)'.*/\1/")
-    CLEAR=$(DECODE "$ENC")
+# Only capture valid lines like:
+# PASS_SOMETHING='encodedvalue'
+grep -E "^[[:space:]]*PASS_[A-Za-z0-9_]+='[^']*'" "$CONFIG_FILE" | \
+while IFS='=' read -r VAR VALUE; do
 
-    # Use single quotes instead of double
-    echo "${VAR}_CLEAR='$CLEAR'" >> "$OUT"
+    VAR=$(echo "$VAR" | tr -d ' ')
+    ENC=$(echo "$VALUE" | sed -E "s/^'([^']*)'.*/\1/")
+
+    if [ -n "$ENC" ]; then
+        CLEAR=$(DECODE "$ENC")
+        echo "${VAR}_CLEAR='$CLEAR'" >> "$OUT"
+    fi
 done
 
 echo "Generated: $OUT"
