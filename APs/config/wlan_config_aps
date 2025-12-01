@@ -440,7 +440,20 @@ USER_ADMIN='admin'
 PASS_ADMIN='K1cJXAs='
 FLAG_ADMIN=''
 
+
+############################################################
+# NOAP
+############################################################
 # NOAP Client
+WLAN_PSK_NOAP=wlan45
+MAC_PSK_NOAP='B4:99:BA:6F:F9:45'
+IP_PSK_NOAP='10.10.1'
+
+WLAN_PSK_NOAP2=wlan46
+MAC_PSK_NOAP2='78:C1:A7:BF:72:46'
+IP_PSK_NOAP2='10.10.1'
+
+
 ESSID_PSK_NOAP='wifi-offices'
 USER_PSK_NOAP='anon1'
 PASS_PSK_NOAP='OlIXRhIbHSpD'
