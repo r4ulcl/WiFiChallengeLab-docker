@@ -1,12 +1,18 @@
 #!/bin/bash -x
 
 # TODO move to Dockerfile
-envsubst_tmp (){
-    for F in ./*.tmp ; do
-        echo $F
-        NEW=`basename $F .tmp`
-        envsubst < $F > $NEW
-        rm $F
+envsubst_tmp () {
+    VARS=$(printf '${%s} ' \
+        KEY_J3D5ETO \
+        WIFICHALLENGE_VERSION \
+        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
+    )
+
+    for F in ./*.tmp; do
+        [ "$F" = './*.tmp' ] && continue
+        NEW=$(basename "$F" .tmp)
+        envsubst "$VARS" < "$F" > "$NEW"
+        rm "$F" 2>/dev/null
     done
 }
 

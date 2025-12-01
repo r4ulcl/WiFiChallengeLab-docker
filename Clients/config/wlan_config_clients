@@ -447,9 +447,13 @@ USER_ADMIN='admin'
 PASS_ADMIN='K1cJXAs='
 FLAG_ADMIN=''
 
+# NOAP Client
+ESSID_PSK_NOAP='wifi-offices'
 USER_PSK_NOAP='anon1'
 PASS_PSK_NOAP='CWEDQg9BCRQmFkY6Amcz'
 FLAG_ANON1='LF8FUh5HW3tETkA6fWcPa2RlKkAqUjFOf1dSA1BFWH9FGkA8LzQOa2RzKRUlHA=='
+ESSID_PSK_NOAP_EXTRA='Jason'
+PASS_PSK_NOAP_EXTRA='CWEDQg9BCRQmFkY6Amcz'
 
 
 ############################################################
