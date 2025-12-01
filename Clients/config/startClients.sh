@@ -76,27 +76,27 @@ rm /root/wlan_config_clients.clear
 
 #sudo modprobe mac80211_hwsim radios=13
 #40-59
-macchanger -m $MAC_MGT_MSCHAP $WLAN_MGT_MSCHAP > /root/logs/macchanger.log 
-macchanger -m $MAC_MGT_GTC $WLAN_MGT_GTC >> /root/logs/macchanger.log
-macchanger -m $MAC_TLS $WLAN_TLS >> /root/logs/macchanger.log
-macchanger -m $MAC_TLS_PHISHING $WLAN_TLS_PHISHING >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY_TABLETS_W $WLAN_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.log 
+macchanger -m $MAC_MGT_GTC $WLAN_CLIENT_MGT_GTC >> /root/logs/macchanger.log
+macchanger -m $MAC_TLS $WLAN_CLIENT_MGT_TLS >> /root/logs/macchanger.log
+macchanger -m $MAC_TLS_PHISHING $WLAN_CLIENT_MGT_TLS_PHISHING >> /root/logs/macchanger.log
+macchanger -m $MAC_MGT_RELAY $WLAN_CLIENT_MGT_RELAY >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS_W $WLAN_CLIENT_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS $WLAN_CLIENT_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
 
-macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_MD5 $WLAN_CLIENT_MGT_MD5 >> /root/logs/macchanger.log
 
-macchanger -m $MAC_WPA_PSK $WLAN_WPA_PSK >> /root/logs/macchanger.log
-macchanger -m $MAC_WPA_PSK2 $WLAN_WPA_PSK2 >> /root/logs/macchanger.log
+macchanger -m $MAC_WPA_PSK $WLAN_CLIENT_PSK >> /root/logs/macchanger.log
+macchanger -m $MAC_WPA_PSK2 $WLAN_CLIENT_PSK2 >> /root/logs/macchanger.log
 
 macchanger -m $MAC_PSK_NOAP $WLAN_PSK_NOAP >> /root/logs/macchanger.log
 macchanger -m $MAC_PSK_NOAP2 $WLAN_PSK_NOAP2 >> /root/logs/macchanger.log
 
-macchanger -m $MAC_OPN1 $WLAN_OPN1 >> /root/logs/macchanger.log
-macchanger -m $MAC_OPN2 $WLAN_OPN2 >> /root/logs/macchanger.log
-macchanger -m $MAC_OPN3 $WLAN_OPN3 >> /root/logs/macchanger.log
-macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log
-macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log
+macchanger -m $MAC_OPN1 $WLAN_CLIENT_OPN1 >> /root/logs/macchanger.log
+macchanger -m $MAC_OPN2 $WLAN_CLIENT_OPN2 >> /root/logs/macchanger.log
+macchanger -m $MAC_OPN3 $WLAN_CLIENT_OPN3 >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_DOWNGRADE $WLAN_CLIENT_SAE_DOWNGRADE >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_WEP $WLAN_CLIENT_WEP >> /root/logs/macchanger.log
 
 
 
@@ -129,14 +129,14 @@ bash /root/cronClients.sh > /root/logs/cronClients.log &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_MSCHAP -c /root/mgtClient/wpa_mschapv2.conf >> /root/logs/supplicantMSCHAP.log &
+    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_MSCHAP -c /root/mgtClient/wpa_mschapv2.conf >> /root/logs/supplicantMSCHAP.log &
     wait $!
 done &
 
 while :
 do
     TIMEOUT=$(( ( RANDOM % 120 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_GTC -c /root/mgtClient/wpa_gtc.conf  >> /root/logs/supplicantGTC.log &
+    sudo timeout -k 1s ${TIMEOUT}s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_GTC -c /root/mgtClient/wpa_gtc.conf  >> /root/logs/supplicantGTC.log &
     wait $!
 done &
 
@@ -144,10 +144,10 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
 
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
     wait $!
 done &
 
@@ -155,7 +155,7 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
     wait $!
 done &
 
@@ -163,7 +163,7 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 30 )  + 30 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_TLS_PHISHING -c /root/mgtClient/wpa_TLS_phishing.conf >> /root/logs/supplicantTLS_phishing.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS_PHISHING -c /root/mgtClient/wpa_TLS_phishing.conf >> /root/logs/supplicantTLS_phishing.log &
     wait $!
 done &
 
@@ -171,7 +171,7 @@ done &
 while :
 do
     TIMEOUT=$(( ( RANDOM % 60 )  + 30 ))
-    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_MGT_MD5 -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_MD5 -c /root/mgtClient/wpa_md5.conf >> /root/logs/supplicantMD5.log &
     wait $!
 done &
 
@@ -179,30 +179,30 @@ done &
 LAST=$!
 
 # PSK .2
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WPA_PSK  -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WPA_PSK2 -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK2.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_PSK  -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_PSK2 -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK2.log &
 
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP -c  /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP.log &
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_PSK_NOAP2 -c /root/pskClient/wpa_psk_noAP.conf > /root/logs/supplicantNoAP2.log &
 
 # OPEN .0
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN1 -c /root/openClient/open_supplicant1.conf > /root/logs/supplicantOpen1.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN2 -c /root/openClient/open_supplicant2.conf > /root/logs/supplicantOpen2.log &
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_OPN3 -c /root/openClient/open_supplicant3.conf > /root/logs/supplicantOpen3.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OPN1 -c /root/openClient/open_supplicant1.conf > /root/logs/supplicantOpen1.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OPN2 -c /root/openClient/open_supplicant2.conf > /root/logs/supplicantOpen2.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OPN3 -c /root/openClient/open_supplicant3.conf > /root/logs/supplicantOpen3.log &
 
 # WPA3 .52
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_DOWNGRADE -c /root/wpa3Client/downgrade_psk.conf > /root/logs/supplicantWPA3Downgrade.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_SAE_DOWNGRADE -c /root/wpa3Client/downgrade_psk.conf > /root/logs/supplicantWPA3Downgrade.log &
 
 # WEP
-sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_WEP -c /root/wepClient/wep.conf > /root/logs/supplicantWEP.log &
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_WEP -c /root/wepClient/wep.conf > /root/logs/supplicantWEP.log &
 
 
 sleep 10
 
 #OPN GET IP and accept captive portal
-opnConnect $WLAN_OPN1 $IP_OPN.100 > /root/logs/OPNClients$WLAN_OPN1.log 2>&1 &
-opnConnect $WLAN_OPN2 $IP_OPN.101 > /root/logs/OPNClients$WLAN_OPN2.log 2>&1 &
-opnConnect $WLAN_OPN3 $IP_OPN.102 > /root/logs/OPNClients$WLAN_OPN3.log 2>&1 &
+opnConnect $WLAN_CLIENT_OPN1 $IP_OPN.100 > /root/logs/OPNClients$WLAN_CLIENT_OPN1.log 2>&1 &
+opnConnect $WLAN_CLIENT_OPN2 $IP_OPN.101 > /root/logs/OPNClients$WLAN_CLIENT_OPN2.log 2>&1 &
+opnConnect $WLAN_CLIENT_OPN3 $IP_OPN.102 > /root/logs/OPNClients$WLAN_CLIENT_OPN3.log 2>&1 &
 
 LAST2=$!
 

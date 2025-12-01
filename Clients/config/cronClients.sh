@@ -40,7 +40,7 @@ done &
 while :
 do
 	# MGT MSCHAP
-	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_MGT_MSCHAP --compressed \
+	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_CLIENT_MGT_MSCHAP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_MSCHAP" \
 		--data-urlencode "Password=$PASS_MGT_MSCHAP_CLEAR" \
@@ -48,7 +48,7 @@ do
 		-c /tmp/userjuan -b /tmp/userjuan &
 
 	# MGT GTC
-	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_MGT_GTC --compressed \
+	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_CLIENT_MGT_GTC --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_GTC" \
 		--data-urlencode "Password=$PASS_MGT_GTC_CLEAR" \
@@ -56,7 +56,7 @@ do
 		-c /tmp/userAdmin -b /tmp/userAdmin &
 
 	# MGT Relay
-	curl -s "http://$IP_MGTRELAY.1/login.php" --interface $WLAN_MGT_RELAY --compressed \
+	curl -s "http://$IP_MGTRELAY.1/login.php" --interface $WLAN_CLIENT_MGT_RELAY --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_RELAY" \
 		--data-urlencode "Password=$PASS_MGT_RELAY_CLEAR" \
@@ -64,7 +64,7 @@ do
 		-c /tmp/userluis -b /tmp/userluis &
 
 	# MGT TLS
-	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_TLS --compressed \
+	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_CLIENT_MGT_TLS --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_TLS" \
 		--data-urlencode "Password=$PASS_MGT_TLS_CLEAR" \
@@ -72,7 +72,7 @@ do
 		-c /tmp/userGlobal -b /tmp/userGlobal &
 
 	# MGT TLS PHISHING
-	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_TLS_PHISHING --compressed \
+	curl -s "http://$IP_MGT_TLS.1/login.php" --interface $WLAN_CLIENT_MGT_TLS_PHISHING --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_PHISHING" \
 		--data-urlencode "Password=$PASS_MGT_PHISHING_CLEAR" \
@@ -82,7 +82,7 @@ do
 	# WPA PSK (login only if redirect)
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
 	if [ "$STATUS" -eq 302 ] ; then
-		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_WPA_PSK --compressed \
+		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_CLIENT_PSK --compressed \
 			-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 			--data-urlencode "Username=$USER_PSK1" \
 			--data-urlencode "Password=$PASS_PSK1_CLEAR" \
@@ -92,7 +92,7 @@ do
 
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_PSK.1/lab.php" -c /tmp/userTest2 -b /tmp/userTest2`
 	if [ "$STATUS" -eq 302 ] ; then
-		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_WPA_PSK2 --compressed \
+		curl -s "http://$IP_PSK.1/login.php" --interface $WLAN_CLIENT_PSK2 --compressed \
 			-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 			--data-urlencode "Username=$USER_PSK2" \
 			--data-urlencode "Password=$PASS_PSK2_CLEAR" \
@@ -116,21 +116,21 @@ do
 		-c /tmp/userAnon11 -b /tmp/userAnon11 &
 
 	# OPEN (kept literal because you have no variables defined)
-	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN1 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_CLIENT_OPN1 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN1" \
 		--data-urlencode "Password=$PASS_WEB_OPN1_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userFree1 -b /tmp/userFree1 &
 
-	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN2 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_CLIENT_OPN2 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN2" \
 		--data-urlencode "Password=$PASS_WEB_OPN2_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userFree2 -b /tmp/userFree2 &
 
-	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_OPN3 --compressed \
+	curl -s "http://$IP_OPN.1/login.php" --interface $WLAN_CLIENT_OPN3 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_OPN3" \
 		--data-urlencode "Password=$PASS_WEB_OPN3_CLEAR" \
@@ -138,7 +138,7 @@ do
 		-c /tmp/userFree3 -b /tmp/userFree3 &
 
 	# WPA3 Downgrade
-	curl -s "http://$IP_DOWNGRADE.1/login.php" --interface $WLAN_DOWNGRADE --compressed \
+	curl -s "http://$IP_DOWNGRADE.1/login.php" --interface $WLAN_CLIENT_SAE_DOWNGRADE --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEB_DOWNGRADE" \
 		--data-urlencode "Password=$PASS_WEB_DOWNGRADE_CLEAR" \
@@ -152,7 +152,7 @@ done &
 # Phishing 
 while :
 do
-	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
+	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_CLIENT_MGT_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
 
 	if [ -n "$SERVER" ]; then
@@ -171,8 +171,8 @@ while :
 do
 	echo loop
 	# TODO Responder client connect
-	#dhclien-wifichallenge -r $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
-	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_TLS_PHISHING 2> /tmp/dhclien-wifichallenge-Responder
+	#dhclien-wifichallenge -r $WLAN_CLIENT_MGT_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
+	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_CLIENT_MGT_TLS_PHISHING 2> /tmp/dhclien-wifichallenge-Responder
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-Responder | awk '{print $2}' | head -n 1`
 	# Responder ""vuln"" - 20 seconds because the SMB takes aprox 10 seconds in respond "Authentication error"
 	# In background to be sure
@@ -203,7 +203,7 @@ done &
 while :
 do
 	#Infine traffic WEP
-	dhclien-wifichallenge $WLAN_WEP -v
+	dhclien-wifichallenge $WLAN_CLIENT_WEP -v
 	ping $IP_WEP.1 -s 1000 -f & 
 	ping $IP_WEP.1 -s 1000 -f
 done &
