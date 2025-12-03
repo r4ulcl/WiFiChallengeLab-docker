@@ -10,7 +10,7 @@ wpa=2
 wpa_key_mgmt=WPA-PSK
 rsn_pairwise=CCMP
 # drop TKIP
-wpa_passphrase="$PASS_WPS_CLEAR"
+wpa_passphrase=$PASS_WPS_CLEAR
 
 ### WPS ###
 eap_server=1

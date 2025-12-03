@@ -42,7 +42,7 @@ eapol_key_index_workaround=0
 eap_server=0
 own_ip_addr=127.0.0.1
 wpa=2
-wpa_passphrase="$PASS_DOWNGRADE_CLEAR"
+wpa_passphrase=$PASS_DOWNGRADE_CLEAR
 wpa_key_mgmt=SAE WPA-PSK
 
 rsn_pairwise=CCMP
