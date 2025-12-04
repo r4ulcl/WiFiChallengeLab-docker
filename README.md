@@ -168,7 +168,7 @@ To recreate the Docker files with the changes made, modify the docker-compose.ym
 
 ## Open Source References
 
-See `OPEN_SOURCE_REFERENCES.md` for the upstream projects, repositories, and licenses used in the lab. Update it when adding tools or changing install scripts.
+See [OPEN_SOURCE_REFERENCES.md](./OPEN_SOURCE_REFERENCES.md) for the upstream projects, repositories, and licenses used in the lab. Update it when adding tools or changing install scripts.
 
 
 ## Support this project
