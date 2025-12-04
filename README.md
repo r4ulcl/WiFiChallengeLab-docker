@@ -166,6 +166,11 @@ To modify the files you can download the repository and edit both APs and client
 
 To recreate the Docker files with the changes made, modify the docker-compose.yml file by commenting out the "image:" line in each Docker and uncommenting the line with "build:". Then use "docker compose build" to create a new version.
 
+## Open Source References
+
+See `OPEN_SOURCE_REFERENCES.md` for the upstream projects, repositories, and licenses used in the lab. Update it when adding tools or changing install scripts.
+
+
 ## Support this project
 
 ### Certified WiFiChallenge Professional (CWP)
