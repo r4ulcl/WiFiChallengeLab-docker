@@ -70,6 +70,9 @@ envsubst_tmp
 cd /root/mgtClient/
 envsubst_tmp
 
+cd /root/oweClient/
+envsubst_tmp
+
 rm /root/wlan_config_clients.clear
 
 #sleep 5
@@ -98,11 +101,11 @@ macchanger -m $MAC_OPN3 $WLAN_CLIENT_OPN3 >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_DOWNGRADE $WLAN_CLIENT_SAE_DOWNGRADE >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_WEP $WLAN_CLIENT_WEP >> /root/logs/macchanger.log
 
+macchanger -m $MAC_CLIENT_OWE $WLAN_CLIENT_OWE >> /root/logs/macchanger.log
+
 
 
 #TODO
-macchanger -r wlan56 >> /root/logs/macchanger.log
-macchanger -r wlan57 >> /root/logs/macchanger.log
 macchanger -r wlan58 >> /root/logs/macchanger.log
 macchanger -r wlan59 >> /root/logs/macchanger.log
 
@@ -196,6 +199,9 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_SAE_DOWNGRADE -c /roo
 # WEP
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_WEP -c /root/wepClient/wep.conf > /root/logs/supplicantWEP.log &
 
+# OWE
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OWE -c /root/oweClient/owe.conf > /root/logs/supplicantOWE.log &
+
 
 sleep 10
 
@@ -225,6 +231,7 @@ ping $IP_MGT_MD5.1 > /dev/nill &
 ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
 ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
 ping $IP_WEP.1 > /dev/nill &
+ping $IP_OWE.1 > /dev/nill &
 
 sleep 10 && echo "ALL SET"
 

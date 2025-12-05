@@ -46,6 +46,9 @@ envsubst_tmp
 #WEP
 cd /root/wep/
 envsubst_tmp
+#OWE
+cd /root/owe/
+envsubst_tmp
 
 # WEB
 cd /var/www/html/
@@ -97,6 +100,7 @@ macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
+macchanger -m $WLAN_OWE $MAC_OWE >> /root/logs/macchanger.log # TODO
 
 
 mkdir /root/logs/ 2> /dev/nil
@@ -181,6 +185,11 @@ host_aps_apd /root/wpa3/hostapd_6ghz.conf > /root/logs/hostapd_6ghz.log &
 # WEP
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP
 host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log &
+
+
+# OWE
+ip addr add $IP_OWE.1/24 dev $WLAN_OWE
+host_aps_apd /root/owe/hostapd_owe.conf > /root/logs/hostapd_owe.log &
 
 #ip addr del $IP_190.15/24 dev enp0s3
 

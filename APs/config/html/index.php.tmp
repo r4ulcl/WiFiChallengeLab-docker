@@ -97,6 +97,11 @@ $rules = [
         "flag" => '${FLAG_OPN}'
     ],
 
+    '${USER_WEB_OWE}' => [
+        "nets" => ['${IP_OWE}.'],
+        "flag" => '${FLAG_OWE}'
+    ],
+
     '${USER_PSK_NOAP}' => [
         "flag" => '${FLAG_ANON1}'
     ],

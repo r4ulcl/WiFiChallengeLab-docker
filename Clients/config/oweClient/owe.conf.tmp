@@ -1,0 +1,6 @@
+network={
+    ssid="$ESSID_OWE"
+    key_mgmt=OWE
+    proto=RSN
+    pairwise=GCMP-256
+}
