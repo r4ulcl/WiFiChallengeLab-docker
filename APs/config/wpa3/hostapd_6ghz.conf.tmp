@@ -1,4 +1,4 @@
-### /etc/hostapd/hostapd.conf  – 6 GHz, WPA3-SAE ###
+### 6 GHz, WPA3-SAE ###
 interface=$WLAN_6GHZ
 driver=nl80211
 country_code=ES

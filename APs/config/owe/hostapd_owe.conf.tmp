@@ -1,9 +1,14 @@
 interface=$WLAN_OWE
 driver=nl80211
-
-ssid=$ESSID_OWE
+country_code=ES
 hw_mode=a
 channel=$CHANNEL_OWE
+op_class=131
+ieee80211ax=1
+wmm_enabled=1
+
+# SSID ------------------------------------------------------------------
+ssid=$ESSID_OWE
 
 ieee80211n=1
 ieee80211ac=1
@@ -15,4 +20,4 @@ wpa_key_mgmt=OWE
 wpa_pairwise=CCMP
 rsn_pairwise=CCMP
 
-ieee80211w=1
+ieee80211w=2

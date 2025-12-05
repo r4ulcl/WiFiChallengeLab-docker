@@ -4,5 +4,5 @@ network={
     proto=RSN
     pairwise=CCMP
     group=CCMP
-    ieee80211w=1
+    ieee80211w=2
 }
