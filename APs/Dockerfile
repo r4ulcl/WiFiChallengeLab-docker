@@ -22,6 +22,7 @@ COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
 COPY config/wpa3/ /root/wpa3/
 COPY config/wep/ /root/wep/
+COPY config/owe/ /root/owe/
 COPY mac80211_hwsim/ /root/mac80211_hwsim_WiFiChallenge
 COPY config/decode_passwords.sh /root/decode_passwords.sh
 

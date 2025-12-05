@@ -16,7 +16,8 @@ COPY config/mgtClient/ /root/mgtClient/
 COPY config/openClient/ /root/openClient/
 COPY config/pskClient/ /root/pskClient/
 COPY config/wpa3Client/ /root/wpa3Client/
-COPY config/wepClient /root/wepClient
+COPY config/wepClient /root/wepClient/
+COPY config/oweClient /root/oweClient/
 COPY config/decode_passwords.sh /root/decode_passwords.sh
 
 #Copy connectINET.sh
