@@ -383,7 +383,7 @@ CHANNEL_OTHER3='6'
 # OWE
 ############################################################
 WLAN_OWE='wlan30'
-CHANNEL_OWE='44'
+CHANNEL_OWE='5'
 ESSID_OWE='wifi-gratis'
 IP_OWE='192.168.20'
 MAC_OWE='F0:9F:C2:71:AF:2F'
