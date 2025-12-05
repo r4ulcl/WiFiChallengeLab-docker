@@ -12,7 +12,7 @@ auth_algs=1
 wpa=2
 wpa_key_mgmt=OWE
 
-rsn_pairwise=GCMP-256
+wpa_pairwise=CCMP
+rsn_pairwise=CCMP
 
-country_code=US
-ctrl_interface=/var/run/hostapd
+ieee80211w=1
