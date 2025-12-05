@@ -149,6 +149,27 @@ do
 	sleep 10
 done &
 
+# Phishing OWE
+while :
+do
+	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_CLIENT_OWE 2> /tmp/dhclien-wifichallenge-owe
+	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-owe | awk '{print $2}' | head -n 1`
+
+	if [ -n "$SERVER" ]; then
+		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userOWEPhishing -b /tmp/userOWEPhishing`
+		response=$(curl -L -s "$URL")
+		if echo "$response" | grep -q "wifichallenge.com"; then
+			echo "Word found"
+			curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' \
+						--data-urlencode "username=$USER_WEB_OWE" \
+						--data-urlencode "password=$PASS_WEB_OWE" \
+						-c /tmp/userOWEPhishing -b /tmp/userOWEPhishing > /dev/null
+		fi		
+	fi
+
+	sleep 1
+done &
+
 # Phishing 
 while :
 do
@@ -156,7 +177,7 @@ do
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
 
 	if [ -n "$SERVER" ]; then
-		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
+		URL=`curl -L -s -o /dev/null -w %{url_effective} "http://$SERVER/login.php" -c /tmp/userTLSPhishing -b /tmp/userTLSPhishing`
 		curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' \
 			--data-urlencode "username=$IDENTITY_MGT_PHISHING_DOMAIN\\$IDENTITY_MGT_PHISHING_USER" \
 			--data-urlencode "password=$PASS_MGT_PHISHING_CLEAR" \

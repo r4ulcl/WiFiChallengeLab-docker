@@ -380,16 +380,21 @@ CHANNEL_OTHER3='6'
 
 
 ############################################################
-# UNSPECIFIED / RESERVE AP
+# OWE
 ############################################################
-WLAN_20='wlan30'
-IP_20='192.168.20'
-MAC_20=''
-PASS_20=''
-CHANNEL_20=''
-FLAG_20=''
+WLAN_OWE='wlan30'
+CHANNEL_OWE='44'
+ESSID_OWE='wifi-gratis'
+IP_OWE='192.168.20'
+MAC_OWE='F0:9F:C2:71:AF:2F'
+USER_WEB_OWE='SUPPLIER\client1'
+PASS_WEB_OWE='GAEpYh9HXQMfQC9qKgAFaDEJLxQUESQfEAZRBwoO'
+FLAG_OWE='LF8FUh5BXisQSxNodWNbazRhekJ/BWtAflBSA1dMWXhLHBFsdGAPbW8xLhN2UmQeKwtdAVMVXi0RTUFqdTIMPjNkfxRzHA=='
 
+############ CLIENTS ############
 
+WLAN_CLIENT_OWE='wlan57'
+MAC_CLIENT_OWE='64:32:A8:FA:21:F4'
 
 ############################################################
 # INTERNAL SYSTEM KEY + LOGIN USERS
