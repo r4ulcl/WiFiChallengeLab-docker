@@ -2,5 +2,7 @@ network={
     ssid="$ESSID_OWE"
     key_mgmt=OWE
     proto=RSN
-    pairwise=GCMP-256
+    pairwise=CCMP
+    group=CCMP
+    ieee80211w=1
 }

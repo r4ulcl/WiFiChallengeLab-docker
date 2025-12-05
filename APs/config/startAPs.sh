@@ -100,7 +100,7 @@ macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
-macchanger -m $WLAN_OWE $MAC_OWE >> /root/logs/macchanger.log # TODO
+macchanger -m $MAC_OWE $WLAN_OWE >> /root/logs/macchanger.log # TODO
 
 
 mkdir /root/logs/ 2> /dev/nil
