@@ -175,8 +175,13 @@ See [OPEN_SOURCE_REFERENCES.md](./OPEN_SOURCE_REFERENCES.md) for the upstream pr
 
 ### Certified WiFiChallenge Professional (CWP)
 
-[<img src="https://import.cdn.thinkific.com/937577/eyw5HcfFRMml6M8GoFq3_FONDO%20CURSO.png">](https://academy.wifichallenge.com/courses/certified-wifichallenge-professional-cwp)
+<p align="center">
+  <a href="https://academy.wifichallenge.com/courses/certified-wifichallenge-professional-cwp">
+    <img src="https://import.cdn.thinkific.com/937577/eyw5HcfFRMml6M8GoFq3_FONDO%20CURSO.png">
+  </a>
+</p>
 
+  
 ## Collaborators
 
 - Raúl Sampedro (@rsrdesarrollo) - Update the Nzyme Docker configuration to support ARM architecture
