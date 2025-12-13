@@ -1,9 +1,9 @@
 interface=$WLAN_OWE
-driver=nl80211
+#driver=nl80211
 country_code=ES
 hw_mode=a
 channel=$CHANNEL_OWE
-op_class=131
+#op_class=131
 #ieee80211ax=1
 #wmm_enabled=1
 
