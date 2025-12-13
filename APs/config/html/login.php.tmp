@@ -39,7 +39,7 @@ $logins = array(
     '${USER_WEB_OPN1}'            => decode('${PASS_WEB_OPN1}', $a),
     '${USER_WEB_OPN2}'            => decode('${PASS_WEB_OPN2}', $a),
     '${USER_WEP}'    => decode('${PASS_WEP}', $a),
-    '${USER_PSK_NOAP}'            => decode('${PASS_PSK_NOAP}', $a)
+    '${USER_PSK_NOAP}'            => decode('${PASS_PSK_NOAP}', $a),
     '${USER_WEB_OWE}'            => decode('${PASS_WEB_OWE}', $a)
 );
 
