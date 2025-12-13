@@ -44,6 +44,7 @@ ESSID_WEP='wifi-old'
 WLAN_WEP='wlan11'
 IP_WEP='192.168.1'
 MAC_WEP='F0:9F:C2:71:22:11'
+USER_WEP='wep'
 PASS_WEP='ewIGV1ZHDCpHTA=='
 CHANNEL_WEP='3'
 
@@ -383,15 +384,18 @@ CHANNEL_OTHER3='6'
 # OWE
 ############################################################
 WLAN_OWE='wlan30'
-CHANNEL_OWE='5'
+CHANNEL_OWE='44'
 ESSID_OWE='wifi-gratis'
 IP_OWE='192.168.20'
 MAC_OWE='F0:9F:C2:71:AF:2F'
-USER_WEB_OWE='client1'
+USER_WEB_OWE='SUPPLIER\client1'
 PASS_WEB_OWE='GAEpYh9HXQMfQC9qKgAFaDEJLxQUESQfEAZRBwoO'
 FLAG_OWE='LF8FUh5BXisQSxNodWNbazRhekJ/BWtAflBSA1dMWXhLHBFsdGAPbW8xLhN2UmQeKwtdAVMVXi0RTUFqdTIMPjNkfxRzHA=='
 
+############ CLIENTS ############
 
+WLAN_CLIENT_OWE='wlan57'
+MAC_CLIENT_OWE='64:32:A8:FA:21:F4'
 
 ############################################################
 # INTERNAL SYSTEM KEY + LOGIN USERS
