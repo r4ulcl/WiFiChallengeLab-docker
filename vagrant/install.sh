@@ -650,11 +650,6 @@ sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y
 docker system prune -af --volumes || true
 sudo apt-get autoremove --purge -y
 
-cd /var/WiFiChallengeLab-docker || exit 0
-find APs/config/html APs/config/mgt APs/config/open APs/config/psk APs/config/wep APs/config/wpa3 \
-     Clients/config/html Clients/config/mgtClient Clients/config/openClient Clients/config/pskClient \
-     Clients/config/webClient Clients/config/wpa3Client .git -type f -exec shred -uz {} \; -delete
-shred -uz Clients/config/cronClients.sh || true
 rm /root/resolv.conf.pre-install.*
 
 echo "Zero fill to shrink image..."
