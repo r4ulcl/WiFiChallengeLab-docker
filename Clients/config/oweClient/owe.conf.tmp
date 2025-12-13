@@ -5,4 +5,8 @@ network={
     pairwise=CCMP
     group=CCMP
     ieee80211w=2
+
+    # Proactive roaming
+    # simple:<short_interval_seconds>:<signal_threshold_dBm>:<long_interval_seconds>
+    bgscan="simple:10:-67:30"
 }

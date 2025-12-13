@@ -73,3 +73,7 @@ dhcp-range=$IP_6GHZ.2,$IP_6GHZ.100,24h
 
 dhcp-host=$WLAN_WEP,$MAC_WEP,$IP_WEP.1
 dhcp-range=$IP_WEP.2,$IP_WEP.100,24h
+
+
+dhcp-host=$WLAN_OWE,$MAC_OWE,$IP_OWE.1
+dhcp-range=$IP_OWE.2,$IP_OWE.100,24h
