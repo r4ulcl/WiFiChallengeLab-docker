@@ -12,7 +12,7 @@ CONFIG_FILE="$1"
 
 if [ -z "$CONFIG_FILE" ]; then
     echo "ERROR: Missing config file argument."
-    echo "Usage: $0 /path/to/wlan_config_aps"
+    echo "Usage: $0 /path/to/wlan_config"
     exit 1
 fi
 

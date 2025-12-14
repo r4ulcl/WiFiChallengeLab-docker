@@ -2,7 +2,7 @@
 
 #Load variables
 set -a
-source /root/wlan_config_clients
+source /root/wlan_config
 
 
 function retry { 

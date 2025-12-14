@@ -67,7 +67,7 @@ services:
     restart: on-failure   # Automatically restart on failure
     env_file:
       - ./nzyme/.env
-      - ./APs/config/wlan_config_aps    
+      - ./APs/config/wlan_config    
     #env_file: .env
     container_name: WiFiChallengeLab-nzyme
     security_opt:

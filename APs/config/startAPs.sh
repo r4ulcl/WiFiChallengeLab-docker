@@ -18,10 +18,10 @@ envsubst_tmp () {
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
-source /root/wlan_config_aps
+source /root/wlan_config
 
-bash /root/decode_passwords.sh /root/wlan_config_aps
-source /root/wlan_config_aps.clear
+bash /root/decode_passwords.sh /root/wlan_config
+source /root/wlan_config.clear
 
 
 #Replace variables in interfaces.tmp file (one is wrong, its useless, idk :) )
@@ -58,7 +58,7 @@ envsubst_tmp
 cd /etc/freeradius/3.0/mods-config/files/
 envsubst_tmp
 
-rm /root/wlan_config_aps.clear
+rm /root/wlan_config.clear
 
 cd
 
