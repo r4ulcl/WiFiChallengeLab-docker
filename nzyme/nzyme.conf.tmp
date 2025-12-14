@@ -214,7 +214,7 @@ uplinks: []
     beacon_rate: 4760
     bssids: [
       {
-        address: "$MAC_MGTRELAY",
+        address: "$MAC_MGT_RELAY",
         fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]
@@ -226,7 +226,7 @@ uplinks: []
     beacon_rate: 4760
     bssids: [
       {
-        address: "$MAC_MGTRELAY_TABLETS",
+        address: "$MAC_MGT_RELAY_TABLETS",
         fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
       }
     ]

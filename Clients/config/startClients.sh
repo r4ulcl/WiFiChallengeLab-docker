@@ -224,12 +224,12 @@ ping $IP_PSK.1 > /dev/nill &
 ping $IP_PSK.1 > /dev/nill &
 ping $IP_PSK_NOAP.1 > /dev/nill &
 ping $IP_PSK_NOAP.1 > /dev/nill &
-ping $IP_MGTRELAY.1 > /dev/nill &
+ping $IP_MGT_RELAY.1 > /dev/nill &
 ping $IP_MGT_TLS.1 > /dev/nill &
 ping $IP_DOWNGRADE.1 > /dev/nill &
 ping $IP_MGT_MD5.1 > /dev/nill &
-ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
-ping $IP_MGTRELAY_TABLETS.1 > /dev/nill &
+ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
+ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
 ping $IP_WEP.1 > /dev/nill &
 ping $IP_OWE.1 > /dev/nill &
 

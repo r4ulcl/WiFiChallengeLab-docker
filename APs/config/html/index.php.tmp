@@ -116,7 +116,7 @@ $rules = [
     ],
 
     '${IDENTITY_MGT_RELAY_PHISHING}' => [
-        "nets" => ['${IP_MGTRELAY}.'],
+        "nets" => ['${IP_MGT_RELAY}.'],
         "flag" => '${FLAG_MGT_RELAY_2}',
         "extra" => true
     ],

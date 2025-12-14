@@ -56,7 +56,7 @@ do
 		-c /tmp/userAdmin -b /tmp/userAdmin &
 
 	# MGT Relay
-	curl -s "http://$IP_MGTRELAY.1/login.php" --interface $WLAN_CLIENT_MGT_RELAY --compressed \
+	curl -s "http://$IP_MGT_RELAY.1/login.php" --interface $WLAN_CLIENT_MGT_RELAY --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_RELAY" \
 		--data-urlencode "Password=$PASS_MGT_RELAY_CLEAR" \
