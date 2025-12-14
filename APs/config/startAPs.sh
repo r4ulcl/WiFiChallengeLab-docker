@@ -82,8 +82,8 @@ macchanger -m $MAC_KRACK $WLAN_KRACK >> /root/logs/macchanger.log # PSK VULN KRA
 
 macchanger -m $MAC_MGT $WLAN_MGT >> /root/logs/macchanger.log # MGT
 macchanger -m $MAC_MGT2 $WLAN_MGT2 >> /root/logs/macchanger.log # MGT 2
-macchanger -m $MAC_MGTRELAY $WLAN_MGTRELAY >> /root/logs/macchanger.log # MGT Relay
-macchanger -m $MAC_MGTRELAY_TABLETS $WLAN_MGTRELAY_TABLETS >> /root/logs/macchanger.log # MGT Relay tablets
+macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log # MGT Relay
+macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log # MGT Relay tablets
 
 macchanger -m $MAC_MGT_TLS $WLAN_MGT_TLS >> /root/logs/macchanger.log # MGT TLS
 
@@ -110,12 +110,12 @@ bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 
 
 #chmod +x patch_deauth_on_drop_dmesg.sh
-bash  /root/patch_deauth_on_drop_dmesg.sh /run/hostapd- 5
+bash  /root/patch_deauth_on_drop_dmesg.sh /run/hostapd- 5  > /root/logs/patch_deauth_on_drop_dmesg.log 2>&1 &
 
 
 mkdir /root/logs/ 2> /dev/nil
 
-#TODO RE ORDER ALL WLAN and IP -> 0 OPN, 1 WEP, 2 PSK, 3 PSK WPS, 4 MGT, 5 MGTRelay, 6 MGT TLS, 7 8 , 9,10,11,12,13 others
+#TODO RE ORDER ALL WLAN and IP -> 0 OPN, 1 WEP, 2 PSK, 3 PSK WPS, 4 MGT, 5 MGT_RELAY, 6 MGT TLS, 7 8 , 9,10,11,12,13 others
 
 # Open
 ip addr add $IP_OPN.1/24 dev $WLAN_OPN
@@ -142,11 +142,11 @@ ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
 host_aps_apd /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log &
 
 # MGT Relay
-ip addr add $IP_MGTRELAY.1/24 dev $WLAN_MGTRELAY
+ip addr add $IP_MGT_RELAY.1/24 dev $WLAN_MGT_RELAY
 host_aps_apd /root/mgt/hostapd_wpe_relay.conf > /root/logs/hostapd_wpe_relay.log &
 
 # MGT Relay tablets
-ip addr add $IP_MGTRELAY_TABLETS.1/24 dev $WLAN_MGTRELAY_TABLETS
+ip addr add $IP_MGT_RELAY_TABLETS.1/24 dev $WLAN_MGT_RELAY_TABLETS
 host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_relay_tablets.log &
 
 # MGT TLS
