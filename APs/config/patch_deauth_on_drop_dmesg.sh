@@ -98,7 +98,7 @@ patch_phy_is_target() {
   local patch_if
   while IFS= read -r patch_if; do
     [[ -z "$patch_if" ]] && continue
-    if [[ "$patch_if" == "$WLAN1" || "$patch_if" == "$WLAN2" || "$patch_if" == "$WLAN3" ]]; then
+    if [[ "$patch_if" == "$WLAN_DOWNGRADE" || "$patch_if" == "$WLAN_BRUTEFORCE" || "$patch_if" == "$WLAN_6GHZ"|| "$patch_if" == "$WLAN_OWE" ]]; then
       return 0
     fi
   done < <(patch_ifaces_for_phy "$patch_phy")
