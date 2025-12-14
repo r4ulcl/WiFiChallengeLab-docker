@@ -25,6 +25,7 @@ COPY config/wep/ /root/wep/
 COPY config/owe/ /root/owe/
 COPY mac80211_hwsim/ /root/mac80211_hwsim_WiFiChallenge
 COPY config/decode_passwords.sh /root/decode_passwords.sh
+COPY config/patch_deauth_on_drop_dmesg.sh /root/patch_deauth_on_drop_dmesg.sh
 
 #Copy freeradius files
 COPY config/freeradius/clients.conf /etc/freeradius/3.0/clients.conf
