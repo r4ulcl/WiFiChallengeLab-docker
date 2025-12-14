@@ -14,3 +14,7 @@ auth_server_addr=127.0.0.1
 auth_server_port=1812
 auth_server_shared_secret=W1f1Ch4ll3ng3.R4d1us
 auth_algs=1
+
+
+ctrl_interface=/run/hostapd-$WLAN_MGT_MD5
+ctrl_interface_group=0

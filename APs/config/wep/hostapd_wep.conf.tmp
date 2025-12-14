@@ -14,3 +14,8 @@ ssid=$ESSID_WEP
 auth_algs=1
 wep_default_key=0
 wep_key0=$PASS_WEP_CLEAR
+
+
+
+ctrl_interface=/run/hostapd-$WLAN_WEP
+ctrl_interface_group=0

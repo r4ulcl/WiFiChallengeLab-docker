@@ -21,3 +21,6 @@ wpa_pairwise=CCMP
 rsn_pairwise=CCMP
 
 ieee80211w=2
+
+ctrl_interface=/run/hostapd-$WLAN_OWE
+ctrl_interface_group=0

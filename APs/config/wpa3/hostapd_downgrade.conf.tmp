@@ -4,8 +4,10 @@ logger_syslog=-1
 logger_syslog_level=2
 logger_stdout=-1
 logger_stdout_level=2
-ctrl_interface=/var/run/hostapd
+
+ctrl_interface=/run/hostapd-$WLAN_DOWNGRADE
 ctrl_interface_group=0
+
 ssid=$ESSID_DOWNGRADE
 hw_mode=g
 channel=$CHANNEL_DOWNGRADE

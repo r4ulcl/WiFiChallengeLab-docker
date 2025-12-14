@@ -9,3 +9,8 @@ wpa=2
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=TKIP CCMP
 wpa_passphrase=$PASS_OTHER1_CLEAR
+
+
+
+ctrl_interface=/run/hostapd-$WLAN_OTHER1
+ctrl_interface_group=0

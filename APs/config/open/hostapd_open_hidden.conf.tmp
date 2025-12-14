@@ -11,3 +11,6 @@ wpa=0
 #accept_mac_file=/root/open/acceptMac.txt
 
 ignore_broadcast_ssid=2
+
+ctrl_interface=/run/hostapd-$WLAN_OPN_HIDDEN
+ctrl_interface_group=0
