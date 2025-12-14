@@ -21,3 +21,6 @@ manufacturer=Qualcomm Atheros
 device_type=6-0050F204-1
 config_methods=label keypad push_button
 ap_pin=12345670
+
+ctrl_interface=/run/hostapd-$WLAN_WPS
+ctrl_interface_group=0

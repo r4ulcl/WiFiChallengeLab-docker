@@ -11,3 +11,6 @@ wpa=0
 #accept_mac_file=/root/open/acceptMac.txt
 
 ap_isolate=1
+
+ctrl_interface=/run/hostapd-$WLAN_OPN
+ctrl_interface_group=0

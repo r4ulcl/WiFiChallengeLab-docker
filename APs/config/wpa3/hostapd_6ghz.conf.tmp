@@ -22,3 +22,7 @@ sae_pwe=1
 
 # (optional) group-rekey every 30 min
 wpa_group_rekey=1800
+
+
+ctrl_interface=/run/hostapd-$WLAN_6GHZ
+ctrl_interface_group=0
