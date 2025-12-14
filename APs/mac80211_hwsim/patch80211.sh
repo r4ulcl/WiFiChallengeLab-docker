@@ -70,7 +70,7 @@ fi
 # 3-B  Rewrite hwsim_mon_xmit() ----------------------------------------
 if ! grep -q 'mac80211_hwsim_tx_frame(data->hw' "$CFILE"; then
     # Replace from function header down to the first closing brace.
-    sed -i -n ':a;N;$!ba;s#static netdev_tx_t hwsim_mon_xmit[^}]*}#static netdev_tx_t hwsim_mon_xmit(struct sk_buff *skb,\n\t\t\t\t\tstruct net_device *dev)\n{\n\tstruct mac80211_hwsim_data *data = netdev_priv(dev);\n\t/* fall back to the normal mac80211 transmit routine */\n\tmac80211_hwsim_tx_frame(data->hw, skb, data->channel);\n\treturn NETDEV_TX_OK;\n}#g' "$CFILE"
+    sed -i -n ':a;N;$!ba;s#static netdev_tx_t hwsim_mon_xmit[^}]*}#static netdev_tx_t hwsim_mon_xmit(struct sk_buff *skb,\n                    struct net_device *dev)\n{\n    struct mac80211_hwsim_data *data = netdev_priv(dev);\n    /* fall back to the normal mac80211 transmit routine */\n    mac80211_hwsim_tx_frame(data->hw, skb, data->channel);\n    return NETDEV_TX_OK;\n}#g' "$CFILE"
     echo "  - hwsim_mon_xmit() replaced"
 else
     echo "  - hwsim_mon_xmit() already patched"
@@ -83,10 +83,10 @@ if ! grep -q 'ACK if destination is our permanent MAC' "$CFILE"; then
     /static bool mac80211_hwsim_addr_match/ {print; infunc=1; next}
     infunc && /^\s*\{/ {
         print "{";
-        print "\t/* ACK if destination is our permanent MAC (even with only monitor IFs). */";
-        print "\tif (ether_addr_equal(addr, data->addresses[0].addr) ||";
-        print "\t    ether_addr_equal(addr, data->addresses[1].addr))";
-        print "\t\treturn true;";
+        print "    /* ACK if destination is our permanent MAC (even with only monitor IFs). */";
+        print "    if (ether_addr_equal(addr, data->addresses[0].addr) ||";
+        print "        ether_addr_equal(addr, data->addresses[1].addr))";
+        print "        return true;";
         infunc=0; next
     }
     {print}
@@ -99,7 +99,7 @@ fi
 # 3-D  Extra monitor-ACK handling in TX path ---------------------------
 if ! grep -q 'deliver the frame to every hwsim radio' "$CFILE"; then
     sed -i '/data->tx_bytes += skb->len;/a \
-\t/* deliver the frame to every hwsim radio on the same channel */' "$CFILE"
+    /* deliver the frame to every hwsim radio on the same channel */' "$CFILE"
     echo "  - Comment before ack = ... added"
 else
     echo "  - Comment before ack already present"
@@ -107,7 +107,7 @@ fi
 
 if ! grep -q 'Forward an IEEE' "$CFILE"; then
     sed -i '/ack = mac80211_hwsim_tx_frame_no_nl/a \
-\t/* Forward an IEEE 802.11 ACK frame to the monitor as well */\n\tif (ack)\n\t\tmac80211_hwsim_monitor_ack(channel, hdr->addr2);\n' "$CFILE"
+    /* Forward an IEEE 802.11 ACK frame to the monitor as well */\n    if (ack)\n        mac80211_hwsim_monitor_ack(channel, hdr->addr2);\n' "$CFILE"
     echo "  - Extra monitor-ACK block inserted"
 else
     echo "  - Extra monitor-ACK block already present"
@@ -140,55 +140,70 @@ fi
 # 3-E-3 Insert detection and drop logic (per-interface state)
 if ! grep -q "\[HWSIM-POC\]" "$CFILE"; then
     sed -i '/mac80211_hwsim_monitor_rx(hw, skb, channel);/a \
-\t{\
-\t\tstruct mac80211_hwsim_data *data = hw->priv;\
-\t\tstruct ieee80211_hdr *hdr = (struct ieee80211_hdr *)skb->data;\
-\t\tu16 fc = le16_to_cpu(hdr->frame_control);\
-\t\tunsigned long now = jiffies;\
-\t\t/* Count auth frames per second */\
-\t\tif (ieee80211_is_auth(fc)) {\
-\t\t\tif (time_before(now, data->poc_last_jiffies + HZ)) {\
-\t\t\t\tdata->poc_auth_counter++;\
-\t\t\t} else {\
-\t\t\t\tif (data->poc_auth_counter > 20) {\
-\t\t\t\t\tdata->poc_flood_streak++;\
-\t\t\t\t\tdata->poc_quiet_streak = 0;\
-\t\t\t\t\tpr_info("[HWSIM-POC][%s] Flood window (%d/5)\\n",\
-\t\t\t\t\t\twiphy_name(hw->wiphy), data->poc_flood_streak);\
-\t\t\t\t} else {\
-\t\t\t\t\tif (data->poc_attack_triggered) data->poc_quiet_streak++;\
-\t\t\t\t\telse data->poc_quiet_streak = 0;\
-\t\t\t\t\tdata->poc_flood_streak = 0;\
-\t\t\t\t}\
-\t\t\t\tif (data->poc_flood_streak >= 5 && !data->poc_attack_triggered) {\
-\t\t\t\t\tdata->poc_attack_triggered = true;\
-\t\t\t\t\tpr_info("[HWSIM-POC][%s] Flood 5s -> vuln mode ON\\n",\
-\t\t\t\t\t\twiphy_name(hw->wiphy));\
-\t\t\t\t}\
-\t\t\t\tif (data->poc_attack_triggered && data->poc_quiet_streak >= 10) {\
-\t\t\t\t\tdata->poc_attack_triggered = false;\
-\t\t\t\t\tpr_info("[HWSIM-POC][%s] Quiet 10s -> vuln mode RESET\\n",\
-\t\t\t\t\t\twiphy_name(hw->wiphy));\
-\t\t\t\t}\
-\t\t\t\tdata->poc_auth_counter = 1;\
-\t\t\t\tdata->poc_last_jiffies = now;\
-\t\t\t}\
-\t\t}\
-\t\t/* Drop only after trigger */\
-\t\tif (data->poc_attack_triggered && ieee80211_is_data(fc)) {\
-\t\t\tif (skb->len > 24) {\
-\t\t\t\tconst u8 *payload = skb->data + 24; /* after 802.11 header */\
-\t\t\t\tif (payload[6] == 0x88 && payload[7] == 0x8e) {\
-\t\t\t\t\t/* Allow EAPOL handshake */\
-\t\t\t\t} else {\
-\t\t\t\t\tpr_info("[HWSIM-POC][%s] Dropping data frame len=%u\\n",\
-\t\t\t\t\t\twiphy_name(hw->wiphy), skb->len);\
-\t\t\t\t\tieee80211_free_txskb(hw, skb);\
-\t\t\t\t\treturn;\
-\t\t\t\t}\
-\t\t\t}\
-\t\t}\
-\t}' "$CFILE"
+    {\    
+/* Use distinct names to avoid shadowing existing locals */\
+        struct mac80211_hwsim_data *poc = hw->priv;\
+        struct ieee80211_hdr *poc_hdr = (struct ieee80211_hdr *)skb->data;\
+        u16 fc = le16_to_cpu(poc_hdr->frame_control);\
+        unsigned long now = jiffies;\
+        /* Count auth frames per second */\
+        if (ieee80211_is_auth(fc)) {\
+                if (time_before(now, poc->poc_last_jiffies + HZ)) {\
+                        poc->poc_auth_counter++;\
+                } else {\
+                        if (poc->poc_auth_counter > 20) {\
+                                poc->poc_flood_streak++;\
+                                poc->poc_quiet_streak = 0;\
+                                pr_info("[HWSIM-POC][%s] Flood window (%d/5)\n",\
+                                        wiphy_name(hw->wiphy), poc->poc_flood_streak);\
+                        } else {\
+                                if (poc->poc_attack_triggered)\
+                                        poc->poc_quiet_streak++;\
+                                else\
+                                        poc->poc_quiet_streak = 0;\
+                                poc->poc_flood_streak = 0;\
+                        }\
+                        if (poc->poc_flood_streak >= 5 && !poc->poc_attack_triggered) {\
+                                poc->poc_attack_triggered = true;\
+                                pr_info("[HWSIM-POC][%s] Flood 5s -> vuln mode ON\n",\
+                                        wiphy_name(hw->wiphy));\
+                        }\
+                        if (poc->poc_attack_triggered && poc->poc_quiet_streak >= 10) {\
+                                poc->poc_attack_triggered = false;\
+                                pr_info("[HWSIM-POC][%s] Quiet 10s -> vuln mode RESET\n",\
+                                        wiphy_name(hw->wiphy));\
+                        }\
+                        poc->poc_auth_counter = 1;\
+                        poc->poc_last_jiffies = now;\
+                }\
+        }\
+        /*\
+         * Drop only after trigger\
+         * IMPORTANT:\
+         * - 802.11 header is not always 24 bytes\
+         * - Need >= hdrlen + 8 before reading LLC/SNAP EtherType bytes 6..7\
+         */\
+        if (poc->poc_attack_triggered && ieee80211_is_data(fc)) {\
+                int hdrlen = ieee80211_hdrlen(fc);\
+                if (skb->len >= hdrlen + 8) {\
+                        const u8 *llc = skb->data + hdrlen;\
+                        /* EtherType in LLC/SNAP header bytes 6..7 */\
+                        bool is_eapol = (llc[6] == 0x88 && llc[7] == 0x8e);\
+                        if (!is_eapol) {\
+                                pr_info("[HWSIM-POC][%s] Dropping data frame len=%u\n",\
+                                        wiphy_name(hw->wiphy), skb->len);\
+                                /*\
+                                 * Choose the correct free call for the path you hooked:\
+                                 * - TX path: ieee80211_free_txskb(hw, skb);\
+                                 * - RX path: kfree_skb(skb); (or the function’s existing error-path free)\
+                                 * FREE_SKB_PLACEHOLDER\
+                                 */\
+                                ieee80211_free_txskb(hw, skb);\
+                                return;\
+                        }\
+                }\
+        }\
+    }' "$CFILE"
     echo "  - Dragondrain PoC per-interface monitor patch added"
 else
     echo "  - Dragondrain PoC per-interface monitor patch already present"
