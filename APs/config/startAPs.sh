@@ -109,6 +109,9 @@ mkdir /root/logs/ 2> /dev/nil
 bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 
 
+#chmod +x patch_deauth_on_drop_dmesg.sh
+bash  /root/patch_deauth_on_drop_dmesg.sh /run/hostapd- 5
+
 
 mkdir /root/logs/ 2> /dev/nil
 

@@ -17,6 +17,8 @@ sudo apt-get install -y gcc-12 g++-12 build-essential || true
 ### ---- Download the code and parche ----------------------------------
 bash patch80211.sh
 
+bash dragondrain.sh
+
 TARGET_VERSION_ERROR="2.4-WiFiChallengeLab-version"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
