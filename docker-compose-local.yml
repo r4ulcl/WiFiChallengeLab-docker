@@ -15,7 +15,6 @@ services:
       - /lib/modules:/lib/modules
       - /usr/src:/usr/src:ro
       - ./logsAP:/root/logs/
-      - ./APs/config/wlan_config_aps:/root/wlan_config_aps
     healthcheck:
       test:
         - CMD-SHELL
@@ -43,7 +42,6 @@ services:
       - ./certs:/root/certs/:ro
       - /lib/modules:/lib/modules
       - ./logsClient:/root/logs/
-      - ./Clients/config/wlan_config_clients:/root/wlan_config_clients
     depends_on:
       - aps
     network_mode: host #NETNS
