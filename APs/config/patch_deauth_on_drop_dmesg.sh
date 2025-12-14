@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# this script fakes the DoS of dragondrain WPA3 attack + the modification of 80211 hwsim
+# Load WLAN definitions
+WLAN_CONFIG_FILE="/root/wlan_config"
+
+if [[ -r "$WLAN_CONFIG_FILE" ]]; then
+  # shellcheck disable=SC1090
+  source "$WLAN_CONFIG_FILE"
+else
+  echo "[!] Cannot read $WLAN_CONFIG_FILE" >&2
+  exit 1
+fi
+
+# Validate required variables
+: "${WLAN_DOWNGRADE:?WLAN_DOWNGRADE not set in /root/wlan_config}"
+: "${WLAN_BRUTEFORCE:?WLAN_BRUTEFORCE not set in /root/wlan_config}"
+: "${WLAN_6GHZ:?WLAN_6GHZ not set in /root/wlan_config}"
+: "${WLAN_OWE:?WLAN_OWE not set in /root/wlan_config}"
 
 patch_CTRL_DIR_PREFIX="${1:-/run/hostapd-}"
 patch_COOLDOWN_SEC="${2:-5}"
@@ -34,22 +49,12 @@ patch_ctrl_dir_for_iface() {
   return 1
 }
 
-# Extract MACs from "all_sta" output in the format you showed:
-# MAC line alone, then key=value lines.
 patch_get_stas_hostapd_all_sta() {
   local patch_if="$1"
   local patch_ctrl_dir="$2"
 
   hostapd_cli -p "$patch_ctrl_dir" -i "$patch_if" all_sta 2>/dev/null \
-    | awk '
-        # MAC header lines are exactly one token and match xx:xx:xx:xx:xx:xx
-        NF==1 && $0 ~ /^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/ { print $0 }
-      '
-}
-
-patch_get_stas_iw() {
-  local patch_if="$1"
-  iw dev "$patch_if" station dump 2>/dev/null | awk '/^Station /{print $2}'
+    | awk 'NF==1 && $0 ~ /^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/ { print $0 }'
 }
 
 patch_deauth_all_on_iface() {
@@ -63,19 +68,18 @@ patch_deauth_all_on_iface() {
     return 0
   fi
 
-  # Disconnect everyone loop (your requested style)
   local patch_macs
   patch_macs="$(patch_get_stas_hostapd_all_sta "$patch_if" "$patch_ctrl_dir" || true)"
 
-  # If all_sta returns nothing, try list_sta as a fallback
+  # Fallback if all_sta yields nothing
   if [[ -z "$patch_macs" ]]; then
     patch_macs="$(hostapd_cli -p "$patch_ctrl_dir" -i "$patch_if" list_sta 2>/dev/null || true)"
-    patch_macs="$(printf "%s\n" "$patch_macs" | awk 'NF==1 && $1 ~ /^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/ {print $1}')"
+    patch_macs="$(printf "%s\n" "$patch_macs" \
+      | awk 'NF==1 && $1 ~ /^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/ {print $1}')"
   fi
 
   if [[ -z "$patch_macs" ]]; then
-    echo "[!] ${patch_if}: hostapd reported no stations; iw fallback for visibility:" >&2
-    patch_get_stas_iw "$patch_if" >&2 || true
+    echo "[!] ${patch_if}: no stations reported by hostapd" >&2
     return 0
   fi
 
@@ -88,11 +92,29 @@ patch_deauth_all_on_iface() {
   done <<< "$patch_macs"
 }
 
+# Return 0 (true) if any interface for this phy matches WLAN1/2/3
+patch_phy_is_target() {
+  local patch_phy="$1"
+  local patch_if
+  while IFS= read -r patch_if; do
+    [[ -z "$patch_if" ]] && continue
+    if [[ "$patch_if" == "$WLAN1" || "$patch_if" == "$WLAN2" || "$patch_if" == "$WLAN3" ]]; then
+      return 0
+    fi
+  done < <(patch_ifaces_for_phy "$patch_phy")
+  return 1
+}
+
 sudo dmesg -wH | while IFS= read -r patch_line; do
   if [[ "$patch_line" =~ \[HWSIM-PATCH\]\[(phy[0-9]+)\]\ Flood\ window\ \(([0-9]+)/([0-9]+)\) ]]; then
     patch_phy="${BASH_REMATCH[1]}"
     patch_window="${BASH_REMATCH[2]}"
     patch_total="${BASH_REMATCH[3]}"
+
+    # Only act if the phy corresponds to WLAN1/2/3 (via iw dev mapping)
+    if ! patch_phy_is_target "$patch_phy"; then
+      continue
+    fi
 
     if (( patch_window <= patch_WINDOW_THRESHOLD )); then
       continue
@@ -112,9 +134,12 @@ sudo dmesg -wH | while IFS= read -r patch_line; do
       continue
     fi
 
-    echo "[*] ${patch_phy} interfaces: ${patch_ifaces[*]}" >&2
-
+    # Only deauth on the interfaces you explicitly allow
     for patch_if in "${patch_ifaces[@]}"; do
+      if [[ "$patch_if" != "$WLAN_DOWNGRADE" && "$patch_if" != "$WLAN_BRUTEFORCE" && "$patch_if" != "$WLAN_6GHZ" && "$patch_if" != "$WLAN_OWE" ]]; then
+        continue
+      fi
+
       patch_ctrl_dir=""
       if patch_ctrl_dir="$(patch_ctrl_dir_for_iface "$patch_if")"; then
         echo "[*] ${patch_if}: ctrl socket dir = ${patch_ctrl_dir}" >&2
