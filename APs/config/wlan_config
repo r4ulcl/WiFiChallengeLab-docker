@@ -190,22 +190,12 @@ MAC_MGT_GTC='64:32:A8:BA:6C:41'
 
 
 ############################################################
-# REGIONAL CORPORATE — wifi-regional-tablets (AP)
-############################################################
-ESSID_MGT_RELAY_TABLETS='wifi-regional-tablets'
-WLAN_MGT_RELAY_TABLETS='wlan28'
-IP_MGT_RELAY_TABLETS='192.168.18'
-MAC_MGT_RELAY_TABLETS='F0:9F:C2:7A:33:28'
-CHANNEL_MGT_RELAY_TABLETS='44'
-FLAG_MGT_RELAY_TABLETS='LF8FUh4QCncWThU8f2FfPjFgLUhyU2AafVUBBVBAVndHGBY6eGYJbmYxKBMkHF9y'
-
-############################################################
 # REGIONAL CORPORATE — wifi-regional (AP)
 ############################################################
 ESSID_MGT_RELAY='wifi-regional'
-WLAN_MGTRELAY='wlan17'
-IP_MGTRELAY='192.168.7'
-MAC_MGTRELAY='F0:9F:C2:71:22:16'
+WLAN_MGT_RELAY='wlan17'
+IP_MGT_RELAY='192.168.7'
+MAC_MGT_RELAY='F0:9F:C2:71:22:16'
 CHANNEL_MGTRELAY='44'
 
 IDENTITY_MGT_RELAY='CONTOSOREG\luis.da'
@@ -222,12 +212,22 @@ ANON_IDENTITY_MGT_RELAY='CONTOSOREG\anonymous'
 
 # Relay client
 WLAN_CLIENT_MGT_RELAY='wlan50'
-MAC_MGT_RELAY='64:32:A8:AC:53:50'
+MAC_CLIENT_MGT_RELAY='64:32:A8:AC:53:50'
 
-# Tablets
+############################################################
+# REGIONAL TABLETS CORPORATE — wifi-regional-tablets (AP)
+############################################################
+ESSID_MGT_RELAY_TABLETS='wifi-regional-tablets'
+WLAN_MGT_RELAY_TABLETS='wlan28'
+IP_MGT_RELAY_TABLETS='192.168.18'
+MAC_MGT_RELAY_TABLETS='F0:9F:C2:7A:33:28'
+CHANNEL_MGT_RELAY_TABLETS='44'
+FLAG_MGT_RELAY_TABLETS='LF8FUh4QCncWThU8f2FfPjFgLUhyU2AafVUBBVBAVndHGBY6eGYJbmYxKBMkHF9y'
+
+############ CLIENTS ############
 WLAN_CLIENT_MGT_RELAY_TABLETS_W='wlan54'
-MAC_MGT_RELAY_TABLETS_W='64:32:A8:BD:64:54'
-IP_MGTRELAY_TABLETS='192.168.18'
+MAC_CLIENT_MGT_RELAY_TABLETS_W='64:32:A8:BD:64:54'
+IP_CLIENT_MGT_RELAY_TABLETS='192.168.18'
 
 WLAN_CLIENT_MGT_RELAY_TABLETS='wlan55'
 MAC_CLIENT_MGT_RELAY_TABLETS='64:32:A8:A9:DE:55'

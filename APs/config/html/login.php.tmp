@@ -94,10 +94,10 @@ $flag_bruteforce          = decode('${FLAG_BRUTEFORCE}', $a);
 $flag_downgrade           = decode('${FLAG_DOWNGRADE}', $a);
 $flag_6ghz                = decode('${FLAG_6GHZ}', $a);
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTRELAY}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY}.') !== false)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tls')\">$FLAG_MGT_RELAY_tls</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGTRELAY_TABLETS}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY_TABLETS}.') !== false)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tablets')\">$FLAG_MGT_RELAY_tablets</button>";
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WPS}.') !== false)

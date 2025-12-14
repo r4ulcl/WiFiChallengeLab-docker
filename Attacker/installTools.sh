@@ -385,6 +385,21 @@ cd "${TOOLS}"
 python3 -m pip install pycryptodome || true
 bzip2 -d assless-chaps/10-million-password-list-top-1000000.db.bz2 || true
 
+
+# dragondrain
+cd "${TOOLS}"
+git clone  https://github.com/vanhoefm/dragondrain-and-time
+apt-get update
+apt-get install autoconf automake libtool shtool libssl-dev pkg-config -y
+
+cd dragondrain-and-time
+
+make distclean 2>/dev/null || true
+
+CFLAGS='-D__packed="__attribute__((__packed__))"' ./configure
+make
+
+
 ###############################################################################
 # Optional: enable SSH on port 2222 (commented out by default)
 ###############################################################################
