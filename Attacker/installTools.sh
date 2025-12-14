@@ -170,7 +170,7 @@ fi
 cd "${TOOLS}"
 apt-get install -y autoconf automake libtool libnl-3-dev libnl-genl-3-dev libpcap-dev libhwloc-dev libcmocka-dev hostapd wpasupplicant tcpdump screen iw usbutils expect rfkill ethtool shtool
 if [ ! -d aircrack-ng ]; then
-  git clone https://github.com/aircrack-ng/aircrack-ng.git
+  git clone https://github.com/WiFiChallenge/aircrack-ng.git
   cd aircrack-ng
   autoreconf -i
   ./configure
