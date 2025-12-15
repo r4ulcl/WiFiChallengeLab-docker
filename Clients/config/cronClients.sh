@@ -152,7 +152,7 @@ done &
 # Phishing OWE
 while :
 do
-	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_CLIENT_OWE 2> /tmp/dhclien-wifichallenge-owe
+	timeout -k 1 10s dhclien-wifichallenge -v $WLAN_CLIENT_OWE 2> /tmp/dhclien-wifichallenge-owe
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge-owe | awk '{print $2}' | head -n 1`
 
 	if [ -n "$SERVER" ]; then
@@ -173,7 +173,7 @@ done &
 # Phishing 
 while :
 do
-	timeout -k 1 5s dhclien-wifichallenge -v $WLAN_CLIENT_MGT_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
+	timeout -k 1 10s dhclien-wifichallenge -v $WLAN_CLIENT_MGT_TLS_PHISHING 2> /tmp/dhclien-wifichallenge
 	SERVER=`grep -E -o "from (25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /tmp/dhclien-wifichallenge | awk '{print $2}' | head -n 1`
 
 	if [ -n "$SERVER" ]; then
