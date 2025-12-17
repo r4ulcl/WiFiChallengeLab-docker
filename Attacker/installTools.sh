@@ -177,7 +177,7 @@ if [ ! -d aircrack-ng ]; then
   make -j"$(nproc)"
   make install
   ldconfig
-  cd .. && rm -rf aircrack-ng
+  cd ..
 fi
 
 # ---------- Hashcat and utils -------------------------------------------------
