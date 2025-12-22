@@ -144,6 +144,23 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 require_pkg bridge-utils
 sudo systemctl enable --now docker
 
+# ----------- Cron in case update kernel ---------------------------------------
+
+cat >/usr/local/sbin/wifi_install.sh <<'EOF'
+#!/bin/bash
+sleep 60
+cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim || exit 1
+bash install.sh
+sleep 120
+cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim || exit 1
+bash install.sh
+EOF
+chmod +x /usr/local/sbin/wifi_install.sh
+
+echo '@reboot root /usr/local/sbin/wifi_install.sh >>/var/log/wifi_install.log 2>&1' \
+  >/etc/cron.d/wifi_install
+chmod 644 /etc/cron.d/wifi_install
+
 # ---------- WiFiChallengeLab --------------------------------------------------
 cd /var
 if [ "$DEV" = "true" ]; then
@@ -276,6 +293,9 @@ sudo apt-get install -y xpra
 
 # Install RDP
 echo 'Install RDP server' && sudo bash Attacker/installRDP.sh user
+
+# ---------- Install tmux ----------------------------------------------------
+sudo apt update && sudo apt install -y tmux
 
 
 # ---------- first login desktop setup ----------------------------------------
