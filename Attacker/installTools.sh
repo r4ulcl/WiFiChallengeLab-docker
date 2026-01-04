@@ -168,7 +168,8 @@ fi
 
 # ---------- Aircrack-ng from source ------------------------------------------
 cd "${TOOLS}"
-apt-get install -y autoconf automake libtool libnl-3-dev libnl-genl-3-dev libpcap-dev libhwloc-dev libcmocka-dev hostapd wpasupplicant tcpdump screen iw usbutils expect rfkill ethtool shtool
+apt-get install -y autoconf automake libtool libnl-3-dev libnl-genl-3-dev libpcap-dev libhwloc-dev libcmocka-dev hostapd wpasupplicant tcpdump screen iw usbutils expect rfkill ethtool shtool pkg-config libssl-dev
+
 if [ ! -d aircrack-ng ]; then
   git clone https://github.com/WiFiChallenge/aircrack-ng.git
   cd aircrack-ng
