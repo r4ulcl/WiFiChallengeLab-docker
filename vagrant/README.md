@@ -1,5 +1,21 @@
 # Create WiFiChallenge Lab 2.0 using Vagrant
 
+``` bash
+# Core (reload provisioner)
+vagrant plugin install vagrant-reload
+
+# Providers
+vagrant plugin install vagrant-vmware-desktop
+vagrant plugin install vagrant-hyperv
+vagrant plugin install vagrant-qemu
+
+# Optional helper for VirtualBox Guest Additions
+vagrant plugin install vagrant-vbguest
+
+# Show installed plugins
+vagrant plugin list
+```
+
 ## For VirtualBox
 
 Create and start the VM (about 1 hour 30 minutes):
