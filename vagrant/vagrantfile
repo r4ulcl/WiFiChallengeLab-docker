@@ -1,7 +1,11 @@
 Vagrant.configure('2') do |config|
-
   # Default: $env:DEV = "false" ; $env:LOCATION = "remote"
-  # DEV: $env:DEV = "true" ; $env:LOCATION = "local" ; vagrant up
+  # DEV:     $env:DEV = "true"  ; $env:LOCATION = "local"  ; vagrant up
+
+  dev_arg      = ENV.fetch('DEV', 'false').to_s
+  location_arg = ENV.fetch('LOCATION', 'remote').to_s
+
+  config.vm.boot_timeout = 600
 
   # ---------- Hyper-V ----------
   config.vm.define 'hyper-v_vm' do |hv_vm|
@@ -9,14 +13,14 @@ Vagrant.configure('2') do |config|
     hv_vm.vm.hostname = 'WiFiChallengeLab'
 
     hv_vm.vm.provider 'hyperv' do |hv|
-      hv.vmname    = 'WiFiChallenge Lab v2.3'
+      hv.vmname    = 'WiFiChallenge Lab v2.4'
       hv.maxmemory = 4096
       hv.memory    = 4096
       hv.cpus      = 4
     end
 
     hv_vm.vm.provision 'shell',
-      inline: <<-SHELL,
+      inline: <<~SHELL,
         set -e
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
@@ -28,21 +32,19 @@ Vagrant.configure('2') do |config|
 
     hv_vm.vm.provision 'shell',
       path: './install.sh',
-      args: [ENV['DEV'], ENV['LOCATION']],
+      args: [dev_arg, location_arg],
       privileged: true
-
 
     hv_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     hv_vm.vm.provision 'shell',
-    inline: <<-SHELL,
-      for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-      sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-      sudo rm -f /tmp/zerofile
-    SHELL
-    privileged: true,
-    run: 'once'
-
+      inline: <<~SHELL,
+        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
+        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+        sudo rm -f /tmp/zerofile
+      SHELL
+      privileged: true,
+      run: 'once'
   end
 
   # ---------- VirtualBox ----------
@@ -53,13 +55,12 @@ Vagrant.configure('2') do |config|
     vb_vm.vm.provider 'virtualbox' do |vb|
       vb.memory = 4096
       vb.cpus   = 4
-      vb.name   = 'WiFiChallenge Lab v2.3'
-      vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
+      vb.name   = 'WiFiChallenge Lab v2.4'
+      vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
       vb.check_guest_additions = false
       vb.functional_vboxsf = false
     end
 
-    # Try to locate the GA ISO on the host and upload it to the guest
     host_ga_iso =
       if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
         'C:/Program Files/Oracle/VirtualBox/VBoxGuestAdditions.iso'
@@ -76,12 +77,8 @@ Vagrant.configure('2') do |config|
       destination: '/tmp/VBoxGuestAdditions.iso',
       run: 'always'
 
-
-    config.vm.boot_timeout = 600
-
-    # 1) Upgrade kernel and headers
     vb_vm.vm.provision 'shell',
-      inline: <<-SHELL,
+      inline: <<~SHELL,
         set -e
         export DEBIAN_FRONTEND=noninteractive
         apt-get update -y
@@ -90,83 +87,73 @@ Vagrant.configure('2') do |config|
       privileged: true,
       run: 'once'
 
-    # Reboot after kernel upgrade
     vb_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
 
-    # 2) Install Guest Additions from the uploaded ISO
     vb_vm.vm.provision 'shell',
-    inline: <<-'SHELL'
-      set -e
-      mkdir -p /mnt/vbga
+      inline: <<~'SHELL',
+        set -e
+        mkdir -p /mnt/vbga
 
-      # Sanity checks
-      if [ ! -s /tmp/VBoxGuestAdditions.iso ]; then
-        echo "Guest Additions ISO missing or empty at /tmp/VBoxGuestAdditions.iso"
-        ls -l /tmp || true
-        exit 1
-      fi
-      file /tmp/VBoxGuestAdditions.iso || true
+        if [ ! -s /tmp/VBoxGuestAdditions.iso ]; then
+          echo "Guest Additions ISO missing or empty at /tmp/VBoxGuestAdditions.iso"
+          ls -l /tmp || true
+          exit 1
+        fi
+        file /tmp/VBoxGuestAdditions.iso || true
 
-      # Make sure loop support is available
-      apt-get update -y
-      apt-get install -y kmod util-linux
-      modprobe loop || true
-      modprobe isofs || true
+        apt-get update -y
+        apt-get install -y kmod util-linux
+        modprobe loop || true
+        modprobe isofs || true
 
-      # Create a loop device for the ISO
-      losetup -fP /tmp/VBoxGuestAdditions.iso
-      LOOPDEV="$(losetup -j /tmp/VBoxGuestAdditions.iso | awk -F: '{print $1}')"
-      if [ -z "$LOOPDEV" ]; then
-        echo "Could not attach loop device"
-        losetup -a || true
-        exit 1
-      fi
+        losetup -fP /tmp/VBoxGuestAdditions.iso
+        LOOPDEV="$(losetup -j /tmp/VBoxGuestAdditions.iso | awk -F: '{print $1}')"
+        if [ -z "$LOOPDEV" ]; then
+          echo "Could not attach loop device"
+          losetup -a || true
+          exit 1
+        fi
 
-      # Mount the ISO read-only as iso9660
-      mount -t iso9660 -o ro "$LOOPDEV" /mnt/vbga || {
-        echo "Mount failed. Dumping loop devices"
-        losetup -a || true
-        exit 1
-      }
+        mount -t iso9660 -o ro "$LOOPDEV" /mnt/vbga || {
+          echo "Mount failed. Dumping loop devices"
+          losetup -a || true
+          exit 1
+        }
 
-      if [ ! -x /mnt/vbga/VBoxLinuxAdditions.run ]; then
-        echo "VBoxLinuxAdditions.run not found on ISO"
-        umount /mnt/vbga
-        losetup -d "$LOOPDEV"
-        exit 1
-      fi
+        if [ ! -x /mnt/vbga/VBoxLinuxAdditions.run ]; then
+          echo "VBoxLinuxAdditions.run not found on ISO"
+          umount /mnt/vbga
+          losetup -d "$LOOPDEV"
+          exit 1
+        fi
 
-      # Run installer. It may return nonzero when X11 parts are skipped on servers
-      sh /mnt/vbga/VBoxLinuxAdditions.run --nox11 || true
+        sh /mnt/vbga/VBoxLinuxAdditions.run --nox11 || true
 
-      umount /mnt/vbga || true
-      losetup -d "$LOOPDEV" || true
+        umount /mnt/vbga || true
+        losetup -d "$LOOPDEV" || true
 
-      # Build for all installed kernels and reload
-      /sbin/rcvboxadd quicksetup all || true
-      /sbin/rcvboxadd reload || true
-    SHELL
+        /sbin/rcvboxadd quicksetup all || true
+        /sbin/rcvboxadd reload || true
+      SHELL
+      privileged: true
 
-    # Final reboot so the running modules match the newly built ones
     vb_vm.vm.provision 'reload', name: 'Reboot after GA install'
 
-    # 3) Your app install
     vb_vm.vm.provision 'shell',
       path: './install.sh',
-      args: [ENV['DEV'], ENV['LOCATION']],
+      args: [dev_arg, location_arg],
       privileged: true
 
     vb_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     vb_vm.vm.provision 'shell',
-    inline: <<-SHELL,
-      for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-      sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-      sudo rm -f /tmp/zerofile
-    SHELL
-    privileged: true,
-    run: 'once'
-
+      inline: <<~SHELL,
+        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
+        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+        sudo rm -f /tmp/zerofile
+      SHELL
+      privileged: true,
+      run: 'once'
   end
 
   # ---------- VMware ----------
@@ -179,13 +166,13 @@ Vagrant.configure('2') do |config|
       v.clone_directory      = 'E:/VMWare'
       v.force_vmware_license = 'workstation'
       v.gui                  = true
-      v.vmx['displayName']   = 'WiFiChallenge Lab v2.3'
+      v.vmx['displayName']   = 'WiFiChallenge Lab v2.4'
       v.memory               = 4096
       v.cpus                 = 4
     end
 
     vmw_vm.vm.provision 'shell',
-      inline: <<-SHELL,
+      inline: <<~SHELL,
         set -e
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
@@ -197,88 +184,13 @@ Vagrant.configure('2') do |config|
 
     vmw_vm.vm.provision 'shell',
       path: './install.sh',
-      args: [ENV['DEV'], ENV['LOCATION']],
+      args: [dev_arg, location_arg],
       privileged: true
 
     vmw_vm.vm.provision 'reload', name: 'Reboot after update kernel'
 
     vmw_vm.vm.provision 'shell',
-    inline: <<-SHELL,
-      for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-      sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-      sudo rm -f /tmp/zerofile
-    SHELL
-    privileged: true,
-    run: 'once'
-
-  end
-
-  # ---------- QEMU ----------
-  config.vm.define 'qemu_vm' do |qemu_vm|
-    qemu_vm.vm.box      = 'generic/debian12'
-    qemu_vm.vm.hostname = 'WiFiChallengeLab'
-
-    qemu_vm.vm.provider 'qemu' do |qemu|
-      qemu.memory  = 4096
-      qemu.cpus    = 4
-      qemu.machine = 'q35'                      # Modern chipset
-      qemu.cpu     = 'host'                     # Expose host CPU features
-      qemu.video_type = 'virtio'                # Modern accelerated video
-      qemu.display = 'gtk'                      # Enable GUI window (use 'spice' for remote display)
-      qemu.audio = 'on'                         # Enable audio output
-      qemu.disk_interface = 'virtio'            # Fast disk I/O
-      qemu.network_interface = 'virtio-net'     # Fast network
-      qemu.name = 'WiFiChallenge Lab v2.3 (QEMU)'
-      qemu.qemu_dir = "C:/Program Files/qemu"
-      qemu.uefi = "C:/Program Files/qemu/share/edk2-x86_64-code.fd"
-
-      qemu.gui = true
-      qemu.extra_qemu_args = ['-nographic']
-    end
-
-    config.vm.boot_timeout = 600
-
-    # 1) Upgrade kernel and headers
-    qemu_vm.vm.provision 'shell',
-      inline: <<-SHELL,
-        set -e
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get update -y
-        apt-get full-upgrade -y
-      SHELL
-      privileged: true,
-      run: 'once'
-
-    # Reboot after kernel upgrade
-    qemu_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
-
-    # 2) Install QEMU guest tools (for better integration and GUI responsiveness)
-    qemu_vm.vm.provision 'shell',
-      inline: <<-SHELL,
-        set -e
-        apt-get install -y qemu-guest-agent spice-vdagent xserver-xorg-video-qxl
-        systemctl enable qemu-guest-agent
-        systemctl start qemu-guest-agent
-      SHELL
-      privileged: true
-
-    # Final reboot after guest tools
-    qemu_vm.vm.provision 'reload', name: 'Reboot after guest tools install'
-
-    # 3) Run your main installer
-    qemu_vm.vm.provision 'shell',
-      path: './install.sh',
-      env: {
-        'DEV' => (ENV['DEV'] || 'false'),
-        'LOCATION' => (ENV['LOCATION'] || 'remote')
-      },
-      privileged: true
-
-    qemu_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    # 4) Clean up old kernels and zero out disk
-    qemu_vm.vm.provision 'shell',
-      inline: <<-SHELL,
+      inline: <<~SHELL,
         for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
         sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
         sudo rm -f /tmp/zerofile
@@ -287,5 +199,65 @@ Vagrant.configure('2') do |config|
       run: 'once'
   end
 
+  # ---------- QEMU ----------
+  config.vm.define 'qemu_vm' do |qemu_vm|
+    qemu_vm.vm.box      = 'generic/debian12'
+    qemu_vm.vm.hostname = 'WiFiChallengeLab'
 
+    qemu_vm.vm.provider 'qemu' do |qemu|
+      qemu.memory            = 4096
+      qemu.cpus              = 4
+      qemu.machine           = 'q35'
+      qemu.cpu               = 'host'
+      qemu.video_type        = 'virtio'
+      qemu.display           = 'gtk'
+      qemu.audio             = 'on'
+      qemu.disk_interface    = 'virtio'
+      qemu.network_interface = 'virtio-net'
+      qemu.name              = 'WiFiChallenge Lab v2.4 (QEMU)'
+      qemu.qemu_dir          = 'C:/Program Files/qemu'
+      qemu.uefi              = 'C:/Program Files/qemu/share/edk2-x86_64-code.fd'
+      qemu.gui               = true
+      qemu.extra_qemu_args   = ['-nographic']
+    end
+
+    qemu_vm.vm.provision 'shell',
+      inline: <<~SHELL,
+        set -e
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y
+        apt-get full-upgrade -y
+      SHELL
+      privileged: true,
+      run: 'once'
+
+    qemu_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
+
+    qemu_vm.vm.provision 'shell',
+      inline: <<~SHELL,
+        set -e
+        apt-get install -y qemu-guest-agent spice-vdagent xserver-xorg-video-qxl
+        systemctl enable qemu-guest-agent
+        systemctl start qemu-guest-agent
+      SHELL
+      privileged: true
+
+    qemu_vm.vm.provision 'reload', name: 'Reboot after guest tools install'
+
+    qemu_vm.vm.provision 'shell',
+      path: './install.sh',
+      args: [dev_arg, location_arg],
+      privileged: true
+
+    qemu_vm.vm.provision 'reload', name: 'Reboot after update kernel'
+
+    qemu_vm.vm.provision 'shell',
+      inline: <<~SHELL,
+        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
+        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
+        sudo rm -f /tmp/zerofile
+      SHELL
+      privileged: true,
+      run: 'once'
+  end
 end
