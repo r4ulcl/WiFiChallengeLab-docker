@@ -132,114 +132,150 @@ uplinks: []
 802_11_networks: [
   {
     ssid: $ESSID_PSK
-    channels: [6]
+    channels: [$CHANNEL_PSK]
     security: [WPA2-PSK-CCMP-TKIP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_PSK",
-        fingerprints: [ 7303e2cb387b7367923cf58574b7e0e7edf58dc541a9714d117d16384bd00613 ]
+        fingerprints: [ $NZYME_FINGERPRINT_PSK ]
       }
     ]
   },
   {
     ssid: $ESSID_OPN
-    channels: [6]
+    channels: [$CHANNEL_OPN]
     security: [NONE]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_OPN",
-        fingerprints: [ 4db0e3114b3db19c2b3fae7a69a692e1edcf7ec718a4a6bf43311dc31185d132 ]
+        fingerprints: [ $NZYME_FINGERPRINT_OPN ]
       }
     ]
   },
   {
     ssid: $ESSID_BRUTEFORCE
-    channels: [11]
+    channels: [$CHANNEL_BRUTEFORCE]
     security: [WPA3-SAE-CCMP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_BRUTEFORCE",
-        fingerprints: [ df5b5f9eec31df5ec9e9e020d00abacde6fd7acd3e4cce45675510b72bbb107b ]
+        fingerprints: [ $NZYME_FINGERPRINT_BRUTEFORCE ]
       }
     ]
   },
   {
     ssid: $ESSID_DOWNGRADE
-    channels: [11]
+    channels: [$CHANNEL_DOWNGRADE]
     security: [WPA3-PSK-SAE-CCMP]
     beacon_rate: 47600
     bssids: [
       {
         address: "$MAC_DOWNGRADE",
-        fingerprints: [ 0d8c1f599eedc365bafbe63fb7c7c8f5592f01c3059a619d79035902fa5d781a ]
+        fingerprints: [ $NZYME_FINGERPRINT_DOWNGRADE ]
       }
     ]
   },
   
   {
     ssid: $ESSID_MGT
-    channels: [44]
+    channels: [$CHANNEL_MGT]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_MGT",
-        fingerprints: [ 296531dde9d53691e52c6a32406f5d811ee13af864df740fad53fc1238e8fc13 ]
+        fingerprints: [ $NZYME_FINGERPRINT_MGT ]
       },
       {
         address: "$MAC_MGT2",
-        fingerprints: [ 296531dde9d53691e52c6a32406f5d811ee13af864df740fad53fc1238e8fc13 ]
+        fingerprints: [ $NZYME_FINGERPRINT_MGT2 ]
       }
     ]
   },
   {
     ssid: $ESSID_MGT_TLS
-    channels: [44]
+    channels: [$CHANNEL_MGT_TLS]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_MGT_TLS",
-        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
+        fingerprints: [ $NZYME_FINGERPRINT_MGT_TLS ]
       }
     ]
   },
   {
     ssid: $ESSID_MGT_RELAY
-    channels: [44]
+    channels: [$CHANNEL_MGTRELAY]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_MGT_RELAY",
-        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
+        fingerprints: [ $NZYME_FINGERPRINT_MGT_RELAY ]
       }
     ]
   },
   {
     ssid: $ESSID_MGT_RELAY_TABLETS
-    channels: [44]
+    channels: [$CHANNEL_MGT_RELAY_TABLETS]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_MGT_RELAY_TABLETS",
-        fingerprints: [ 2d5d13288a250894738458150d9c884351b18f11f0abfdab3717a42a8e763592 ]
+        fingerprints: [ $NZYME_FINGERPRINT_MGT_RELAY_TABLETS ]
       }
     ]
   },
   {
     ssid: $ESSID_WEP
-    channels: [3]
+    channels: [$CHANNEL_WEP]
     security: [NONE]
     beacon_rate: 4760
     bssids: [
       {
         address: "$MAC_WEP",
-        fingerprints: [ 4db0e3114b3db19c2b3fae7a69a692e1edcf7ec718a4a6bf43311dc31185d132 ]
+        fingerprints: [ $NZYME_FINGERPRINT_WEP ]
+      }
+    ]
+  },
+  {
+    ssid: $ESSID_MGT_MD5
+    channels: [$CHANNEL_MGT_MD5]
+    security: [WPA2-EAM-CCMP-TKIP]
+    beacon_rate: 4760
+    bssids: [
+      {
+        address: "$MAC_MGT_MD5",
+        fingerprints: [ $NZYME_FINGERPRINT_MGT_MD5 ]
+      }
+    ]
+  },
+  {
+    ssid: $ESSID_OWE
+    channels: [$CHANNEL_OWE]
+    security: [WPA2-UNKNOWN-CCMP]
+    beacon_rate: 4760
+    bssids: [
+      {
+        address: "$MAC_OWE",
+        fingerprints: [ $NZYME_FINGERPRINT_OWE ]
+      }
+    ]
+  },
+  {
+    ssid: $ESSID_WPS
+    channels: [$CHANNEL_WPS]
+    security: [WPA2-PSK-CCMP]
+    beacon_rate: 4760
+    bssids: [
+      {
+        address: "$MAC_WPS",
+        fingerprints: [ $NZYME_FINGERPRINT_WPS ]
       }
     ]
   },
