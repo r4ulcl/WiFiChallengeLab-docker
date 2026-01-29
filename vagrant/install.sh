@@ -311,7 +311,7 @@ sudo chmod +x /var/aux.sh
 apt_update
 apt_install gnome-core gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor \
   gnome-tweaks gnome-shell-extension-dashtodock gnome-shell-extension-prefs gnome-remote-desktop \
-  gdm3 network-manager-gnome gnome-calculator evince eog file-roller
+  gdm3 network-manager-gnome gnome-calculator evince eog file-roller gnome-shell-extension-desktop-icons-ng
 
 sudo systemctl enable gdm3 || true
 sudo systemctl set-default graphical.target || true
@@ -401,6 +401,17 @@ gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true |
 gsettings set org.gnome.shell.extensions.dash-to-dock unity-backlit-items true || true
 gsettings set org.gnome.desktop.wm.preferences audible-bell false || true
 gsettings set org.gnome.shell.extensions.dash-to-dock extend-height true
+
+# Desktop icons (DING) enable + allow creating files/folders on desktop
+# Enable DING extension if present
+gnome-extensions list 2>/dev/null | grep -qx 'ding@rastersoft.com' && \
+  gnome-extensions enable ding@rastersoft.com || true
+
+# Make sure Nautilus is NOT managing the desktop (DING does)
+gsettings set org.gnome.desktop.background show-desktop-icons false || true
+
+# Optional: ensure file manager can handle desktop related actions
+gsettings set org.gnome.nautilus.preferences show-delete-permanently true || true
 
 # Ensure user has sudo
 sudo usermod -aG sudo user || true
