@@ -68,11 +68,7 @@ if (isset($_POST['Submit'])) {
 </head>
 <body>
 
-<script>
-function copyFlagToClipboard(flag) {
-  navigator.clipboard.writeText(flag).then(()=>alert('Flag copied to clipboard!'));
-}
-</script>
+<script src="script.js"></script>
 
 <div class="content">
 <?php
@@ -118,7 +114,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') !== false)
 ?>
 
 <!-- LOGIN UI -->
-<form action="" method="post" name="Login_Form">
+<form action="login.php" method="post" name="Login_Form">
   <table width="400" border="0" align="center" cellpadding="5" cellspacing="1" class="Table">
     <?php if (isset($msg)) { ?>
     <tr><td colspan="2" align="center"><?php echo $msg; ?></td></tr><?php } ?>
