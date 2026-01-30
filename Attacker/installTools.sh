@@ -397,6 +397,7 @@ cd dragondrain-and-time
 
 make distclean 2>/dev/null || true
 
+autoreconf -i
 CFLAGS='-D__packed="__attribute__((__packed__))"' ./configure
 make
 
