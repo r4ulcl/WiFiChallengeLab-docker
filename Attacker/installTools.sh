@@ -401,6 +401,9 @@ autoreconf -i
 CFLAGS='-D__packed="__attribute__((__packed__))"' ./configure
 make
 
+# Link to airgeddon plugin
+sudo chmod +x "${TOOLS}/dragondrain-and-time/src/dragondrain"
+sudo ln -sf "${TOOLS}"/dragondrain-and-time/src/dragondrain /usr/local/bin/dragondrain 
 
 ###############################################################################
 # Optional: enable SSH on port 2222 (commented out by default)
