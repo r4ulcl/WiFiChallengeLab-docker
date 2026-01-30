@@ -264,6 +264,25 @@ wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/m
 dpkg -i bully_*.deb || apt-get -y --fix-broken install || true
 rm -f bully_*.deb
 
+# Install ath_masker
+cd "${TOOLS}"
+git clone --depth 1 https://github.com/vanhoefm/ath_masker 
+cd ath_masker/
+make
+
+mkdir -p "/lib/modules/$(uname -r)/kernel/drivers/net/wireless/"
+cp ath_masker.ko "/lib/modules/$(uname -r)/kernel/drivers/net/wireless/"
+depmod -a
+
+echo -e "ath\nath_masker" | tee /etc/modules-load.d/ath_masker.conf > /dev/null
+echo "softdep ath_masker pre: ath" | tee /etc/modprobe.d/ath_masker.conf > /dev/null
+
+modprobe ath
+modprobe ath_masker
+cd cd "${TOOLS}"
+rm -rf ath_masker/ 2> /dev/null
+
+
 # hostapd-mana
 apt-get install -y libnl-genl-3-dev libssl-dev
 cd "${TOOLS}"
@@ -401,7 +420,7 @@ autoreconf -i
 CFLAGS='-D__packed="__attribute__((__packed__))"' ./configure
 make
 
-# Link to airgeddon plugin
+# Link dragondrain to airgeddon plugin
 sudo chmod +x "${TOOLS}/dragondrain-and-time/src/dragondrain"
 sudo ln -sf "${TOOLS}"/dragondrain-and-time/src/dragondrain /usr/local/bin/dragondrain 
 
