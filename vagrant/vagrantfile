@@ -17,6 +17,7 @@ Vagrant.configure('2') do |config|
       hv.maxmemory = 4096
       hv.memory    = 4096
       hv.cpus      = 4
+      # Note: Hyper-V does not typically expose a normal audio device to Linux guests.
     end
 
     hv_vm.vm.provision 'shell',
@@ -59,6 +60,10 @@ Vagrant.configure('2') do |config|
       vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
       vb.check_guest_additions = false
       vb.functional_vboxsf = false
+      vb.customize ['modifyvm', :id, '--audio', 'dsound']
+      vb.customize ['modifyvm', :id, '--audiocontroller', 'hda']
+      # If you ever need a fallback, swap controller to ac97:
+      # vb.customize ['modifyvm', :id, '--audiocontroller', 'ac97']
     end
 
     host_ga_iso =
@@ -169,6 +174,10 @@ Vagrant.configure('2') do |config|
       v.vmx['displayName']   = 'WiFiChallenge Lab v2.4'
       v.memory               = 4096
       v.cpus                 = 4
+      # Force sound device present/connected (Windows host)
+      v.vmx['sound.present']        = 'TRUE'
+      v.vmx['sound.autodetect']     = 'TRUE'
+      v.vmx['sound.startConnected'] = 'TRUE'
     end
 
     vmw_vm.vm.provision 'shell',
@@ -218,7 +227,11 @@ Vagrant.configure('2') do |config|
       qemu.qemu_dir          = 'C:/Program Files/qemu'
       qemu.uefi              = 'C:/Program Files/qemu/share/edk2-x86_64-code.fd'
       qemu.gui               = true
-      qemu.extra_qemu_args   = ['-nographic']
+      qemu.extra_qemu_args = [
+        '-audiodev', 'dsound,id=snd0',
+        '-device', 'ich9-intel-hda',
+        '-device', 'hda-duplex,audiodev=snd0'
+      ]
     end
 
     qemu_vm.vm.provision 'shell',
