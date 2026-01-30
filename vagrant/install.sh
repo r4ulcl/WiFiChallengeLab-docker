@@ -501,6 +501,12 @@ if command -v dmidecode >/dev/null 2>&1; then
     apt_install virtualbox-guest-utils virtualbox-guest-x11
   fi
 fi
+# ---------- sound  ---------------------------------------------------
+
+apt_install alsa-utils
+
+apt_install sox libsox-fmt-all pipewire-audio-client-libraries
+
 
 # ---------- allow root X11 ----------------------------------------------------
 for u in vagrant user; do
