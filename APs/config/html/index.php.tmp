@@ -167,7 +167,7 @@ if (isset($r['multi'])) {
             exit;
         }
     }
-    echo "No FLAG, try logging in with another user ;)";
+    echo "No FLAG, try logging in with another user ;)  ";
     echo "<a href=\"logout.php\">Click here</a> to Logout.";
     exit;
 }
