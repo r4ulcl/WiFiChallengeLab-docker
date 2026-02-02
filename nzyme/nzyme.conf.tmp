@@ -209,7 +209,7 @@ uplinks: []
   },
   {
     ssid: $ESSID_MGT_RELAY
-    channels: [$CHANNEL_MGTRELAY]
+    channels: [$CHANNEL_MGT_RELAY]
     security: [WPA2-EAM-CCMP]
     beacon_rate: 4760
     bssids: [
