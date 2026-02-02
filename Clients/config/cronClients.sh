@@ -225,8 +225,8 @@ while :
 do
 	#Infine traffic WEP
 	dhclien-wifichallenge $WLAN_CLIENT_WEP -v
-	ping $IP_WEP.1 -s 1000 -f & 
-	ping $IP_WEP.1 -s 1000 -f
+	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f & 
+	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f
 done &
 
 # Infinite wait
