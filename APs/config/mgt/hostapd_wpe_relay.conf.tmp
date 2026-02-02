@@ -1,7 +1,7 @@
 # Configuration file for hostapd-wpe
 
 # Interface - Probably wlan0 for 802.11, eth0 for wired
-interface=$WLAN_MGTRELAY
+interface=$WLAN_MGT_RELAY
 
 # May have to change these depending on build location
 eap_user_file=/root/mgt/hostapd_wpe_relay.eap_user
@@ -13,7 +13,7 @@ private_key_passwd=whatever
 
 # 802.11 Options
 ssid=$ESSID_MGT_RELAY
-channel=$CHANNEL_MGTRELAY
+channel=$CHANNEL_MGT_RELAY
 
 # WPE Options - Dont need to change these to make it all work 
 #
@@ -114,7 +114,7 @@ logger_stdout_level=2
 # hostapd_cli will use it when trying to connect with hostapd.
 #ctrl_interface=/var/run/hostapd
 
-ctrl_interface=/run/hostapd-$WLAN_MGTRELAY
+ctrl_interface=/run/hostapd-$WLAN_MGT_RELAY
 ctrl_interface_group=0
 
 # Access control for the control interface can be configured by setting the
