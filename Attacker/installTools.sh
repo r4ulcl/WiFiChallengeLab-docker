@@ -131,10 +131,10 @@ cd "${TOOLS}"
 git clone https://github.com/mamatb/UnicastDeauth.git || true
 python3 -m pip install --break-system-packages -r UnicastDeauth/requirements.txt || python3 -m pip install -r UnicastDeauth/requirements.txt
 
-# ---------- EapHammer fork ----------------------------------------------------
+# ---------- EapHammer ----------------------------------------------------
 cd "${TOOLS}"
 if [ ! -d eaphammer ]; then
-  git clone https://github.com/r4ulcl/eaphammer.git
+  git clone https://github.com/s0lst1c3/eaphammer
   cd eaphammer
   while read -r dep; do
     apt-get install -y "$dep" || apt-get -y --fix-broken install || true
@@ -142,13 +142,13 @@ if [ ! -d eaphammer ]; then
   apt-get install -y dsniff apache2 libffi-dev python3-openssl
   systemctl disable --now apache2 || true
   ./ubuntu-unattended-setup || echo "eaphammer unattended setup failed, continuing"
-  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl gevent netifaces || true
-  wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini || true
+  #python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl gevent netifaces || true
+  #wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini || true
 fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
-python3 -m pip install aioquic || true
-pip3 install tqdm pem aioquic --break-system-packages || true
-python3 -m pip install --break-system-packages -r pip.req
+#python3 -m pip install aioquic || true
+#pip3 install tqdm pem aioquic --break-system-packages || true
+#python3 -m pip install --break-system-packages -r pip.req
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
@@ -279,7 +279,7 @@ echo "softdep ath_masker pre: ath" | tee /etc/modprobe.d/ath_masker.conf > /dev/
 
 modprobe ath
 modprobe ath_masker
-cd cd "${TOOLS}"
+cd "${TOOLS}"
 rm -rf ath_masker/ 2> /dev/null
 
 
