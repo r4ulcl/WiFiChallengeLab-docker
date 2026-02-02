@@ -150,6 +150,7 @@ echo "Welcome {$user}<br><br>";
 
 if (!isset($rules[$user])) {
     echo "No FLAG for this user";
+    echo "<a href=\"logout.php\">Click here</a> to Logout.";
     exit;
 }
 
@@ -167,6 +168,7 @@ if (isset($r['multi'])) {
         }
     }
     echo "No FLAG, try logging in with another user ;)";
+    echo "<a href=\"logout.php\">Click here</a> to Logout.";
     exit;
 }
 
@@ -190,11 +192,9 @@ if (!empty($r['extra'])) {
     Certificate Authority: <a href=\"/.internalCA/\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/</a>";
 }
 
-echo "<br><br>Congratulation! You have logged into password protected page.";
+echo "<br><br>Congratulation! You have logged into password protected page. 
+<a href=\"logout.php\">Click here</a> to Logout.";
 ?>
-
-echo "<a href=\"logout.php\">Click here</a> to Logout.";
-
 
 <div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
   <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
