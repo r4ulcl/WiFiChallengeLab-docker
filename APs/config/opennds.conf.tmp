@@ -78,4 +78,4 @@ FirewallRuleSet users-to-router {
    # FirewallRule allow tcp port 443
 }
 
-trustedmaclist $MAC_OPN1,MAC_OPN2,MAC_OPN3
+trustedmaclist $MAC_OPN1,$MAC_OPN2,$MAC_OPN3
