@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:dev
+    image: r4ulcl/wifichallengelab-aps:latest
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     #env_file: ./APs/.env
