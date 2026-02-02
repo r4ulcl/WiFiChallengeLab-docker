@@ -620,7 +620,10 @@ for pkg in "${packages[@]}"; do
 done
 
 echo 'Install WiFi tools'
-sudo bash Attacker/installTools.sh
+sudo bash Attacker/installTools.sh || {
+  echo "installTools.sh failed"
+  exit 1
+}
 
 sudo apt-get -o Dpkg::Use-Pty=0 -y autoremove </dev/null || true
 sudo apt-get -o Dpkg::Use-Pty=0 clean </dev/null || true
