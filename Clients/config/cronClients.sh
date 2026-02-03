@@ -212,7 +212,7 @@ do
 
 			sleep 0.5
             # run smbmap under cpulimit and timeout (foreground)
-            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_DOMAIN" -u "IDENTITY_MGT_PHISHING_USER" -p "$PASS_MGT_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1
+            timeout -k 1 20s cpulimit -l 30 -f -- /usr/bin/smbmap -d "$IDENTITY_MGT_PHISHING_DOMAIN" -u "$IDENTITY_MGT_PHISHING_USER" -p "$PASS_MGT_PHISHING_CLEAR" -H "$SERVER" >/dev/null 2>&1
         ) 9>/var/lock/smbmap.lock
 
     else
