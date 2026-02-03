@@ -1,5 +1,33 @@
 # Changelog WiFiChallengeLab
 
+## Changelog: WiFiChallengeLab v2.4
+
+### Modifications
+
+* Added **OWE lab scenario** with new AP and client configs "force vuln" to dragonrain
+* Configured 6GHz SAE network to challenge
+* Introduced **decode_passwords** helper to generate `_CLEAR` vars from encoded passwords
+* Added **OPEN_SOURCE_REFERENCES.md** and refreshed **README** (badges, docs, usage notes)
+* Added more variables in ENV to web, aps, clients and nzyme. 
+* New tools
+  * WiFiChallenge/aircrack-ng with `--mfp`
+  * vanhoefm/dragondrain-and-time
+  * vanhoefm/ath_masker 
+* Update website GUI 
+
+### Bug Fixes
+
+* Cleaned up **wlan_config** and env vars for APs, clients and relay
+* Fixed **hostapd** and FreeRADIUS issues (quoting and password handling)
+* Added missing **gettext-base** and other minor dependencies in client images
+
+### Miscellaneous Improvements
+
+* Enabled **Docker layer caching** and path based CI workflows
+* Normalized line endings to **LF** and added `.gitattributes` for consistent diffs
+* Workflows only generate the docker if there is any change
+
+
 ## Changelog: WiFiChallengeLab v2.3
 
 ### Modifications
