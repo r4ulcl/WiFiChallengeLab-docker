@@ -13,7 +13,7 @@ Vagrant.configure('2') do |config|
     hv_vm.vm.hostname = 'WiFiChallengeLab'
 
     hv_vm.vm.provider 'hyperv' do |hv|
-      hv.vmname    = 'WiFiChallenge Lab v2.4'
+      hv.vmname    = 'WiFiChallenge Lab v2.5'
       hv.maxmemory = 4096
       hv.memory    = 4096
       hv.cpus      = 4
@@ -56,7 +56,7 @@ Vagrant.configure('2') do |config|
     vb_vm.vm.provider 'virtualbox' do |vb|
       vb.memory = 4096
       vb.cpus   = 4
-      vb.name   = 'WiFiChallenge Lab v2.4'
+      vb.name   = 'WiFiChallenge Lab v2.5'
       vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
       vb.check_guest_additions = false
       vb.functional_vboxsf = false
@@ -171,7 +171,7 @@ Vagrant.configure('2') do |config|
       v.clone_directory      = 'E:/VMWare'
       v.force_vmware_license = 'workstation'
       v.gui                  = true
-      v.vmx['displayName']   = 'WiFiChallenge Lab v2.4'
+      v.vmx['displayName']   = 'WiFiChallenge Lab v2.5'
       v.memory               = 4096
       v.cpus                 = 4
       # Force sound device present/connected (Windows host)
@@ -223,7 +223,7 @@ Vagrant.configure('2') do |config|
       qemu.audio             = 'on'
       qemu.disk_interface    = 'virtio'
       qemu.network_interface = 'virtio-net'
-      qemu.name              = 'WiFiChallenge Lab v2.4 (QEMU)'
+      qemu.name              = 'WiFiChallenge Lab v2.5 (QEMU)'
       qemu.qemu_dir          = 'C:/Program Files/qemu'
       qemu.uefi              = 'C:/Program Files/qemu/share/edk2-x86_64-code.fd'
       qemu.gui               = true
