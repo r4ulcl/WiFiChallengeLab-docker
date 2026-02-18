@@ -1,0 +1,51 @@
+name: Docker Image CI Clients challenge
+
+on:
+  push:
+    branches:
+      - 'challenge'
+    paths:
+      - Clients/**
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Clients
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-clients:challenge
+            ghcr.io/${{ github.repository_owner }}/wifichallengelab-clients:challenge
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-clients:challenge-cache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/wifichallengelab-clients:challenge-cache,mode=max
