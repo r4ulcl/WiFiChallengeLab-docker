@@ -227,10 +227,6 @@ fping -l -p 3000 -q \
   "$IP_OWE.1" \
   > /dev/null 2>&1
 
-
-wait
-
-
 sleep 10 && echo "ALL SET"
 
 /bin/bash
