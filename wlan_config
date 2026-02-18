@@ -5,6 +5,11 @@ POSTGRES_DB='nzyme'
 POSTGRES_USER='nzyme'
 POSTGRES_PASSWORD='6iQ8TeFVPQE12ToyyEjf'
 
+ADMIN_PASSWORD_HASH='8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'
+DATABASE_URL='postgresql://localhost:5432/nzyme?user=nzyme&password=6iQ8TeFVPQE12ToyyEjf'
+
+EXTERNAL_URL='http://localhost:22900'
+WLAN='wlan60'
 
 ############################################################
 # OPEN NETWORK — wifi-guest (AP)
