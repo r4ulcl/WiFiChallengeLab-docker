@@ -3,7 +3,7 @@
 ############################################
 # Uses existing environment variables
 # Generates:
-#   wlan_config.clear
+#   /root/wlan_config.clear
 ############################################
 
 if [ -z "$KEY_J3D5ETO" ]; then
@@ -27,7 +27,7 @@ DECODE() {
     ' "$1"
 }
 
-OUT="wlan_config.clear"
+OUT="/root/wlan_config.clear"
 echo '# AUTO-GENERATED DO NOT EDIT' > "$OUT"
 
 # Iterate over existing environment variables
