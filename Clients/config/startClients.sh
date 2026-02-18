@@ -26,7 +26,7 @@ function opnConnect {
     IP=$2
     IP_OPN=192.168.10
 	echo "Starting $WLAN"
-	retry "dhclien-wifichallenge $WLAN" 2> /dev/nill
+	retry "dhclien-wifichallenge $WLAN" 2> /dev/null
 
     sleep 10
     curl --silent http://$IP_OPN.1 -L
@@ -116,8 +116,8 @@ sleep 5
 #sleep 15
 
 # Delete logs to >> always
-mkdir /root/logs/ 2> /dev/nill
-rm /root/logs/ 2> /dev/nill
+mkdir /root/logs/ 2> /dev/null
+rm /root/logs/ 2> /dev/null
 
 # Exec cronClient
 bash /root/cronClients.sh > /root/logs/cronClients.log &
@@ -214,24 +214,23 @@ LAST2=$!
 
 sleep 5
 
-ping $IP_OPN.1 > /dev/nill &
-ping $IP_OPN.1 > /dev/nill &
-ping $IP_OPN.1 > /dev/nill &
-ping $IP_MGT.1 > /dev/nill &
-ping $IP_MGT.1 > /dev/nill &
-ping $IP_MGT_TLS.1 > /dev/nill &
-ping $IP_PSK.1 > /dev/nill &
-ping $IP_PSK.1 > /dev/nill &
-ping $IP_PSK_NOAP.1 > /dev/nill &
-ping $IP_PSK_NOAP.1 > /dev/nill &
-ping $IP_MGT_RELAY.1 > /dev/nill &
-ping $IP_MGT_TLS.1 > /dev/nill &
-ping $IP_DOWNGRADE.1 > /dev/nill &
-ping $IP_MGT_MD5.1 > /dev/nill &
-ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
-ping $IP_MGT_RELAY_TABLETS.1 > /dev/nill &
-ping $IP_WEP.1 > /dev/nill &
-ping $IP_OWE.1 > /dev/nill &
+fping -l -p 3000 -q \
+  "$IP_OPN.1" \
+  "$IP_MGT.1" \
+  "$IP_MGT_TLS.1" \
+  "$IP_PSK.1" \
+  "$IP_PSK_NOAP.1" \
+  "$IP_MGT_RELAY.1" \
+  "$IP_DOWNGRADE.1" \
+  "$IP_MGT_MD5.1" \
+  "$IP_MGT_RELAY_TABLETS.1" \
+  "$IP_WEP.1" \
+  "$IP_OWE.1" \
+  > /dev/null 2>&1
+
+
+wait
+
 
 sleep 10 && echo "ALL SET"
 

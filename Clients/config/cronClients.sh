@@ -10,12 +10,12 @@ function retry {
 }
 
 #40-59 skip OPN
-killall dhclien-wifichallenge 2> /dev/nill &
+killall dhclien-wifichallenge 2> /dev/null &
 for N in `seq 40 46`; do
-	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
 for N in `seq 50 59`; do
-	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
 
 # Start Apache in client for Client isolation test
@@ -26,12 +26,12 @@ sleep 10
 # DHCP
 while :
 do
-	killall dhclien-wifichallenge 2> /dev/nill &
+	killall dhclien-wifichallenge 2> /dev/null &
 	for N in `seq 40 46`; do
-		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
 	for N in `seq 50 59`; do
-		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/nill &
+		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
     wait $!
 	sleep 60
@@ -225,8 +225,7 @@ while :
 do
 	#Infine traffic WEP
 	dhclien-wifichallenge $WLAN_CLIENT_WEP -v
-	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f & 
-	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f
+    timeout -k 1 60s fping -l -p 1000 -b 1000 -q "$IP_WEP.1"
 done &
 
 # Infinite wait
