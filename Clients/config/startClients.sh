@@ -50,9 +50,8 @@ echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
 #LOAD VARIABLES FROM FILE (EXPORT)
 set -a
-source /root/wlan_config
 
-bash /root/decode_passwords.sh /root/wlan_config
+bash /root/decode_passwords.sh
 source /root/wlan_config.clear
 
 cd /root/openClient/
