@@ -1,27 +1,15 @@
 #!/bin/bash
 
 ############################################
-# Usage:
-#   ./decode_passwords.sh /path/to/config
-#
+# Uses existing environment variables
 # Generates:
-#   /path/to/config.clear
+#   wlan_config.clear
 ############################################
 
-CONFIG_FILE="$1"
-
-if [ -z "$CONFIG_FILE" ]; then
-    echo "ERROR: Missing config file argument."
-    echo "Usage: $0 /path/to/wlan_config"
+if [ -z "$KEY_J3D5ETO" ]; then
+    echo "ERROR: KEY_J3D5ETO is not set in environment."
     exit 1
 fi
-
-if [ ! -f "$CONFIG_FILE" ]; then
-    echo "ERROR: File not found: $CONFIG_FILE"
-    exit 1
-fi
-
-source "$CONFIG_FILE"
 
 DECODE() {
     php -r '
@@ -39,17 +27,11 @@ DECODE() {
     ' "$1"
 }
 
-OUT="${CONFIG_FILE}.clear"
+OUT="wlan_config.clear"
 echo '# AUTO-GENERATED DO NOT EDIT' > "$OUT"
 
-# Only capture valid lines like:
-# PASS_SOMETHING='encodedvalue'
-grep -E "^[[:space:]]*PASS_[A-Za-z0-9_]+='[^']*'" "$CONFIG_FILE" | \
-while IFS='=' read -r VAR VALUE; do
-
-    VAR=$(echo "$VAR" | tr -d ' ')
-    ENC=$(echo "$VALUE" | sed -E "s/^'([^']*)'.*/\1/")
-
+# Iterate over existing environment variables
+env | grep -E '^PASS_[A-Za-z0-9_]+=' | while IFS='=' read -r VAR ENC; do
     if [ -n "$ENC" ]; then
         CLEAR=$(DECODE "$ENC")
         echo "${VAR}_CLEAR='$CLEAR'" >> "$OUT"
