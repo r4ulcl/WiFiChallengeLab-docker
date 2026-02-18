@@ -17,7 +17,6 @@ RUN cd ; wget wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
        ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
 
 #Copy config files
-COPY config/wlan_config /root/wlan_config
 COPY config/open/ /root/open/
 COPY config/psk/ /root/psk/
 COPY config/mgt/ /root/mgt/
