@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:challenge
+    image: r4ulcl/wifichallengelab-aps:latest
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     env_file:
@@ -27,7 +27,7 @@ services:
     privileged: true #NETNS
 
   clients:
-    image: r4ulcl/wifichallengelab-clients:challenge
+    image: r4ulcl/wifichallengelab-clients:latest
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
     env_file:
