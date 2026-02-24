@@ -409,7 +409,7 @@ CHANNEL_OTHER3='6'
 # OWE
 ############################################################
 WLAN_OWE='wlan30'
-NZYME_FINGERPRINT_OWE='bf21209c8e7e0c8c22bb11a14458cda5f6d7213570c3d8bd005c6450f2a74b93'
+NZYME_FINGERPRINT_OWE='725e4328157da4044fcd67ef6062588a3e1caf41571fcdb02b968ae6bb4236e4'
 CHANNEL_OWE='44'
 ESSID_OWE='wifi-complimentary'
 IP_OWE='192.168.20'
