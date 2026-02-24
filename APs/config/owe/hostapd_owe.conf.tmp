@@ -10,17 +10,12 @@ channel=$CHANNEL_OWE
 # SSID ------------------------------------------------------------------
 ssid=$ESSID_OWE
 
-ieee80211n=1
-ieee80211ac=1
-
 auth_algs=1
 wpa=2
 wpa_key_mgmt=OWE
-
-wpa_pairwise=CCMP
 rsn_pairwise=CCMP
-
 ieee80211w=2
+owe_groups=19
 
 ctrl_interface=/run/hostapd-$WLAN_OWE
 ctrl_interface_group=0

@@ -15,11 +15,12 @@ sudo apt install linux-headers-$(uname -r) -y || true
 sudo apt-get install -y gcc-12 g++-12 build-essential || true
 
 ### ---- Download the code and parche ----------------------------------
+rm -f mac80211_hwsim.c mac80211_hwsim.h mac80211_hwsim.c.bak
 bash patch80211.sh
 
-bash dragondrain.sh
+PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 
-TARGET_VERSION_ERROR="2.4-WiFiChallengeLab-version"
+TARGET_VERSION_ERROR="2.4.1-WiFiChallengeLab-version"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install
