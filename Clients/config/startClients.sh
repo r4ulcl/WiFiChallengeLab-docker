@@ -44,6 +44,8 @@ function opnConnect {
     echo "DONE $WLAN"
 }
 
+# Challenge-dev
+
 date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf

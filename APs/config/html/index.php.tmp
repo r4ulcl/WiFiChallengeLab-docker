@@ -187,7 +187,7 @@ if (!empty($r['extra'])) {
     private_key=/root/certs/server.key<br>
     private_key_passwd=whatever<br>
     dh_file=/etc/hostapd-wpe/dh<br><br>
-    ssid=wifi-corp<br>
+    ssid=wifi-business<br>
     channel=44<br><br>
     Certificate Authority: <a href=\"/.internalCA/\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/</a>";
 }

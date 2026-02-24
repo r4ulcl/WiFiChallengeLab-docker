@@ -1,0 +1,119 @@
+services:
+  aps:
+    image: r4ulcl/wifichallengelab-aps:challenge
+    restart: on-failure   # Automatically restart on failure
+    container_name: WiFiChallengeLab-APs
+    env_file:
+      - ./wlan_config    
+    volumes:
+      - ./certs:/root/certs/:ro
+      - ./certs:/root/mgt/certs/:ro
+      - ./certs:/var/www/html/.internalCA/
+      - /lib/modules:/lib/modules
+      - /usr/src:/usr/src:ro
+      - ./logsAP:/root/logs/
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ip netns exec ns-ap /bin/bash -c '
+          curl -f -s http://localhost/login.php >/dev/null || exit 1;
+          curl -s http://localhost:8080 >/dev/null || exit 2;
+          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    network_mode: host #NETNS
+    privileged: true #NETNS
+
+  clients:
+    image: r4ulcl/wifichallengelab-clients:challenge
+    restart: on-failure   # Automatically restart on failure
+    container_name: WiFiChallengeLab-Clients
+    env_file:
+      - ./wlan_config    
+    volumes:
+      - ./certs:/root/certs/:ro
+      - /lib/modules:/lib/modules
+      - ./logsClient:/root/logs/
+    depends_on:
+      - aps
+    network_mode: host #NETNS
+    privileged: true #NETNS
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ip netns exec ns-client /bin/bash -c '
+          curl -s http://localhost >/dev/null || exit 1;
+          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 45s
+
+
+  nzyme:
+    image: r4ulcl/wifichallengelab-nzyme:latest
+    restart: on-failure   # Automatically restart on failure
+    env_file:
+      - ./wlan_config    
+    #env_file: .env
+    container_name: WiFiChallengeLab-nzyme
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./nzyme/nzyme-logs/logs/:/var/log/nzyme/
+      - ./nzyme/nzyme.conf.tmp:/etc/nzyme/nzyme.conf.tmp
+    #ports:
+    #  - "22900:22900"
+    depends_on:
+      - aps
+      - db
+    environment:
+      - TZ=Europe/Berlin
+    network_mode: host #USB Antena
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f -s http://localhost:22900 >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    cap_add: # full access to wifi interface
+      - NET_ADMIN
+      - NET_RAW
+    deploy:
+        resources:
+            limits:
+              cpus: "0.50"
+              memory: 512M
+            reservations:
+              memory: 128M
+
+  db:
+    image: postgres:14
+    restart: unless-stopped
+    #env_file: ./nzyme/.env
+    env_file:
+      - ./wlan_config    
+    container_name: WiFiChallengeLab-nzyme-db
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - aps
+    environment:
+      - TZ=Europe/Berlin
+    volumes:
+      - ./nzyme/nzyme-logs/data:/var/lib/postgresql/data
+    ports:
+      - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
+      interval: 10s
+      start_period: 30s
+    deploy:
+        resources:
+            limits:
+              cpus: "0.50"
+              memory: 512M
+            reservations:
+              memory: 128M
