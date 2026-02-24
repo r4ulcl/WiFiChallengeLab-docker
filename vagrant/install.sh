@@ -698,6 +698,8 @@ sudo apt-get -o Dpkg::Use-Pty=0 autoremove --purge -y </dev/null || true
 
 rm -f /root/resolv.conf.pre-install.* 2>/dev/null || true
 
+sudo rm -r /root/.bash_history /home/user/.bash_history 
+
 echo "Zero fill to shrink image..."
 sudo dd if=/dev/zero of=/tmp/zerofile bs=1M 2>/dev/null || true
 sudo rm -f /tmp/zerofile
