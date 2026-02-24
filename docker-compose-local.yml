@@ -7,7 +7,8 @@ services:
       network: host
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
-    #env_file: ./APs/.env
+    env_file:
+      - ./wlan_config    
     volumes:
       - ./certs:/root/certs/:ro
       - ./certs:/root/mgt/certs/:ro
@@ -37,7 +38,8 @@ services:
       network: host
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-Clients
-    #env_file: ./Clients/.env
+    env_file:
+      - ./wlan_config    
     volumes:
       - ./certs:/root/certs/:ro
       - /lib/modules:/lib/modules
@@ -67,7 +69,7 @@ services:
     restart: on-failure   # Automatically restart on failure
     env_file:
       - ./nzyme/.env
-      - ./APs/config/wlan_config    
+      - ./wlan_config    
     #env_file: .env
     container_name: WiFiChallengeLab-nzyme
     security_opt:
