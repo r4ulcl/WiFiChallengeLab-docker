@@ -50,7 +50,7 @@ ${ALT_MODNAME}-objs := mac80211_hwsim.o
 EOF
 
 echo "==> Building ${ALT_MODNAME}.ko …"
-make -s -C "/lib/modules/${KVER}/build" M="${BUILD_DIR}" modules
+SKIP_BTF=1 make -s -C "/lib/modules/${KVER}/build" M="${BUILD_DIR}" modules
 
 # verify version of freshly‑built binary
 NEW_VER="$(modver "./${ALT_MODNAME}.ko")"
