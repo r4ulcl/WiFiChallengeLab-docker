@@ -10,7 +10,8 @@ services:
       - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
-      - /usr/src:/usr/src:ro
+      - /usr/src:/usr/src
+      - /usr/lib:/host_usr_lib:ro
       - ./logsAP:/root/logs/
     healthcheck:
       test:
