@@ -7,8 +7,10 @@ LOCATION=${2:-remote}
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 export DEBCONF_NOWARNINGS=yes
+export DEBIAN_PRIORITY=critical
 export NEEDRESTART_MODE=a
 export UCF_FORCE_CONFFNEW=1
+export APT_LISTCHANGES_FRONTEND=none
 
 # Fix for Debian 12 python packaging guardrails when scripts use "pip install" globally
 # Best practice is venv or pipx, but this prevents "externally-managed-environment" hard failures.
@@ -20,23 +22,80 @@ DEB_CODENAME="bookworm"
 date
 
 # ---------- helpers -----------------------------------------------------------
+run_as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+preseed_desktop_debconf() {
+  run_as_root debconf-set-selections <<'EOF'
+keyboard-configuration keyboard-configuration/modelcode string pc105
+keyboard-configuration keyboard-configuration/layoutcode string us
+keyboard-configuration keyboard-configuration/variantcode string
+keyboard-configuration keyboard-configuration/optionscode string
+keyboard-configuration keyboard-configuration/store_defaults_in_debconf_db boolean true
+keyboard-configuration keyboard-configuration/compose select No compose key
+keyboard-configuration keyboard-configuration/toggle select No toggling
+keyboard-configuration keyboard-configuration/xkb-keymap select us
+console-setup console-setup/charmap47 select UTF-8
+console-setup console-setup/codeset47 select Guess optimal character set
+console-setup console-setup/fontface47 select Fixed
+console-setup console-setup/fontsize-text47 select 16
+EOF
+}
+
 apt_update() {
-  sudo apt-get -o Dpkg::Use-Pty=0 update -y </dev/null
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 update -y </dev/null
 }
 
 apt_install() {
-  sudo apt-get -o Dpkg::Use-Pty=0 install -y \
-    -o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confnew" \
-    "$@" </dev/null
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 install -y \
+      -o Dpkg::Options::="--force-confdef" \
+      -o Dpkg::Options::="--force-confnew" \
+      "$@" </dev/null
 }
 
 apt_remove() {
-  sudo apt-get -o Dpkg::Use-Pty=0 remove -y "$@" </dev/null || true
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 remove -y "$@" </dev/null || true
 }
 
 apt_purge() {
-  sudo apt-get -o Dpkg::Use-Pty=0 purge -y "$@" </dev/null || true
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 purge -y "$@" </dev/null || true
 }
 
 service_exists() {
@@ -308,6 +367,7 @@ EOF
 sudo chmod +x /var/aux.sh
 
 # ---------- Install GNOME -----------------------------------------------------
+preseed_desktop_debconf
 apt_update
 apt_install gnome-core gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor \
   gnome-tweaks gnome-shell-extension-dashtodock gnome-shell-extension-prefs gnome-remote-desktop \
@@ -327,15 +387,31 @@ sudo tee /etc/configureUser.sh >/dev/null <<'EOF'
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+export DEBCONF_NOWARNINGS=yes
+export DEBIAN_PRIORITY=critical
+export NEEDRESTART_MODE=a
+export UCF_FORCE_CONFFNEW=1
+export APT_LISTCHANGES_FRONTEND=none
+
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
   eval "$(dbus-launch --sh-syntax)"
 fi
 
-sudo apt-get -o Dpkg::Use-Pty=0 install -y \
-  -o Dpkg::Options::="--force-confdef" \
-  -o Dpkg::Options::="--force-confnew" \
-  gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales libnss3-tools firefox-esr \
-  </dev/null >/dev/null || true
+sudo env \
+  DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+  DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+  DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+  DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+  NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+  UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+  APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+  apt-get -o Dpkg::Use-Pty=0 install -y \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confnew" \
+    gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales libnss3-tools firefox-esr \
+    </dev/null >/dev/null || true
 
 sudo mkdir -p /opt/background
 sudo cp /var/WiFiChallengeLab-docker/WiFiChallengeLab.png /opt/background/ 2>/dev/null || true
@@ -385,7 +461,15 @@ sleep 10
 CA=/var/WiFiChallengeLab-docker/certs/ca.crt
 PROFILE_DIR=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' -print -quit 2>/dev/null || true)
 if [ -n "$PROFILE_DIR" ] && [ -f "$CA" ]; then
-  command -v certutil >/dev/null 2>&1 || sudo apt-get -o Dpkg::Use-Pty=0 install -y libnss3-tools </dev/null || true
+  command -v certutil >/dev/null 2>&1 || sudo env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 install -y libnss3-tools </dev/null || true
   certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA" 2>/dev/null || true
 fi
 

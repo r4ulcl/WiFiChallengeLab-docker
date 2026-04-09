@@ -4,9 +4,42 @@ set -e
 TARGET_USER="${1:-}"
 
 export DEBIAN_FRONTEND="noninteractive"
+export DEBCONF_NONINTERACTIVE_SEEN="true"
+export DEBCONF_NOWARNINGS="yes"
+export DEBIAN_PRIORITY="critical"
+export NEEDRESTART_MODE="a"
+export UCF_FORCE_CONFFNEW="1"
+export APT_LISTCHANGES_FRONTEND="none"
 
 need_cmd() { command -v "$1" >/dev/null 2>&1; }
 backup_file() { local f="$1"; if [ -f "$f" ] && [ ! -f "${f}.bak" ]; then cp -a "$f" "${f}.bak"; fi; }
+apt_noninteractive() {
+  env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 "$@" </dev/null
+}
+preseed_desktop_debconf() {
+  debconf-set-selections <<'EOF'
+keyboard-configuration keyboard-configuration/modelcode string pc105
+keyboard-configuration keyboard-configuration/layoutcode string us
+keyboard-configuration keyboard-configuration/variantcode string
+keyboard-configuration keyboard-configuration/optionscode string
+keyboard-configuration keyboard-configuration/store_defaults_in_debconf_db boolean true
+keyboard-configuration keyboard-configuration/compose select No compose key
+keyboard-configuration keyboard-configuration/toggle select No toggling
+keyboard-configuration keyboard-configuration/xkb-keymap select us
+console-setup console-setup/charmap47 select UTF-8
+console-setup console-setup/codeset47 select Guess optimal character set
+console-setup console-setup/fontface47 select Fixed
+console-setup console-setup/fontsize-text47 select 16
+EOF
+}
 detect_user() {
   if [ -n "$TARGET_USER" ]; then id -u "$TARGET_USER" >/dev/null; echo "$TARGET_USER"; return; fi
   if [ -n "${SUDO_USER:-}" ] && id -u "$SUDO_USER" >/dev/null 2>&1; then echo "$SUDO_USER"; return; fi
@@ -22,8 +55,12 @@ USER_HOME="$(getent passwd "$USER_NAME" | cut -d: -f6)"
 echo "Using target user: $USER_NAME ($USER_HOME)"
 
 echo "Updating apt and installing packages..."
-apt-get update -y
-apt-get install -y xrdp xorgxrdp gnome-session gnome-shell dbus-x11 network-manager
+preseed_desktop_debconf
+apt_noninteractive update -y
+apt_noninteractive install -y \
+  -o Dpkg::Options::="--force-confdef" \
+  -o Dpkg::Options::="--force-confnew" \
+  xrdp xorgxrdp gnome-session gnome-shell dbus-x11 network-manager
 
 # Groups required for xrdp and Wi-Fi control
 adduser xrdp ssl-cert >/dev/null 2>&1 || true

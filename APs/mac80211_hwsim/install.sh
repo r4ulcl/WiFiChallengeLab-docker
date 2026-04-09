@@ -5,12 +5,40 @@
 #
 # set -euo pipefail
 
+export DEBIAN_FRONTEND="${DEBIAN_FRONTEND:-noninteractive}"
+export DEBCONF_NONINTERACTIVE_SEEN="${DEBCONF_NONINTERACTIVE_SEEN:-true}"
+export DEBCONF_NOWARNINGS="${DEBCONF_NOWARNINGS:-yes}"
+export DEBIAN_PRIORITY="${DEBIAN_PRIORITY:-critical}"
+export NEEDRESTART_MODE="${NEEDRESTART_MODE:-a}"
+export UCF_FORCE_CONFFNEW="${UCF_FORCE_CONFFNEW:-1}"
+export APT_LISTCHANGES_FRONTEND="${APT_LISTCHANGES_FRONTEND:-none}"
+
 ### ---- configuration -------------------------------------------------
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 AUTO_INSTALL_DEPS="${AUTO_INSTALL_DEPS:-0}"
 HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
 # ----------------------------------------------------------------------
+
+run_as_root() {
+    if [[ "$(id -u)" -eq 0 ]]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
+apt_noninteractive() {
+    run_as_root env \
+        DEBIAN_FRONTEND="${DEBIAN_FRONTEND}" \
+        DEBCONF_NONINTERACTIVE_SEEN="${DEBCONF_NONINTERACTIVE_SEEN}" \
+        DEBCONF_NOWARNINGS="${DEBCONF_NOWARNINGS}" \
+        DEBIAN_PRIORITY="${DEBIAN_PRIORITY}" \
+        NEEDRESTART_MODE="${NEEDRESTART_MODE}" \
+        UCF_FORCE_CONFFNEW="${UCF_FORCE_CONFFNEW}" \
+        APT_LISTCHANGES_FRONTEND="${APT_LISTCHANGES_FRONTEND}" \
+        apt-get -o Dpkg::Use-Pty=0 "$@" </dev/null
+}
 
 require_cmds=()
 for c in make gcc g++; do
@@ -20,7 +48,7 @@ done
 if (( ${#require_cmds[@]} > 0 )); then
     if [[ "${AUTO_INSTALL_DEPS}" == "1" ]]; then
         echo "[i] Missing build tools (${require_cmds[*]}). Installing ..."
-        sudo apt-get install -y gcc-12 g++-12 build-essential
+        apt_noninteractive install -y gcc-12 g++-12 build-essential
     else
         echo "ERROR: Missing build tools: ${require_cmds[*]}"
         echo "Install them manually or run with AUTO_INSTALL_DEPS=1."
@@ -94,9 +122,9 @@ resolve_kbuild_dir() {
 
     if can_write_usr_src; then
         echo "[i] Trying to install matching headers inside this environment ..."
-        sudo apt update -y || true
+        apt_noninteractive update -y || true
         if pkg_available "linux-headers-${KVER}"; then
-            sudo apt install "linux-headers-${KVER}" -y || true
+            apt_noninteractive install -y "linux-headers-${KVER}" || true
         else
             echo "[i] Package linux-headers-${KVER} is not available in current APT repositories."
         fi
