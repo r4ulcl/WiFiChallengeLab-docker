@@ -296,6 +296,16 @@ EOF
 sudo chmod +x /root/restartWiFi.sh /home/user/restartWiFi.sh
 sudo chown user:user /home/user/restartWiFi.sh
 
+sudo tee /root/resetWiFi.sh /home/user/resetWiFi.sh >/dev/null <<'EOF'
+#!/bin/bash
+cd /var/WiFiChallengeLab-docker
+docker compose down
+docker compose up -d
+EOF
+sudo chmod +x /root/resetWiFi.sh /home/user/resetWiFi.sh
+sudo chown user:user /home/user/resetWiFi.sh
+
+
 sudo tee /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh >/dev/null <<'EOF'
 #!/bin/bash
 cd /var/WiFiChallengeLab-docker
