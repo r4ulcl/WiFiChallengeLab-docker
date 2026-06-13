@@ -26,6 +26,10 @@ Vagrant.configure('2') do |config|
     hv_vm.vm.provision 'shell',
       inline: <<~SHELL,
         set -e
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
       SHELL
@@ -97,6 +101,10 @@ Vagrant.configure('2') do |config|
       inline: <<~SHELL,
         set -e
         export DEBIAN_FRONTEND=noninteractive
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         apt-get full-upgrade -y
       SHELL
@@ -202,6 +210,10 @@ Vagrant.configure('2') do |config|
     vmw_vm.vm.provision 'shell',
       inline: <<~SHELL,
         set -e
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
       SHELL
@@ -260,6 +272,10 @@ Vagrant.configure('2') do |config|
       inline: <<~SHELL,
         set -e
         export DEBIAN_FRONTEND=noninteractive
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/vda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         apt-get full-upgrade -y
       SHELL
