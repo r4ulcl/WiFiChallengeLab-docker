@@ -188,6 +188,12 @@ See [OPEN_SOURCE_REFERENCES.md](./OPEN_SOURCE_REFERENCES.md) for the upstream pr
 
 - Oscar Alfonso (OscarAkaElvis / v1s1t0r, [airgeddon](https://github.com/v1s1t0r1sh3r3/airgeddon) author) - Collaboration in testing and script improvement
 
+
+## Similar Projects
+
+- [WifiForge](https://github.com/blackhillsinfosec/WifiForge)
+
+
 ## License
 
 [GNU General Public License v3.0](https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE) 
