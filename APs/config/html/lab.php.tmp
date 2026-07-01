@@ -3,6 +3,7 @@
    WiFiChallenge by r4ulcl 
 */
 
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 if (!isset($_SESSION['UserData']['Username'])) {
@@ -23,7 +24,7 @@ $user = $_SESSION['UserData']['Username'];
 <div class="content">
 
 <?php
-echo "Welcome {$user}<br><br>";
+echo "Welcome " . htmlspecialchars($user) . "<br><br>";
 ?>
 
 <p>Congratulations! You have logged into a protected area.</p>

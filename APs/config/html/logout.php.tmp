@@ -1,16 +1,19 @@
 <?php
-    session_start(); /* Starts the session */
-    session_destroy(); /* Destroy started session */
-    header("location:login.php");  /* Redirect to login page */
-    exit;
-?>
+/*
+   WiFiChallenge by r4ulcl
+*/
 
-<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
-  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
-    WiFiChallenge ${WIFICHALLENGE_VERSION} 
-  </a>
-  © 
-  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
-    <?php echo date('Y'); ?> r4ulcl
-  </a>
-</div>
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
+session_start();                 /* Resume the session so it can be cleared */
+$_SESSION = [];                  /* Remove every session variable */
+
+/* Expire the session cookie so the browser stops resending a stale id */
+if (ini_get('session.use_cookies')) {
+    $p = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+}
+
+session_destroy();               /* Destroy the server-side session */
+header('Location: login.php');   /* Back to the login page */
+exit;
