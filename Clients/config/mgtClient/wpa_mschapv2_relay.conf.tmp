@@ -12,5 +12,5 @@ network={
     phase1="peapver=1"
 	ca_cert="/root/certs/ca.crt"
     phase2="auth=MSCHAPV2"
-    ieee80211w=0
+    ieee80211w=1 # match the AP's PMF-capable (ieee80211w=1) setting
 }
