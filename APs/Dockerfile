@@ -1,7 +1,7 @@
 FROM debian
 #FROM kalilinux/kali-rolling
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make g++ libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget freeradius nano
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make gcc-12 g++-12 build-essential libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget freeradius nano
 
 
 #opennds
@@ -90,6 +90,37 @@ RUN touch /var/run/hostapd_wps_pin_requests
 
 #Change name of hostapd to avoid airmon-ng check kill, etc
 RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
+
+# Build hostapd 2.10 from source WITH TLS 1.3 (CONFIG_TLSV13=y) and use it as the
+# AP binary. Debian's stock hostapd 2.10 is not compiled with CONFIG_TLSV13, so
+# EAP-TLS over TLS 1.3 (the secure wifi-universal client) would otherwise be
+# unavailable and every EAP-TLS handshake would fall back to cleartext TLS 1.2.
+# NOTE: this one binary serves ALL lab SSIDs, so we start from upstream defconfig
+# and re-enable every feature the lab uses (WEP/WPS/SAE/OWE/EAP server + nl80211 +
+# HT/VHT/HE) alongside TLSV13. Build deps (make, gcc, libssl-dev, libnl-*-dev,
+# pkg-config, wget) are already installed above.
+RUN cd /tmp \
+ && wget -q https://w1.fi/releases/hostapd-2.10.tar.gz \
+ && tar xf hostapd-2.10.tar.gz \
+ && cd hostapd-2.10/hostapd \
+ && cp defconfig .config \
+ && printf '%s\n' \
+      'CONFIG_DRIVER_NL80211=y' \
+      'CONFIG_LIBNL32=y' \
+      'CONFIG_IEEE80211N=y' \
+      'CONFIG_IEEE80211AC=y' \
+      'CONFIG_IEEE80211AX=y' \
+      'CONFIG_WEP=y' \
+      'CONFIG_WPS=y' \
+      'CONFIG_SAE=y' \
+      'CONFIG_OWE=y' \
+      'CONFIG_EAP_FAST=y' \
+      'CONFIG_TLSV12=y' \
+      'CONFIG_TLSV13=y' >> .config \
+ && make -j"$(nproc)" \
+ && install -m 0755 hostapd /usr/sbin/host_aps_apd \
+ && install -m 0755 hostapd_cli /usr/sbin/hostapd_cli \
+ && rm -rf /tmp/hostapd-2.10*
 
 
 COPY config/ns-inet.sh /root/

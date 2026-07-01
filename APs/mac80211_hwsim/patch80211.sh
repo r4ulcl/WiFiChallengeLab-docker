@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+#set -euo pipefail
 
 DEST="./"
 mkdir -p "$DEST"
@@ -17,17 +17,34 @@ fi
 base_url="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/${subdir}"
 files=(mac80211_hwsim.c mac80211_hwsim.h)
 
+# Per-branch cache so an offline rebuild can reuse previously fetched sources
+# (raw, pre-patch) for the matching kernel branch.
+CACHE_DIR="${DEST}/cache/${branch}"
+mkdir -p "$CACHE_DIR"
+
 printf "→ Kernel branch:  %s\n→ Source path:    %s\n" "$branch" "$subdir"
 
 for f in "${files[@]}"; do
   url="${base_url}/${f}?h=${branch}"
   dst="${DEST}/${f}"
+  cache="${CACHE_DIR}/${f}"
   if [[ -f "$dst" ]]; then
     echo "  • $f already exists – skipping download"
     continue
   fi
   printf '  • Downloading %s …\n' "$f"
-  curl -fsSL "$url" -o "$dst"
+  # Bounded timeouts so no network fails fast instead of hanging the container.
+  if curl -fsSL --connect-timeout 5 --max-time 30 "$url" -o "$dst"; then
+    cp -f "$dst" "$cache"        # refresh cache for offline reuse
+  else
+    rm -f "$dst"                 # drop any truncated/empty output
+    if [[ -f "$cache" ]]; then
+      echo "  • download failed – using cached $f for branch $branch"
+      cp -f "$cache" "$dst"
+    else
+      echo "  ✖ download failed and no cached $f for branch $branch (offline?)" >&2
+    fi
+  fi
 done
 echo "✔ Sources are in ${DEST}"
 

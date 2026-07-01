@@ -9,7 +9,7 @@ fi
 
 # Install mac80211_hwsim_WiFiChallenge if missing
 cd /root/mac80211_hwsim_WiFiChallenge
-sudo bash install.sh
+sudo bash install.sh  || true
 
 # Returns all available interfaces, except "lo" and "veth*".
 available_interfaces()
@@ -28,21 +28,17 @@ available_interfaces()
    echo ${ret[@]}
 }
 
-IFACE="$1"
-#FORCE IFACE
-IFACE=`ip route show | grep 'default via' | awk '{print $5}'`
+# Pick the host uplink for internet sharing: the default-route interface, which
+# is name independent (eth0 on the generic box, but works for ens*/enp* too).
+IFACE="$(ip route show default 2>/dev/null | awk '/default/ {print $5; exit}')"
 if [[ -z "$IFACE" ]]; then
-   ifaces=($(available_interfaces))
-   if [[ ${#ifaces[@]} -gt 0 ]]; then
-      IFACE=${ifaces[0]}
-      echo "Using interface $IFACE"
-   else
-      echo "Usage: ./ns-inet <IFACE>"
-      exit 1
-   fi
+   # No default route: try the first ethernet that has a global IPv4 address.
+   IFACE="$(ip -o -4 addr show scope global 2>/dev/null | awk '$2 ~ /^(eth|en)/ {print $2; exit}')"
+fi
+if [[ -n "$IFACE" ]]; then
+   echo "Using uplink interface $IFACE for AP internet sharing"
 else
-   IFACE=`ip route show | grep 'default via' | awk '{print $5}'`
-   echo "Using interface $IFACE"
+   echo "WARNING: no uplink/default route found; APs will start WITHOUT internet sharing (offline mode)."
 fi
 
 NS="ns-ap"
@@ -122,11 +118,13 @@ iptables -F FORWARD
 # Flush nat rules.
 iptables -t nat -F
 
-# Enable masquerading of 10.200.1.0.
-iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
- 
-iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
-iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
+# Enable masquerading of 10.200.1.0/24 out the uplink (only if we have one,
+# so an offline lab still starts its APs without a bogus MASQUERADE rule).
+if [[ -n "$IFACE" ]]; then
+   iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
+   iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
+   iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
+fi
 
 # Get into namespace and exec startAP
 ip netns exec ${NS} /bin/bash /root/startAPs.sh --rcfile <(echo "PS1=\"${NS}> \"")

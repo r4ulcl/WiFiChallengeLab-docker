@@ -3,6 +3,7 @@
    WiFiChallenge by r4ulcl 
 */
 
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 if (isset($_SESSION['Username'])) {
@@ -48,9 +49,9 @@ if (isset($_POST['Submit'])) {
   $Username = $_POST['Username'] ?? '';
   $Password = $_POST['Password'] ?? '';
 
-  if (isset($logins[$Username]) && $logins[$Username] == $Password) {
+  if (isset($logins[$Username]) && hash_equals($logins[$Username], (string) $Password)) {
 
-    $_SESSION['UserData']['Username'] = $logins[$Username];
+    $_SESSION['UserData']['Username'] = $Username;
     $_SESSION['Username'] = $Username;
 
     header("location:index.php");
@@ -74,7 +75,7 @@ if (isset($_POST['Submit'])) {
 <?php
 
 # AUTO-LOGIN FOR GLOBAL ADMIN
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_TLS}.') !== false) {
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_TLS}.') === 0) {
   $_SESSION['UserData']['Username'] = '${IDENTITY_MGT_TLS}';
   $_SESSION['Username'] = '${IDENTITY_MGT_TLS}';
   header("location:index.php");
@@ -90,25 +91,25 @@ $flag_bruteforce          = decode('${FLAG_BRUTEFORCE}', $a);
 $flag_downgrade           = decode('${FLAG_DOWNGRADE}', $a);
 $flag_6ghz                = decode('${FLAG_6GHZ}', $a);
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tls')\">$FLAG_MGT_RELAY_tls</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY_TABLETS}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY_TABLETS}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tablets')\">$FLAG_MGT_RELAY_tablets</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WPS}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WPS}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wps')\">$flag_wps</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WEP}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WEP}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wep')\">$flag_wep</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_BRUTEFORCE}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_BRUTEFORCE}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_bruteforce')\">$flag_bruteforce</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_downgrade')\">$flag_downgrade</button>";
 
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') !== false)
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') === 0)
   echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_6ghz')\">$flag_6ghz</button>";
 
 ?>

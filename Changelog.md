@@ -1,5 +1,29 @@
 # Changelog WiFiChallengeLab
 
+## Changelog: WiFiChallengeLab v2.5
+
+### Modifications
+
+* Consolidated host networking on **NetworkManager + systemd-resolved** for consistent internet, DNS and IP across VirtualBox, VMware, QEMU and Hyper-V
+* Added **host-only networks** for RDP: `192.168.56.10` (VirtualBox) and `192.168.59.10` (VMware)
+* Made the **Nzyme web UI reachable from other computers** (external URL auto-detects the host IP instead of `localhost`)
+* Added **Start/Stop Nzyme** desktop launchers and helper scripts
+* Added an **EAP-TLS identity-leak scenario**: a privacy-hardened client (`GLOBAL\GlobalAdmin`) alongside a leaking client (`GLOBAL\franz.ka`) whose certificate exposes username, email and organization details
+* Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**: TLS 1.3 clients keep the certificate encrypted, while a forced-TLS-1.2 client demonstrates the cleartext-certificate leak
+
+### Bug Fixes
+
+* Fixed **DNS** breaking on networks that block public resolvers (removed the immutable `/etc/resolv.conf` lock)
+* Fixed **AP internet sharing** to use name-independent uplink detection
+* Fixed **EAP-TLS client certificates** missing the `clientAuth` Extended Key Usage
+* Made the **CA certificate RFC 5280-conformant** (`keyCertSign`/`cRLSign`) and corrected the **server certificate** subject/SAN to `radius.wifichallenge.com`
+
+### Miscellaneous Improvements
+
+* Added **network self-heal** service to recover the uplink via DHCP on boot
+* Disabled **Debian automatic updates** (apt timers, unattended-upgrades, periodic config)
+* Removed **email/PII and legacy Netscape fields** from generated certificates and hardened `createCert.sh` extensions (explicit `CA:FALSE`, critical `keyUsage`)
+
 ## Changelog: WiFiChallengeLab v2.4
 
 ### Modifications

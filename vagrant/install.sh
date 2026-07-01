@@ -7,8 +7,10 @@ LOCATION=${2:-remote}
 export DEBIAN_FRONTEND=noninteractive
 export DEBCONF_NONINTERACTIVE_SEEN=true
 export DEBCONF_NOWARNINGS=yes
+export DEBIAN_PRIORITY=critical
 export NEEDRESTART_MODE=a
 export UCF_FORCE_CONFFNEW=1
+export APT_LISTCHANGES_FRONTEND=none
 
 # Fix for Debian 12 python packaging guardrails when scripts use "pip install" globally
 # Best practice is venv or pipx, but this prevents "externally-managed-environment" hard failures.
@@ -20,23 +22,80 @@ DEB_CODENAME="bookworm"
 date
 
 # ---------- helpers -----------------------------------------------------------
+run_as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+preseed_desktop_debconf() {
+  run_as_root debconf-set-selections <<'EOF'
+keyboard-configuration keyboard-configuration/modelcode string pc105
+keyboard-configuration keyboard-configuration/layoutcode string us
+keyboard-configuration keyboard-configuration/variantcode string
+keyboard-configuration keyboard-configuration/optionscode string
+keyboard-configuration keyboard-configuration/store_defaults_in_debconf_db boolean true
+keyboard-configuration keyboard-configuration/compose select No compose key
+keyboard-configuration keyboard-configuration/toggle select No toggling
+keyboard-configuration keyboard-configuration/xkb-keymap select us
+console-setup console-setup/charmap47 select UTF-8
+console-setup console-setup/codeset47 select Guess optimal character set
+console-setup console-setup/fontface47 select Fixed
+console-setup console-setup/fontsize-text47 select 16
+EOF
+}
+
 apt_update() {
-  sudo apt-get -o Dpkg::Use-Pty=0 update -y </dev/null
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 update -y </dev/null
 }
 
 apt_install() {
-  sudo apt-get -o Dpkg::Use-Pty=0 install -y \
-    -o Dpkg::Options::="--force-confdef" \
-    -o Dpkg::Options::="--force-confnew" \
-    "$@" </dev/null
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 install -y \
+      -o Dpkg::Options::="--force-confdef" \
+      -o Dpkg::Options::="--force-confnew" \
+      "$@" </dev/null
 }
 
 apt_remove() {
-  sudo apt-get -o Dpkg::Use-Pty=0 remove -y "$@" </dev/null || true
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 remove -y "$@" </dev/null || true
 }
 
 apt_purge() {
-  sudo apt-get -o Dpkg::Use-Pty=0 purge -y "$@" </dev/null || true
+  run_as_root env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 purge -y "$@" </dev/null || true
 }
 
 service_exists() {
@@ -76,10 +135,21 @@ apt_purge unattended-upgrades
 # Timezone
 sudo timedatectl set-timezone Europe/Madrid
 
-# tame apt timers if present
-sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
-sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
-sudo systemctl mask apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+# ---------- disable Debian automatic updates ---------------------------------
+# Stop, disable and mask every periodic apt unit so the lab never auto-updates
+# (avoids apt locks and surprise package changes mid-challenge).
+for unit in apt-daily.timer apt-daily-upgrade.timer apt-daily.service apt-daily-upgrade.service; do
+  sudo systemctl stop "$unit" 2>/dev/null || true
+  sudo systemctl disable "$unit" 2>/dev/null || true
+  sudo systemctl mask "$unit" 2>/dev/null || true
+done
+# Turn off the APT periodic config itself (effective even without unattended-upgrades).
+sudo tee /etc/apt/apt.conf.d/20auto-upgrades >/dev/null <<'EOF'
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Download-Upgradeable-Packages "0";
+APT::Periodic::Unattended-Upgrade "0";
+APT::Periodic::AutocleanInterval "0";
+EOF
 
 # Remove fwupd if present
 apt_remove fwupd
@@ -237,6 +307,16 @@ EOF
 sudo chmod +x /root/restartWiFi.sh /home/user/restartWiFi.sh
 sudo chown user:user /home/user/restartWiFi.sh
 
+sudo tee /root/resetWiFi.sh /home/user/resetWiFi.sh >/dev/null <<'EOF'
+#!/bin/bash
+cd /var/WiFiChallengeLab-docker
+docker compose down
+docker compose up -d
+EOF
+sudo chmod +x /root/resetWiFi.sh /home/user/resetWiFi.sh
+sudo chown user:user /home/user/resetWiFi.sh
+
+
 sudo tee /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh >/dev/null <<'EOF'
 #!/bin/bash
 cd /var/WiFiChallengeLab-docker
@@ -245,6 +325,57 @@ sudo docker compose up --detach
 EOF
 sudo chmod +x /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh
 sudo chown user:user /home/user/updateWiFiChallengeLab.sh
+
+# ---------- Nzyme start/stop helper scripts ----------------------------------
+# Start the Nzyme WIDS and its PostgreSQL database (both detached/in background)
+sudo tee /root/startNzyme.sh /home/user/startNzyme.sh >/dev/null <<'EOF'
+#!/bin/bash
+cd /var/WiFiChallengeLab-docker || exit 1
+nohup sudo docker compose up -d db nzyme >/tmp/startNzyme.log 2>&1 &
+notify-send -i /opt/background/nzyme.ico "Nzyme" "Starting Nzyme and database in the background..." 2>/dev/null || true
+EOF
+sudo chmod +x /root/startNzyme.sh /home/user/startNzyme.sh
+sudo chown user:user /home/user/startNzyme.sh
+
+# Stop the Nzyme WIDS and its PostgreSQL database (in the background)
+sudo tee /root/stopNzyme.sh /home/user/stopNzyme.sh >/dev/null <<'EOF'
+#!/bin/bash
+cd /var/WiFiChallengeLab-docker || exit 1
+nohup sudo docker compose stop nzyme db >/tmp/stopNzyme.log 2>&1 &
+notify-send -i /opt/background/nzyme.ico "Nzyme" "Stopping Nzyme and database in the background..." 2>/dev/null || true
+EOF
+sudo chmod +x /root/stopNzyme.sh /home/user/stopNzyme.sh
+sudo chown user:user /home/user/stopNzyme.sh
+
+# Desktop launchers so the user can double-click to start/stop Nzyme
+sudo mkdir -p /home/user/Desktop
+
+sudo tee /home/user/Desktop/StartNzyme.desktop >/dev/null <<'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Start Nzyme
+Comment=Start the Nzyme WIDS and its database in the background
+Exec=/home/user/startNzyme.sh
+Icon=/opt/background/nzyme.ico
+Terminal=false
+Categories=Utility;
+EOF
+
+sudo tee /home/user/Desktop/StopNzyme.desktop >/dev/null <<'EOF'
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Stop Nzyme
+Comment=Stop the Nzyme WIDS and its database in the background
+Exec=/home/user/stopNzyme.sh
+Icon=/opt/background/nzyme.ico
+Terminal=false
+Categories=Utility;
+EOF
+
+sudo chmod +x /home/user/Desktop/StartNzyme.desktop /home/user/Desktop/StopNzyme.desktop
+sudo chown -R user:user /home/user/Desktop
 
 # ---------- Wi-Fi scan powersave tweak ---------------------------------------
 sudo sed -i 's/wifi.powersave = 3/wifi.powersave = 2/' /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf 2>/dev/null || true
@@ -308,6 +439,7 @@ EOF
 sudo chmod +x /var/aux.sh
 
 # ---------- Install GNOME -----------------------------------------------------
+preseed_desktop_debconf
 apt_update
 apt_install gnome-core gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor \
   gnome-tweaks gnome-shell-extension-dashtodock gnome-shell-extension-prefs gnome-remote-desktop \
@@ -327,15 +459,31 @@ sudo tee /etc/configureUser.sh >/dev/null <<'EOF'
 #!/bin/bash
 set -e
 
+export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
+export DEBCONF_NOWARNINGS=yes
+export DEBIAN_PRIORITY=critical
+export NEEDRESTART_MODE=a
+export UCF_FORCE_CONFFNEW=1
+export APT_LISTCHANGES_FRONTEND=none
+
 if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
   eval "$(dbus-launch --sh-syntax)"
 fi
 
-sudo apt-get -o Dpkg::Use-Pty=0 install -y \
-  -o Dpkg::Options::="--force-confdef" \
-  -o Dpkg::Options::="--force-confnew" \
-  gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales libnss3-tools firefox-esr \
-  </dev/null >/dev/null || true
+sudo env \
+  DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+  DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+  DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+  DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+  NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+  UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+  APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+  apt-get -o Dpkg::Use-Pty=0 install -y \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confnew" \
+    gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales libnss3-tools firefox-esr \
+    </dev/null >/dev/null || true
 
 sudo mkdir -p /opt/background
 sudo cp /var/WiFiChallengeLab-docker/WiFiChallengeLab.png /opt/background/ 2>/dev/null || true
@@ -349,6 +497,11 @@ gsettings set org.gnome.desktop.session idle-delay 0 || true
 gsettings set org.gnome.desktop.screensaver lock-enabled false || true
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing' || true
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing' || true
+
+# Stop GNOME Software from downloading or offering automatic updates.
+gsettings set org.gnome.software download-updates false 2>/dev/null || true
+gsettings set org.gnome.software download-updates-notify false 2>/dev/null || true
+gsettings set org.gnome.software allow-updates false 2>/dev/null || true
 
 gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT' || true
 gsettings set org.gnome.shell.extensions.dash-to-dock autohide false || true
@@ -385,7 +538,15 @@ sleep 10
 CA=/var/WiFiChallengeLab-docker/certs/ca.crt
 PROFILE_DIR=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' -print -quit 2>/dev/null || true)
 if [ -n "$PROFILE_DIR" ] && [ -f "$CA" ]; then
-  command -v certutil >/dev/null 2>&1 || sudo apt-get -o Dpkg::Use-Pty=0 install -y libnss3-tools </dev/null || true
+  command -v certutil >/dev/null 2>&1 || sudo env \
+    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
+    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
+    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
+    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
+    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
+    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
+    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
+    apt-get -o Dpkg::Use-Pty=0 install -y libnss3-tools </dev/null || true
   certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA" 2>/dev/null || true
 fi
 
@@ -412,6 +573,16 @@ gsettings set org.gnome.desktop.background show-desktop-icons false || true
 
 # Optional: ensure file manager can handle desktop related actions
 gsettings set org.gnome.nautilus.preferences show-delete-permanently true || true
+
+# Allow launching .desktop / scripts on double-click and trust our Nzyme launchers
+gsettings set org.gnome.nautilus.preferences executable-text-activation 'launch' || true
+gsettings set org.gnome.shell.extensions.ding show-link-emblem false 2>/dev/null || true
+for launcher in "$HOME"/Desktop/StartNzyme.desktop "$HOME"/Desktop/StopNzyme.desktop; do
+  if [ -f "$launcher" ]; then
+    chmod +x "$launcher" || true
+    gio set "$launcher" metadata::trusted true 2>/dev/null || true
+  fi
+done
 
 # Ensure user has sudo
 sudo usermod -aG sudo user || true
@@ -476,22 +647,157 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now monitor-health.service
 
-# ---------- DNS resolver tweaks ----------------------------------------------
-if systemctl is-active systemd-resolved >/dev/null 2>&1; then
-  sudo mkdir -p /etc/systemd/resolved.conf.d
-  sudo tee /etc/systemd/resolved.conf.d/dns.conf >/dev/null <<'EOF'
+# ---------- Network + DNS: consolidate on NetworkManager + systemd-resolved ----
+# Goal: identical, reliable DHCP IP + DNS on VirtualBox, VMware, QEMU and Hyper-V.
+#
+# The generic/debian12 box ships ifupdown + resolvconf + ifplugd bound to eth0,
+# and GNOME pulls in NetworkManager on top. That left the wired link "unmanaged"
+# in the desktop and (together with installTools.sh) pinned /etc/resolv.conf to
+# an immutable 1.1.1.1/8.8.8.8, which breaks DNS on any network that blocks those
+# resolvers. We retire the legacy stack and let NetworkManager own every ethernet
+# device (name independent, so it behaves the same on every hypervisor) with
+# systemd-resolved doing DNS: per-link DHCP servers first, public fallback after.
+apt_install network-manager systemd-resolved
+
+# 1) systemd-resolved: prefer the link/DHCP DNS, fall back to public resolvers.
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo tee /etc/systemd/resolved.conf.d/wifichallenge-dns.conf >/dev/null <<'EOF'
 [Resolve]
-DNS=8.8.8.8 1.1.1.1
-FallbackDNS=9.9.9.9
+# DNS= is intentionally empty: per-link (DHCP) servers are used first so the lab
+# also works on restricted or corporate networks. FallbackDNS covers networks
+# that hand out no usable resolver.
+FallbackDNS=1.1.1.1 8.8.8.8 9.9.9.9
 EOF
-  sudo systemctl restart systemd-resolved || true
-else
-  sudo bash -c 'printf "nameserver 8.8.8.8\nnameserver 1.1.1.1\n" > /etc/resolv.conf'
+sudo systemctl enable systemd-resolved 2>/dev/null || true
+sudo systemctl restart systemd-resolved 2>/dev/null || true
+# Point glibc at the systemd-resolved stub (the standard, mutable symlink).
+if [ -e /run/systemd/resolve/stub-resolv.conf ]; then
+  sudo chattr -i /etc/resolv.conf 2>/dev/null || true
+  sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 fi
 
+# 2) Retire the legacy ifupdown/resolvconf/ifplugd uplink so it cannot fight
+#    NetworkManager. Keep loopback only in /etc/network/interfaces; the current
+#    DHCP lease stays up until the post-install reboot, so SSH is never dropped.
+if [ -f /etc/network/interfaces ]; then
+  sudo cp -a /etc/network/interfaces "/etc/network/interfaces.wifichallenge.bak.$(date +%s)" 2>/dev/null || true
+  sudo tee /etc/network/interfaces >/dev/null <<'EOF'
+# Managed by NetworkManager (WiFiChallengeLab). Loopback only here.
+source /etc/network/interfaces.d/*
+auto lo
+iface lo inet loopback
+EOF
+fi
+sudo systemctl disable --now ifplugd 2>/dev/null || true
+sudo systemctl disable --now resolvconf 2>/dev/null || true
+apt_purge resolvconf ifplugd
+
+# 3) NetworkManager owns the ethernet uplink and uses systemd-resolved for DNS,
+#    but must NEVER touch the lab's simulated radios or container plumbing.
+sudo mkdir -p /etc/NetworkManager/conf.d
+sudo tee /etc/NetworkManager/conf.d/99-wifichallenge.conf >/dev/null <<'EOF'
+[main]
+plugins=keyfile
+dns=systemd-resolved
+[keyfile]
+# Leave the mac80211_hwsim Wi-Fi radios and the docker/namespace veth plumbing
+# alone; the lab drives those with iw/hostapd/wpa_supplicant, not NetworkManager.
+unmanaged-devices=type:wifi;interface-name:veth*;interface-name:vpeer*;interface-name:docker*;interface-name:br-*;interface-name:hwsim*
+EOF
+
+# 4) Explicit, name-independent DHCP profile for the NAT uplink (eth0 on the
+#    generic box across every provider). An explicit profile guarantees DHCP
+#    even if the auto "Wired connection" does not trigger on some hypervisor.
+sudo mkdir -p /etc/NetworkManager/system-connections
+sudo tee /etc/NetworkManager/system-connections/eth0-nat.nmconnection >/dev/null <<'EOF'
+[connection]
+id=eth0-nat
+type=ethernet
+interface-name=eth0
+autoconnect=true
+autoconnect-priority=100
+[ethernet]
+[ipv4]
+method=auto
+[ipv6]
+method=ignore
+EOF
+sudo chmod 600 /etc/NetworkManager/system-connections/eth0-nat.nmconnection
+
+# 5) Optional host-only interface (eth1) so RDP-by-IP works as documented.
+#    Provider aware: VirtualBox -> 192.168.56.10, VMware -> 192.168.59.10.
+#    never-default keeps internet routing through the NAT uplink (eth0).
+HOSTONLY_IP=""
+if command -v dmidecode >/dev/null 2>&1; then
+  if sudo dmidecode -s system-product-name 2>/dev/null | grep -iq virtualbox; then
+    HOSTONLY_IP="192.168.56.10"
+  elif sudo dmidecode -s system-product-name 2>/dev/null | grep -iq vmware; then
+    HOSTONLY_IP="192.168.59.10"
+  fi
+fi
+if [ -n "$HOSTONLY_IP" ]; then
+  sudo tee /etc/NetworkManager/system-connections/eth1-hostonly.nmconnection >/dev/null <<EOF
+[connection]
+id=eth1-hostonly
+type=ethernet
+interface-name=eth1
+autoconnect=true
+autoconnect-priority=50
+[ethernet]
+[ipv4]
+method=manual
+address1=${HOSTONLY_IP}/24
+never-default=true
+may-fail=true
+[ipv6]
+method=ignore
+EOF
+  sudo chmod 600 /etc/NetworkManager/system-connections/eth1-hostonly.nmconnection
+fi
+
+sudo systemctl enable NetworkManager 2>/dev/null || true
+
+# 6) Disable dnsmasq on the host if present (the lab runs its own inside the AP
+#    container network namespace, not on the host).
 if service_exists dnsmasq.service; then
   sudo systemctl disable dnsmasq || true
 fi
+
+# 7) Boot-time self-heal: if NetworkManager ever fails to bring up a default
+#    route on a given hypervisor, escalate to a one-shot DHCP so SSH/RDP and
+#    internet always recover (anti-brick safety net for the uplink switch).
+sudo tee /usr/local/sbin/ensure-net.sh >/dev/null <<'EOF'
+#!/bin/bash
+# Give NetworkManager a chance first.
+for _ in $(seq 1 30); do
+  ip route show default | grep -q . && exit 0
+  sleep 2
+done
+nmcli networking on 2>/dev/null || true
+nmcli -t -f DEVICE,TYPE device 2>/dev/null | awk -F: '$2=="ethernet"{print $1}' | while read -r d; do
+  nmcli device connect "$d" 2>/dev/null || true
+done
+for _ in $(seq 1 10); do
+  ip route show default | grep -q . && exit 0
+  sleep 2
+done
+# Last resort: one-shot DHCP on the first ethernet device.
+ETH="$(ls /sys/class/net 2>/dev/null | grep -E '^(eth|en)' | head -n1)"
+[ -n "$ETH" ] && dhclient -1 "$ETH" 2>/dev/null || true
+EOF
+sudo chmod +x /usr/local/sbin/ensure-net.sh
+sudo tee /etc/systemd/system/ensure-net.service >/dev/null <<'EOF'
+[Unit]
+Description=WiFiChallengeLab network self-heal (ensure a default route exists)
+After=NetworkManager.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ensure-net.sh
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable ensure-net.service 2>/dev/null || true
 
 # ---------- guest additions ---------------------------------------------------
 if command -v dmidecode >/dev/null 2>&1; then

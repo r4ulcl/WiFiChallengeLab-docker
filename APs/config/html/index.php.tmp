@@ -3,6 +3,7 @@
    WiFiChallenge by r4ulcl 
 */
 
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 if (!isset($_SESSION['UserData']['Username'])) {
@@ -146,7 +147,7 @@ function copyFlagToClipboard(flag) {
 <div class="content">
 
 <?php
-echo "Welcome {$user}<br><br>";
+echo "Welcome " . htmlspecialchars($user) . "<br><br>";
 
 if (!isset($rules[$user])) {
     echo "No FLAG for this user";
@@ -189,7 +190,7 @@ if (!empty($r['extra'])) {
     dh_file=/etc/hostapd-wpe/dh<br><br>
     ssid=wifi-corp<br>
     channel=44<br><br>
-    Certificate Authority: <a href=\"/.internalCA/\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/</a>";
+    Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a>";
 }
 
 echo "<br><br>Congratulation! You have logged into password protected page. 

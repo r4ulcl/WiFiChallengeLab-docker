@@ -104,8 +104,9 @@ macchanger -m $MAC_CLIENT_OWE $WLAN_CLIENT_OWE >> /root/logs/macchanger.log
 
 
 
+macchanger -m $MAC_TLS_LEAK $WLAN_CLIENT_MGT_TLS_LEAK >> /root/logs/macchanger.log # MGT TLS leak (franz.ka)
+
 #TODO
-macchanger -r wlan58 >> /root/logs/macchanger.log
 macchanger -r wlan59 >> /root/logs/macchanger.log
 
 sleep 5
@@ -158,6 +159,14 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
+    wait $!
+done &
+
+# MGT client TLS leaking (GLOBAL\franz.ka)
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS_LEAK -c /root/mgtClient/wpa_TLS_leak.conf >> /root/logs/supplicantTLS_leak.log &
     wait $!
 done &
 

@@ -28,8 +28,22 @@ nameserver 8.8.8.8
 options timeout:2 attempts:2
 EOF
 
-# Make it immutable so nothing flips it to 127.0.0.1 mid-install
+# Make it immutable so nothing flips it to 127.0.0.1 mid-install.
 chattr +i /etc/resolv.conf 2>/dev/null || true
+
+# IMPORTANT: this lock is TEMPORARY. Always release it (and hand DNS back to
+# systemd-resolved / NetworkManager) when this script exits, however it exits.
+# Leaving /etc/resolv.conf immutable and pinned to 1.1.1.1/8.8.8.8 was the root
+# cause of "DNS works on my network but not on theirs" across VirtualBox, VMware,
+# QEMU and Hyper-V (any network blocking those resolvers had no working DNS, and
+# the user could not fix it because the file was immutable).
+__restore_resolv_conf() {
+  chattr -i /etc/resolv.conf 2>/dev/null || true
+  if [ -e /run/systemd/resolve/stub-resolv.conf ]; then
+    ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+  fi
+}
+trap __restore_resolv_conf EXIT
 
 # quick sanity check
 getent hosts deb.debian.org >/dev/null || echo "Warning: DNS check failed"
@@ -265,8 +279,13 @@ dpkg -i bully_*.deb || apt-get -y --fix-broken install || true
 rm -f bully_*.deb
 
 # Install ath_masker
+# NOTE: this builds AND loads a kernel module. Inside a container image build
+# there are no headers for the running kernel and modules cannot be loaded, so
+# the whole block is best-effort (set +e) to avoid aborting the build; on the
+# VM/host it still builds and loads normally.
+set +e
 cd "${TOOLS}"
-git clone --depth 1 https://github.com/vanhoefm/ath_masker 
+git clone --depth 1 https://github.com/vanhoefm/ath_masker
 cd ath_masker/
 make
 
@@ -281,6 +300,7 @@ modprobe ath
 modprobe ath_masker
 cd "${TOOLS}"
 rm -rf ath_masker/ 2> /dev/null
+set -e
 
 
 # hostapd-mana

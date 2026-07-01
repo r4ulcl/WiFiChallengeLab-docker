@@ -1,6 +1,6 @@
 services:
   aps:
-    image: r4ulcl/wifichallengelab-aps:challenlatestge
+    image: r4ulcl/wifichallengelab-aps:latest
     restart: on-failure   # Automatically restart on failure
     container_name: WiFiChallengeLab-APs
     env_file:
@@ -10,7 +10,8 @@ services:
       - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
-      - /usr/src:/usr/src:ro
+      - /usr/src:/usr/src
+      - /usr/lib:/host_usr_lib:ro
       - ./logsAP:/root/logs/
     healthcheck:
       test:

@@ -19,6 +19,9 @@ Vagrant.configure('2') do |config|
     hv_vm.vm.box      = 'generic/debian12'
     hv_vm.vm.hostname = 'WiFiChallengeLab'
 
+    # Default primary disk size
+    hv_vm.vm.disk :disk, size: '50GB', primary: true
+
     hv_vm.vm.provider 'hyperv' do |hv|
       hv.vmname    = 'WiFiChallenge Lab v2.4.1'
       hv.maxmemory = 4096
@@ -30,6 +33,10 @@ Vagrant.configure('2') do |config|
     hv_vm.vm.provision 'shell',
       inline: <<~SHELL,
         set -e
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
       SHELL
@@ -68,6 +75,14 @@ Vagrant.configure('2') do |config|
       else               'pulse'   # Alt: 'alsa', 'none'
       end
 
+    # Host-only network so the documented RDP target 192.168.56.10 exists.
+    # auto_config: false -> the static IP is owned by NetworkManager inside the
+    # guest (eth1-hostonly profile in install.sh), not by Vagrant/ifupdown.
+    vb_vm.vm.network 'private_network', ip: '192.168.56.10', auto_config: false
+
+    # Default primary disk size
+    vb_vm.vm.disk :disk, size: '50GB', primary: true
+
     vb_vm.vm.provider 'virtualbox' do |vb|
       vb.memory = 4096
       vb.cpus   = 4
@@ -101,6 +116,10 @@ Vagrant.configure('2') do |config|
       inline: <<~SHELL,
         set -e
         export DEBIAN_FRONTEND=noninteractive
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         apt-get full-upgrade -y
       SHELL
@@ -181,6 +200,14 @@ Vagrant.configure('2') do |config|
     vmw_vm.vm.box      = 'generic/debian12'
     vmw_vm.vm.hostname = 'WiFiChallengeLab'
 
+    # Host-only network so the documented RDP target 192.168.59.10 exists.
+    # auto_config: false -> the static IP is owned by NetworkManager inside the
+    # guest (eth1-hostonly profile in install.sh), not by Vagrant/ifupdown.
+    vmw_vm.vm.network 'private_network', ip: '192.168.59.10', auto_config: false
+
+    # Default primary disk size
+    vmw_vm.vm.disk :disk, size: '50GB', primary: true
+
     vmw_vm.vm.provider 'vmware_desktop' do |v|
       v.linked_clone         = false
       v.clone_directory      = 'E:/VMWare'
@@ -198,6 +225,10 @@ Vagrant.configure('2') do |config|
     vmw_vm.vm.provision 'shell',
       inline: <<~SHELL,
         set -e
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
       SHELL
@@ -236,6 +267,9 @@ Vagrant.configure('2') do |config|
       else               'pa,id=snd0'   # Alt: alsa,id=snd0
       end
 
+    # Default primary disk size
+    qemu_vm.vm.disk :disk, size: '50GB', primary: true
+
     qemu_vm.vm.provider 'qemu' do |qemu|
       qemu.memory            = 4096
       qemu.cpus              = 4
@@ -261,6 +295,10 @@ Vagrant.configure('2') do |config|
       inline: <<~SHELL,
         set -e
         export DEBIAN_FRONTEND=noninteractive
+        ROOT_SRC="$(findmnt -no SOURCE /)"
+        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/vda
+        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
         apt-get update -y
         apt-get full-upgrade -y
       SHELL
