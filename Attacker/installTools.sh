@@ -28,8 +28,22 @@ nameserver 8.8.8.8
 options timeout:2 attempts:2
 EOF
 
-# Make it immutable so nothing flips it to 127.0.0.1 mid-install
+# Make it immutable so nothing flips it to 127.0.0.1 mid-install.
 chattr +i /etc/resolv.conf 2>/dev/null || true
+
+# IMPORTANT: this lock is TEMPORARY. Always release it (and hand DNS back to
+# systemd-resolved / NetworkManager) when this script exits, however it exits.
+# Leaving /etc/resolv.conf immutable and pinned to 1.1.1.1/8.8.8.8 was the root
+# cause of "DNS works on my network but not on theirs" across VirtualBox, VMware,
+# QEMU and Hyper-V (any network blocking those resolvers had no working DNS, and
+# the user could not fix it because the file was immutable).
+__restore_resolv_conf() {
+  chattr -i /etc/resolv.conf 2>/dev/null || true
+  if [ -e /run/systemd/resolve/stub-resolv.conf ]; then
+    ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+  fi
+}
+trap __restore_resolv_conf EXIT
 
 # quick sanity check
 getent hosts deb.debian.org >/dev/null || echo "Warning: DNS check failed"

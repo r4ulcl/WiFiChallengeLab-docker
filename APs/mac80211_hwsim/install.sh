@@ -18,6 +18,19 @@ ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 AUTO_INSTALL_DEPS="${AUTO_INSTALL_DEPS:-0}"
 HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
+# Version stamped into the patched module by patch80211.sh (single source of truth).
+TARGET_VERSION="2.4.1-WiFiChallengeLab-version"
+# ----------------------------------------------------------------------
+
+### ---- Fast path: already installed? -------------------------------
+# Run this BEFORE any apt/curl/build step so an already-built module starts
+# the lab fully offline (no internet required at AP container start).
+KVER="$(uname -r)"
+ALT_MOD_PATH_EARLY="/lib/modules/${KVER}/kernel/drivers/net/wireless/${ALT_MODNAME}.ko"
+if [[ "$(modinfo -F version "${ALT_MOD_PATH_EARLY}" 2>/dev/null || echo none)" == "${TARGET_VERSION}" ]]; then
+    echo "==> ${ALT_MODNAME} ${TARGET_VERSION} already installed for ${KVER}; nothing to do (offline-safe)."
+    exit 0
+fi
 # ----------------------------------------------------------------------
 
 run_as_root() {
@@ -122,7 +135,10 @@ resolve_kbuild_dir() {
 
     if can_write_usr_src; then
         echo "[i] Trying to install matching headers inside this environment ..."
-        apt_noninteractive update -y || true
+        # Bounded timeouts + no retries so a missing network fails fast instead
+        # of hanging the AP container start (offline-safe).
+        apt_noninteractive -o Acquire::Retries=0 \
+            -o Acquire::http::Timeout=5 -o Acquire::https::Timeout=5 update -y || true
         if pkg_available "linux-headers-${KVER}"; then
             apt_noninteractive install -y "linux-headers-${KVER}" || true
         else
@@ -158,8 +174,14 @@ resolve_kbuild_dir() {
 resolve_kbuild_dir
 
 ### ---- Download the code and parche ----------------------------------
+# Start from clean work files each run; patch80211.sh keeps a per-branch cache
+# under ./cache/ so an offline rebuild can reuse previously fetched sources.
 rm -f mac80211_hwsim.c mac80211_hwsim.h mac80211_hwsim.c.bak
-bash patch80211.sh
+if ! bash patch80211.sh; then
+    echo "ERROR: could not obtain/patch mac80211_hwsim sources (offline and no cached copy?)."
+    echo "       Build once while online, then offline starts will reuse the installed module."
+    exit 1
+fi
 
 PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 

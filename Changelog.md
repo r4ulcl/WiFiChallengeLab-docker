@@ -1,5 +1,22 @@
 # Changelog WiFiChallengeLab
 
+## Changelog: WiFiChallengeLab v2.5
+
+### Modifications
+
+* Consolidated host networking on **NetworkManager + systemd-resolved** for consistent internet, DNS and IP across VirtualBox, VMware, QEMU and Hyper-V
+* Added **host-only networks** for RDP: `192.168.56.10` (VirtualBox) and `192.168.59.10` (VMware)
+* Added **Start/Stop Nzyme** desktop launchers and helper scripts
+
+### Bug Fixes
+
+* Fixed **DNS** breaking on networks that block public resolvers (removed the immutable `/etc/resolv.conf` lock)
+* Fixed **AP internet sharing** to use name-independent uplink detection
+
+### Miscellaneous Improvements
+
+* Added **network self-heal** service to recover the uplink via DHCP on boot
+
 ## Changelog: WiFiChallengeLab v2.4
 
 ### Modifications
