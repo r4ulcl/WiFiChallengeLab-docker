@@ -17,9 +17,7 @@ private_key_passwd=whatever
 #   * TLS 1.2 clients (wpa_TLS_leak.conf) -> client cert is sent in the CLEAR
 #     during the handshake, leaking whatever is in the subject (PII, username).
 # TLS 1.0/1.1 stay disabled; only 1.2 and 1.3 are offered.
-# NOTE: TLS 1.3 EAP needs hostapd built with OpenSSL and CONFIG_TLSV13=y (marked
-# experimental); if the build lacks it, only TLS 1.2 is available (everything
-# then leaks). Verify the negotiated version against the running container.
+# TLS 1.3 EAP requires hostapd built with OpenSSL and CONFIG_TLSV13=y
 tls_flags=[ENABLE-TLSv1.3][DISABLE-TLSv1.0][DISABLE-TLSv1.1]
 
 # 802.11 Options
