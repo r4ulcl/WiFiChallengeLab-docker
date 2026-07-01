@@ -1,25 +1,43 @@
 <p align="center">
-  <img src="images/B-WifiChallengeLab-LOGO.png">
+  <img src="images/B-WifiChallengeLab-LOGO.png" alt="WiFiChallengeLab Lab">
 </p>
 
 <p align="center">
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/releases"><img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker" alt="GitHub releases"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers"><img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub stars"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network"><img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub forks"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues"><img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub issues"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker.svg?style=flat" alt="GitHub license"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/releases"><img src="https://img.shields.io/github/v/release/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Latest release"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/blob/main/LICENSE"><img src="https://img.shields.io/github/license/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=gnu" alt="License"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/commits/main"><img src="https://img.shields.io/github/last-commit/r4ulcl/WiFiChallengeLab-docker/main?style=flat&logo=git&logoColor=white&label=last%20commit%20(main)" alt="Last commit (main)"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/commits/dev"><img src="https://img.shields.io/github/last-commit/r4ulcl/WiFiChallengeLab-docker/dev?style=flat&logo=git&logoColor=white&label=last%20commit%20(dev)" alt="Last commit (dev)"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker"><img src="https://img.shields.io/github/languages/top/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=gnubash&logoColor=white" alt="Top language"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg" alt="APs CI"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg" alt="Clients CI"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml/badge.svg" alt="nzyme CI"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/stargazers"><img src="https://img.shields.io/github/stars/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Stars"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network/members"><img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Forks"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues"><img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Open issues"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/graphs/contributors"><img src="https://img.shields.io/github/contributors/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Contributors"></a>
+  <a href="https://www.codefactor.io/repository/github/r4ulcl/WiFiChallengeLab-docker"><img src="https://www.codefactor.io/repository/github/r4ulcl/WiFiChallengeLab-docker/badge" alt="CodeFactor"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker"><img src="https://sloc.xyz/github/r4ulcl/WiFiChallengeLab-docker" alt="Lines of code"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml/badge.svg" alt="APs DEV CI"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml/badge.svg" alt="Clients DEV CI"></a>&nbsp;&nbsp;
-  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml/badge.svg" alt="nzyme DEV CI"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-aps?style=flat&logo=docker&logoColor=white&label=aps%20image" alt="APs Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-aps?style=flat&logo=docker&logoColor=white&label=aps%20pulls" alt="APs Docker pulls"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-clients?style=flat&logo=docker&logoColor=white&label=clients%20image" alt="Clients Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-clients?style=flat&logo=docker&logoColor=white&label=clients%20pulls" alt="Clients Docker pulls"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-nzyme?style=flat&logo=docker&logoColor=white&label=nzyme%20image" alt="nzyme Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-nzyme?style=flat&logo=docker&logoColor=white&label=nzyme%20pulls" alt="nzyme Docker pulls"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps.yml/badge.svg" alt="APs build"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients.yml/badge.svg" alt="Clients build"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme.yml/badge.svg" alt="nzyme build"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-aps-dev.yml/badge.svg" alt="APs (dev) build"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-clients-dev.yml/badge.svg" alt="Clients (dev) build"></a>
+  <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml"><img src="https://github.com/r4ulcl/WiFiChallengeLab-docker/actions/workflows/docker-image-nzyme-dev.yml/badge.svg" alt="nzyme (dev) build"></a>
 </p>
 
 <h1 align="left">WiFiChallengeLab-docker</h1>
