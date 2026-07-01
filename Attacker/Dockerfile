@@ -1,67 +1,77 @@
-FROM kalilinux/kali-rolling as builder
+# WiFiChallengeLab - Attacker (headless, docker-exec access)
+#
+# Docker build of the WiFiChallenge attacker machine: the SAME offensive Wi-Fi
+# toolset as the lab VM, but WITHOUT any GUI, RDP or SSH. The container has no
+# sshd and no desktop; it just stays alive so you attach to it directly with
+# `docker exec`:
+#
+#     docker compose -f docker-compose-attacker.yml up -d --build
+#     docker compose -f docker-compose-attacker.yml exec attacker bash
+#   or, without compose:
+#     docker build -t wifichallengelab-attacker Attacker/
+#     docker run -d --name attacker --privileged --network host \
+#                -v /lib/modules:/lib/modules -v /usr/src:/usr/src \
+#                wifichallengelab-attacker
+#     docker exec -it attacker bash
+#
+# Kali is the base because the toolset (eaphammer, hostapd-wpe, mdk3, bettercap,
+# asleap, the Realtek Alfa DKMS drivers, ...) ships as Kali packages.
+#
+# WARNING: like the rest of the lab, this image runs privileged and shares the
+# host kernel (/lib/modules, USB pass-through for real Alfa adapters). Never run
+# it privileged on a physical host you rely on — only inside a lab VM.
+FROM kalilinux/kali-rolling
 
-RUN mkdir /root/tools
+LABEL org.opencontainers.image.title="WiFiChallengeLab Attacker" \
+      org.opencontainers.image.description="Headless (no GUI/RDP/SSH, docker-exec) WiFi attacker toolbox with Alfa adapter drivers" \
+      org.opencontainers.image.source="https://github.com/r4ulcl/WiFiChallengeLab-docker"
 
-WORKDIR /root/tools
+ENV DEBIAN_FRONTEND=noninteractive \
+    DEBCONF_NONINTERACTIVE_SEEN=true \
+    DEBCONF_NOWARNINGS=yes \
+    DEBIAN_PRIORITY=critical \
+    NEEDRESTART_MODE=a \
+    UCF_FORCE_CONFFNEW=1 \
+    APT_LISTCHANGES_FRONTEND=none \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN apt-get update && apt-get install -y nmap python3 git make wget
+# --- base utilities the install scripts assume are present --------------------
+# tini = PID 1 that reaps the processes spawned via `docker exec`. No openssh
+# here: access is docker-exec only (no SSH, no GUI, no RDP).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      tini sudo ca-certificates git wget curl kmod procps iproute2 iw usbutils \
+      rfkill pciutils nano \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN cd /root/tools && git clone https://github.com/blackarrowsec/EAP_buster
-#RUN cd /root/tools && git clone https://github.com/ZerBea/hcxtools.git \ 
-#    && cd hcxtools && make && make install
+# --- lab "user" account -------------------------------------------------------
+# installTools.sh writes to /home/user and runs `chown user:user`, so the user
+# must exist before it runs. user/user with passwordless sudo, matching the VM.
+RUN useradd -m -s /bin/bash user \
+ && echo 'user:user' | chpasswd \
+ && usermod -aG sudo user \
+ && echo 'user ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/zzz-user \
+ && chmod 0440 /etc/sudoers.d/zzz-user
 
-RUN cd /root/tools &&  apt-get install python3-pip -y \
-    && DEBIAN_FRONTEND=noninteractive apt-get install tshark -y \
-    && git clone https://github.com/r4ulcl/wifi_db \
-    && cd wifi_db && pip3 install -r requirements.txt \
-    && wget https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/pcapFilter.sh
+# --- offensive Wi-Fi toolset (the same installer the lab VM uses) -------------
+# Heavy layer: aircrack-ng, eaphammer, hostapd-wpe/mana, airgeddon, wifite2,
+# wifiphisher, bettercap, hashcat, john, wpa_sycophant, mdk4, reaver, ...
+COPY installTools.sh /root/installTools.sh
+RUN bash /root/installTools.sh
 
-RUN cd /root/tools && git clone https://github.com/Snizz/crEAP
+# --- Alfa Network USB adapter drivers + firmware ------------------------------
+COPY installAlfa.sh /root/installAlfa.sh
+RUN bash /root/installAlfa.sh
 
-RUN apt-get install -y eaphammer hostapd-wpe aircrack-ng arp-scan airgeddon \ 
-    build-essential libnl-genl-3-dev libssl-dev build-essential \ 
-    pkg-config git libnl-genl-3-dev libssl-dev reaver
+# --- shrink the (already large) image -----------------------------------------
+RUN apt-get autoremove -y || true; apt-get autoclean || true; apt-get clean || true; \
+    rm -rf /var/lib/apt/lists/*
 
-#RUN apt-get install -y mana-toolkit eapeak wpa_sycophant berate_ap air-hammer create_ap 
-RUN apt-get install -y mdk4 wifipumpkin3 libpcap-dev curl
+WORKDIR /root
 
-#hostapd mana
-RUN cd /root/tools && git clone https://github.com/sensepost/hostapd-mana && cd hostapd-mana \ 
-	&& make -C hostapd -j 4 && ln -s /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
-
-# EAPEAK
-#RUN cd /root/tools && apt-get install libssl-dev swig python3-dev gcc -y \
-#	&& pip3 install pipenv && git clone https://github.com/securestate/eapeak \
-#	&& cd eapeak && pipenv --two install
-
-#Reaver
-RUN cd /root/tools && git clone https://github.com/t6x/reaver-wps-fork-t6x && cd reaver-wps-fork-t6x* \
-	&& cd src && ./configure && make && make install
-
-#wpa_sycophant
-RUN cd /root/tools && git clone https://github.com/sensepost/wpa_sycophant && cd wpa_sycophant/ \
-	&& make -C wpa_supplicant -j 4
-
-#berate_ap
-RUN cd /root/tools && git clone https://github.com/sensepost/berate_ap
-
-RUN apt-get install -y python2
-
-#air-hammer
-RUN cd /root/tools && git clone https://github.com/Wh1t3Rh1n0/air-hammer && cd air-hammer \
-	&& curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py \
-	&& python2 get-pip.py && pip2 install wpa_supplicant && pip2 install service_identity
-
-# autoremove any dependencies that are no longer needed
-RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
-
-#FROM kalilinux/kali-rolling
-#COPY --from=builder 
-
-#Enable ssh
-RUN apt-get install -y ssh
-RUN echo Port 2222 >> /etc/ssh/sshd_config && systemctl enable ssh 
-
-CMD /bin/bash 
-
-#RUN cd /root/tools &&  
+# Enter the running container with:  docker exec -it <container> bash
+# tini stays PID 1 and reaps zombies; `sleep infinity` keeps the container up
+# so it can be attached to at any time.
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["sleep", "infinity"]

@@ -279,8 +279,13 @@ dpkg -i bully_*.deb || apt-get -y --fix-broken install || true
 rm -f bully_*.deb
 
 # Install ath_masker
+# NOTE: this builds AND loads a kernel module. Inside a container image build
+# there are no headers for the running kernel and modules cannot be loaded, so
+# the whole block is best-effort (set +e) to avoid aborting the build; on the
+# VM/host it still builds and loads normally.
+set +e
 cd "${TOOLS}"
-git clone --depth 1 https://github.com/vanhoefm/ath_masker 
+git clone --depth 1 https://github.com/vanhoefm/ath_masker
 cd ath_masker/
 make
 
@@ -295,6 +300,7 @@ modprobe ath
 modprobe ath_masker
 cd "${TOOLS}"
 rm -rf ath_masker/ 2> /dev/null
+set -e
 
 
 # hostapd-mana
