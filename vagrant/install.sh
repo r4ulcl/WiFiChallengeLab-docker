@@ -135,10 +135,21 @@ apt_purge unattended-upgrades
 # Timezone
 sudo timedatectl set-timezone Europe/Madrid
 
-# tame apt timers if present
-sudo systemctl stop apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
-sudo systemctl disable apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
-sudo systemctl mask apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+# ---------- disable Debian automatic updates ---------------------------------
+# Stop, disable and mask every periodic apt unit so the lab never auto-updates
+# (avoids apt locks and surprise package changes mid-challenge).
+for unit in apt-daily.timer apt-daily-upgrade.timer apt-daily.service apt-daily-upgrade.service; do
+  sudo systemctl stop "$unit" 2>/dev/null || true
+  sudo systemctl disable "$unit" 2>/dev/null || true
+  sudo systemctl mask "$unit" 2>/dev/null || true
+done
+# Turn off the APT periodic config itself (effective even without unattended-upgrades).
+sudo tee /etc/apt/apt.conf.d/20auto-upgrades >/dev/null <<'EOF'
+APT::Periodic::Update-Package-Lists "0";
+APT::Periodic::Download-Upgradeable-Packages "0";
+APT::Periodic::Unattended-Upgrade "0";
+APT::Periodic::AutocleanInterval "0";
+EOF
 
 # Remove fwupd if present
 apt_remove fwupd
@@ -486,6 +497,11 @@ gsettings set org.gnome.desktop.session idle-delay 0 || true
 gsettings set org.gnome.desktop.screensaver lock-enabled false || true
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing' || true
 gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type 'nothing' || true
+
+# Stop GNOME Software from downloading or offering automatic updates.
+gsettings set org.gnome.software download-updates false 2>/dev/null || true
+gsettings set org.gnome.software download-updates-notify false 2>/dev/null || true
+gsettings set org.gnome.software allow-updates false 2>/dev/null || true
 
 gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT' || true
 gsettings set org.gnome.shell.extensions.dash-to-dock autohide false || true

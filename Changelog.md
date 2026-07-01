@@ -6,6 +6,7 @@
 
 * Consolidated host networking on **NetworkManager + systemd-resolved** for consistent internet, DNS and IP across VirtualBox, VMware, QEMU and Hyper-V
 * Added **host-only networks** for RDP: `192.168.56.10` (VirtualBox) and `192.168.59.10` (VMware)
+* Made the **Nzyme web UI reachable from other computers** (external URL auto-detects the host IP instead of `localhost`)
 * Added **Start/Stop Nzyme** desktop launchers and helper scripts
 
 ### Bug Fixes
@@ -16,6 +17,7 @@
 ### Miscellaneous Improvements
 
 * Added **network self-heal** service to recover the uplink via DHCP on boot
+* Disabled **Debian automatic updates** (apt timers, unattended-upgrades, periodic config)
 
 ## Changelog: WiFiChallengeLab v2.4
 
