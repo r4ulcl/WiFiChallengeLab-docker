@@ -1,0 +1,37 @@
+# Cleaned up example, see original wpa_supplicant.conf for comments.
+#
+# Leaking EAP-TLS client (GLOBAL\franz.ka).
+# This is the INSECURE counterpart of wpa_TLS.conf:
+#   * Forces legacy TLS <=1.2, so the client certificate is transmitted in the
+#     CLEAR during the handshake (TLS 1.3 would encrypt it).
+#   * Uses client_leak.crt -> subject is full of PII (username, email, org,
+#     dept, location), all of which then leaks to any passive sniffer.
+# The AP (hostapd_wpe_tls) offers both TLS 1.2 and 1.3; this client picks 1.2,
+# the privacy-hardened wpa_TLS.conf client forces 1.3. Use them to compare.
+
+#ctrl_interface=/var/run/wpa_supplicant
+#ctrl_interface_group=wheel
+
+eapol_version=1
+ap_scan=1
+fast_reauth=1
+
+network={
+	ssid="$ESSID_MGT_TLS"
+	scan_ssid=0
+	mode=0
+	proto=RSN
+	key_mgmt=WPA-EAP
+	auth_alg=OPEN
+	eap=TLS
+	anonymous_identity="$ANON_IDENTITY_MGT_TLS"
+	identity="$IDENTITY_MGT_TLS_LEAK"
+	# Force legacy TLS <=1.2 (disable 1.3): the client certificate is then sent
+	# in cleartext during the handshake, leaking client_leak.crt's PII on the air.
+	phase1="tls_disable_tlsv1_3=1"
+	ca_cert="/root/certs/ca.crt"
+	client_cert="/root/certs/client_leak.crt"
+	private_key="/root/certs/client_leak.key"
+	private_key_passwd="whatever"
+	ieee80211w=2 # use Protected Management Frames (PMF)
+}

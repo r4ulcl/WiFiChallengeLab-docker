@@ -11,6 +11,17 @@ private_key=/root/certs/server.key
 private_key_passwd=whatever
 #dh_file=/etc/hostapd-wpe/dh
 
+# This AP intentionally supports BOTH EAP-TLS over TLS 1.3 and legacy TLS 1.2.
+# The client chooses the version, which decides whether its certificate leaks:
+#   * TLS 1.3 clients (wpa_TLS.conf)      -> client cert is ENCRYPTED, no leak.
+#   * TLS 1.2 clients (wpa_TLS_leak.conf) -> client cert is sent in the CLEAR
+#     during the handshake, leaking whatever is in the subject (PII, username).
+# TLS 1.0/1.1 stay disabled; only 1.2 and 1.3 are offered.
+# NOTE: TLS 1.3 EAP needs hostapd built with OpenSSL and CONFIG_TLSV13=y (marked
+# experimental); if the build lacks it, only TLS 1.2 is available (everything
+# then leaks). Verify the negotiated version against the running container.
+tls_flags=[ENABLE-TLSv1.3][DISABLE-TLSv1.0][DISABLE-TLSv1.1]
+
 # 802.11 Options
 ssid=$ESSID_MGT_TLS
 channel=$CHANNEL_MGT_TLS

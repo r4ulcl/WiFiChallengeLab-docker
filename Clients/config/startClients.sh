@@ -161,6 +161,14 @@ do
     wait $!
 done &
 
+# MGT client TLS leaking (GLOBAL\franz.ka)
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS_LEAK -c /root/mgtClient/wpa_TLS_leak.conf >> /root/logs/supplicantTLS_leak.log &
+    wait $!
+done &
+
 # MGT TLS .7 phishing
 while :
 do
