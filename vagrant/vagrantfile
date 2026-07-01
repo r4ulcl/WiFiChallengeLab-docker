@@ -1,9 +1,139 @@
-Vagrant.configure('2') do |config|
-  # Default: $env:DEV = "false" ; $env:LOCATION = "remote"
-  # DEV:     $env:DEV = "true"  ; $env:LOCATION = "local"  ; vagrant up
+# WiFiChallenge Lab v2.5
+#
+# Default: $env:DEV = "false" ; $env:LOCATION = "remote"
+# DEV:     $env:DEV = "true"  ; $env:LOCATION = "local"  ; vagrant up
+#
+# Requires: vagrant plugin install vagrant-reload
+#
+# No vm.disk config on purpose: generic/debian12 already ships a large
+# thin-provisioned primary disk, and Vagrant cannot shrink disks anyway.
 
-  dev_arg      = ENV.fetch('DEV', 'false').to_s
-  location_arg = ENV.fetch('LOCATION', 'remote').to_s
+# Local variable, not a constant: Vagrant evaluates a Vagrantfile more than
+# once per run, and re-assigning a constant warns on every re-evaluation.
+lab_name = 'WiFiChallenge Lab v2.5'
+
+# Preseed grub-pc so full-upgrade never prompts for an install device, then
+# apply all pending updates. $1 is the provider-specific fallback root disk.
+def base_update_script
+  <<~'SHELL'
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+    ROOT_SRC="$(findmnt -no SOURCE /)"
+    ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
+    [ -b "$ROOT_DEV" ] || ROOT_DEV="$1"
+    echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
+    apt-get update -y
+    apt-get full-upgrade -y
+  SHELL
+end
+
+# Purge kernels and headers older than the running one, then zero the free
+# space so the exported disk compacts well. /var/tmp, not /tmp: stays on the
+# root filesystem even if /tmp is ever tmpfs (zeroing tmpfs only burns RAM).
+def cleanup_script
+  <<~'SHELL'
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+    KVER="$(uname -r)"   # e.g. 6.1.0-37-amd64
+    KBASE="${KVER%-*}"   # e.g. 6.1.0-37; also matches the current -common headers
+    PURGE="$(dpkg-query -W -f '${db:Status-Abbrev} ${Package}\n' 'linux-image-[0-9]*' 'linux-headers-[0-9]*' 2>/dev/null | awk '/^ii/{print $2}' | grep -vF "$KBASE" || true)"
+    [ -z "$PURGE" ] || apt-get remove --purge -y $PURGE
+    apt-get autoremove --purge -y
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+    fstrim -av || true
+    dd if=/dev/zero of=/var/tmp/zerofile bs=1M || true
+    # sync BEFORE rm: dirty pages of an unlinked file can be dropped without
+    # ever hitting the disk, which would leave free space un-zeroed.
+    sync
+    rm -f /var/tmp/zerofile
+    sync
+  SHELL
+end
+
+def ga_install_script
+  <<~'SHELL'
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+    ISO=/var/tmp/VBoxGuestAdditions.iso
+
+    if [ ! -s "$ISO" ]; then
+      echo "Guest Additions ISO missing or empty at $ISO"
+      exit 1
+    fi
+
+    # The installer builds kernel modules for the freshly upgraded kernel, so
+    # it needs the toolchain and matching headers; dkms keeps rebuilding them
+    # on every later kernel change.
+    apt-get update -y
+    apt-get install -y build-essential dkms "linux-headers-$(uname -r)"
+
+    mkdir -p /mnt/vbga
+    if mountpoint -q /mnt/vbga; then umount /mnt/vbga; fi
+    mount -o loop,ro "$ISO" /mnt/vbga
+
+    if [ ! -x /mnt/vbga/VBoxLinuxAdditions.run ]; then
+      echo "VBoxLinuxAdditions.run not found on ISO"
+      umount /mnt/vbga
+      exit 1
+    fi
+
+    rc=0
+    sh /mnt/vbga/VBoxLinuxAdditions.run --nox11 || rc=$?
+    umount /mnt/vbga
+    # Exit code 2 only means the X11 components were skipped (headless
+    # install); anything else is a real failure, do not mask it.
+    if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+      echo "Guest Additions installer failed with exit code $rc"
+      exit "$rc"
+    fi
+
+    /sbin/rcvboxadd quicksetup all
+    /sbin/rcvboxadd reload || true
+
+    # ~55 MB that would otherwise survive into the exported disk. A later
+    # `vagrant provision` re-uploads it via the file provisioner first.
+    rm -f "$ISO"
+  SHELL
+end
+
+def apply_base_update(node, fallback_root_dev)
+  node.vm.provision 'shell',
+    inline: base_update_script,
+    args: [fallback_root_dev],
+    privileged: true,
+    run: 'once'
+
+  node.vm.provision 'reload', name: 'Reboot after kernel upgrade'
+end
+
+def apply_install_and_cleanup(node, dev_arg, location_arg)
+  node.vm.provision 'shell',
+    path: './install.sh',
+    args: [dev_arg, location_arg],
+    privileged: true
+
+  node.vm.provision 'reload', name: 'Reboot after install.sh'
+
+  node.vm.provision 'shell',
+    inline: cleanup_script,
+    privileged: true,
+    run: 'once'
+end
+
+Vagrant.configure('2') do |config|
+  unless Vagrant.has_plugin?('vagrant-reload')
+    raise 'Missing plugin, run: vagrant plugin install vagrant-reload'
+  end
+
+  dev_arg      = ENV.fetch('DEV', 'false')
+  location_arg = ENV.fetch('LOCATION', 'remote')
+  unless %w[true false].include?(dev_arg)
+    raise "DEV must be 'true' or 'false', got '#{dev_arg}'"
+  end
+  unless %w[local remote].include?(location_arg)
+    raise "LOCATION must be 'local' or 'remote', got '#{location_arg}'"
+  end
 
   host_os =
     case RUBY_PLATFORM
@@ -13,60 +143,33 @@ Vagrant.configure('2') do |config|
     end
 
   config.vm.boot_timeout = 600
+  config.vm.box          = 'generic/debian12'
+  config.vm.hostname     = 'WiFiChallengeLab'
 
+  # install.sh is uploaded by the shell provisioner, so /vagrant is unused.
+  # Disabling it avoids the SMB credentials prompt on Hyper-V and the broken
+  # vboxsf mount on VirtualBox (functional_vboxsf is off below).
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  # All machines are opt-in (autostart: false): a bare `vagrant up` would
+  # otherwise try to create every definition under the host's default
+  # provider. Use: vagrant up <machine> [--provider=<provider>]
   # ---------- Hyper-V ----------
-  config.vm.define 'hyper-v_vm' do |hv_vm|
-    hv_vm.vm.box      = 'generic/debian12'
-    hv_vm.vm.hostname = 'WiFiChallengeLab'
-
-    # Default primary disk size
-    hv_vm.vm.disk :disk, size: '50GB', primary: true
-
+  config.vm.define 'hyper-v_vm', autostart: false do |hv_vm|
     hv_vm.vm.provider 'hyperv' do |hv|
-      hv.vmname    = 'WiFiChallenge Lab v2.4.1'
-      hv.maxmemory = 4096
-      hv.memory    = 4096
-      hv.cpus      = 4
+      hv.vmname = lab_name
+      # Fixed 4 GB: no maxmemory, so dynamic memory stays off.
+      hv.memory = 4096
+      hv.cpus   = 4
       # Note: Hyper-V does not typically expose a normal audio device to Linux guests.
     end
 
-    hv_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        set -e
-        ROOT_SRC="$(findmnt -no SOURCE /)"
-        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
-        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
-        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
-        apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
-      SHELL
-      privileged: true,
-      run: 'once'
-
-    hv_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    hv_vm.vm.provision 'shell',
-      path: './install.sh',
-      args: [dev_arg, location_arg],
-      privileged: true
-
-    hv_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    hv_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-        sudo rm -f /tmp/zerofile
-      SHELL
-      privileged: true,
-      run: 'once'
+    apply_base_update(hv_vm, '/dev/sda')
+    apply_install_and_cleanup(hv_vm, dev_arg, location_arg)
   end
 
   # ---------- VirtualBox ----------
-  config.vm.define 'virtualbox_vm' do |vb_vm|
-    vb_vm.vm.box      = 'generic/debian12'
-    vb_vm.vm.hostname = 'WiFiChallengeLab'
-
+  config.vm.define 'virtualbox_vm', autostart: false do |vb_vm|
     # Host-side audio backend
     vbox_audio =
       case host_os
@@ -80,258 +183,134 @@ Vagrant.configure('2') do |config|
     # guest (eth1-hostonly profile in install.sh), not by Vagrant/ifupdown.
     vb_vm.vm.network 'private_network', ip: '192.168.56.10', auto_config: false
 
-    # Default primary disk size
-    vb_vm.vm.disk :disk, size: '50GB', primary: true
-
     vb_vm.vm.provider 'virtualbox' do |vb|
       vb.memory = 4096
       vb.cpus   = 4
-      vb.name   = 'WiFiChallenge Lab v2.4.1'
+      vb.name   = lab_name
       vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
       vb.check_guest_additions = false
       vb.functional_vboxsf = false
-      vb.customize ['modifyvm', :id, '--audio', vbox_audio]
+
+      # VirtualBox 7.x removed --audio in favor of --audio-driver/--audio-enabled.
+      # If the version cannot be detected, assume a current (7.x) install.
+      vbox_major =
+        begin
+          `VBoxManage --version 2>#{File::NULL}`[/\A(\d+)/, 1]&.to_i || 7
+        rescue StandardError
+          7
+        end
+      if vbox_major >= 7
+        vb.customize ['modifyvm', :id, '--audio-driver', vbox_audio]
+        vb.customize ['modifyvm', :id, '--audio-enabled', 'on']
+      else
+        vb.customize ['modifyvm', :id, '--audio', vbox_audio]
+      end
       vb.customize ['modifyvm', :id, '--audiocontroller', 'hda']
       # If you ever need a fallback, swap controller to ac97:
       # vb.customize ['modifyvm', :id, '--audiocontroller', 'ac97']
     end
 
-    host_ga_iso =
-      if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
-        'C:/Program Files/Oracle/VirtualBox/VBoxGuestAdditions.iso'
-      elsif RUBY_PLATFORM =~ /darwin/
-        '/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso'
+    ga_iso_candidates =
+      case host_os
+      when :windows
+        ['C:/Program Files/Oracle/VirtualBox/VBoxGuestAdditions.iso']
+      when :macos
+        ['/Applications/VirtualBox.app/Contents/MacOS/VBoxGuestAdditions.iso']
       else
-        File.exist?('/usr/share/virtualbox/VBoxGuestAdditions.iso') ?
-          '/usr/share/virtualbox/VBoxGuestAdditions.iso' :
-          '/usr/lib/virtualbox/additions/VBoxGuestAdditions.iso'
+        ['/usr/share/virtualbox/VBoxGuestAdditions.iso',
+         '/usr/lib/virtualbox/additions/VBoxGuestAdditions.iso']
       end
+    host_ga_iso = ga_iso_candidates.find { |p| File.exist?(p) } || ga_iso_candidates.first
 
+    # /var/tmp, not /tmp: survives the reboot between upload and GA install
+    # even if /tmp is ever tmpfs.
     vb_vm.vm.provision 'file',
       source: host_ga_iso,
-      destination: '/tmp/VBoxGuestAdditions.iso',
-      run: 'always'
+      destination: '/var/tmp/VBoxGuestAdditions.iso'
+
+    apply_base_update(vb_vm, '/dev/sda')
 
     vb_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        set -e
-        export DEBIAN_FRONTEND=noninteractive
-        ROOT_SRC="$(findmnt -no SOURCE /)"
-        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
-        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
-        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
-        apt-get update -y
-        apt-get full-upgrade -y
-      SHELL
-      privileged: true,
-      run: 'once'
-
-    vb_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
-
-    vb_vm.vm.provision 'shell',
-      inline: <<~'SHELL',
-        set -e
-        mkdir -p /mnt/vbga
-
-        if [ ! -s /tmp/VBoxGuestAdditions.iso ]; then
-          echo "Guest Additions ISO missing or empty at /tmp/VBoxGuestAdditions.iso"
-          ls -l /tmp || true
-          exit 1
-        fi
-        file /tmp/VBoxGuestAdditions.iso || true
-
-        apt-get update -y
-        apt-get install -y kmod util-linux
-        modprobe loop || true
-        modprobe isofs || true
-
-        losetup -fP /tmp/VBoxGuestAdditions.iso
-        LOOPDEV="$(losetup -j /tmp/VBoxGuestAdditions.iso | awk -F: '{print $1}')"
-        if [ -z "$LOOPDEV" ]; then
-          echo "Could not attach loop device"
-          losetup -a || true
-          exit 1
-        fi
-
-        mount -t iso9660 -o ro "$LOOPDEV" /mnt/vbga || {
-          echo "Mount failed. Dumping loop devices"
-          losetup -a || true
-          exit 1
-        }
-
-        if [ ! -x /mnt/vbga/VBoxLinuxAdditions.run ]; then
-          echo "VBoxLinuxAdditions.run not found on ISO"
-          umount /mnt/vbga
-          losetup -d "$LOOPDEV"
-          exit 1
-        fi
-
-        sh /mnt/vbga/VBoxLinuxAdditions.run --nox11 || true
-
-        umount /mnt/vbga || true
-        losetup -d "$LOOPDEV" || true
-
-        /sbin/rcvboxadd quicksetup all || true
-        /sbin/rcvboxadd reload || true
-      SHELL
+      inline: ga_install_script,
       privileged: true
 
     vb_vm.vm.provision 'reload', name: 'Reboot after GA install'
 
-    vb_vm.vm.provision 'shell',
-      path: './install.sh',
-      args: [dev_arg, location_arg],
-      privileged: true
-
-    vb_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    vb_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-        sudo rm -f /tmp/zerofile
-      SHELL
-      privileged: true,
-      run: 'once'
+    apply_install_and_cleanup(vb_vm, dev_arg, location_arg)
   end
 
   # ---------- VMware ----------
-  config.vm.define 'vmware_vm' do |vmw_vm|
-    vmw_vm.vm.box      = 'generic/debian12'
-    vmw_vm.vm.hostname = 'WiFiChallengeLab'
-
+  config.vm.define 'vmware_vm', autostart: false do |vmw_vm|
     # Host-only network so the documented RDP target 192.168.59.10 exists.
     # auto_config: false -> the static IP is owned by NetworkManager inside the
     # guest (eth1-hostonly profile in install.sh), not by Vagrant/ifupdown.
     vmw_vm.vm.network 'private_network', ip: '192.168.59.10', auto_config: false
 
-    # Default primary disk size
-    vmw_vm.vm.disk :disk, size: '50GB', primary: true
-
     vmw_vm.vm.provider 'vmware_desktop' do |v|
       v.linked_clone         = false
-      v.clone_directory      = 'E:/VMWare'
+      # Where full clones go; override per host with VMWARE_CLONE_DIR.
+      if ENV['VMWARE_CLONE_DIR']
+        v.clone_directory = ENV['VMWARE_CLONE_DIR']
+      elsif host_os == :windows
+        v.clone_directory = 'E:/VMWare'
+      end
       v.force_vmware_license = 'workstation'
       v.gui                  = true
-      v.vmx['displayName']   = 'WiFiChallenge Lab v2.4.1'
+      v.vmx['displayName']   = lab_name
       v.memory               = 4096
       v.cpus                 = 4
-      # Force sound device present/connected (Windows host)
+      # Force sound device present/connected
       v.vmx['sound.present']        = 'TRUE'
       v.vmx['sound.autodetect']     = 'TRUE'
       v.vmx['sound.startConnected'] = 'TRUE'
     end
 
-    vmw_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        set -e
-        ROOT_SRC="$(findmnt -no SOURCE /)"
-        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
-        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/sda
-        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
-        apt-get update -y
-        DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
-      SHELL
-      privileged: true,
-      run: 'once'
-
-    vmw_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    vmw_vm.vm.provision 'shell',
-      path: './install.sh',
-      args: [dev_arg, location_arg],
-      privileged: true
-
-    vmw_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    vmw_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-        sudo rm -f /tmp/zerofile
-      SHELL
-      privileged: true,
-      run: 'once'
+    apply_base_update(vmw_vm, '/dev/sda')
+    apply_install_and_cleanup(vmw_vm, dev_arg, location_arg)
   end
 
   # ---------- QEMU ----------
-  config.vm.define 'qemu_vm' do |qemu_vm|
-    qemu_vm.vm.box      = 'generic/debian12'
-    qemu_vm.vm.hostname = 'WiFiChallengeLab'
-
+  # Requires the vagrant-qemu plugin. Note: that plugin does not support
+  # Windows hosts, only Linux and macOS.
+  config.vm.define 'qemu_vm', autostart: false do |qemu_vm|
     # Host-side audio backend
     qemu_audio =
       case host_os
-      when :windows then 'dsound,id=snd0'
-      when :macos   then 'coreaudio,id=snd0'
-      else               'pa,id=snd0'   # Alt: alsa,id=snd0
+      when :macos then 'coreaudio,id=snd0'
+      else             'pa,id=snd0'   # Alt: alsa,id=snd0
       end
 
-    # Default primary disk size
-    qemu_vm.vm.disk :disk, size: '50GB', primary: true
-
     qemu_vm.vm.provider 'qemu' do |qemu|
-      qemu.memory            = 4096
-      qemu.cpus              = 4
-      qemu.machine           = 'q35'
-      qemu.cpu               = 'host'
-      qemu.video_type        = 'virtio'
-      qemu.display           = 'gtk'
-      qemu.audio             = 'on'
-      qemu.disk_interface    = 'virtio'
-      qemu.network_interface = 'virtio-net'
-      qemu.name              = 'WiFiChallenge Lab v2.4.1 (QEMU)'
-      qemu.qemu_dir          = 'C:/Program Files/qemu'
-      qemu.uefi              = 'C:/Program Files/qemu/share/edk2-x86_64-code.fd'
-      qemu.gui               = true
+      qemu.memory   = '4G'
+      qemu.smp      = '4'
+      qemu.machine  = host_os == :macos ? 'q35,accel=hvf' : 'q35,accel=kvm'
+      qemu.cpu      = 'host'
+      qemu.qemu_dir = '/usr/share/qemu' if host_os == :linux
+      # generic/debian12 boots via BIOS/grub-pc: no UEFI firmware here.
+      # macOS QEMU builds ship the cocoa display, usually not gtk.
       qemu.extra_qemu_args = [
+        '-name', "#{lab_name} (QEMU)",
+        '-display', host_os == :macos ? 'cocoa' : 'gtk',
+        '-device', 'virtio-vga',
         '-audiodev', qemu_audio,
         '-device', 'ich9-intel-hda',
         '-device', 'hda-duplex,audiodev=snd0'
       ]
     end
 
+    apply_base_update(qemu_vm, '/dev/vda')
+
     qemu_vm.vm.provision 'shell',
-      inline: <<~SHELL,
+      inline: <<~'SHELL',
         set -e
         export DEBIAN_FRONTEND=noninteractive
-        ROOT_SRC="$(findmnt -no SOURCE /)"
-        ROOT_DEV="/dev/$(lsblk -no PKNAME "$ROOT_SRC" 2>/dev/null | head -n1)"
-        [ -b "$ROOT_DEV" ] || ROOT_DEV=/dev/vda
-        echo "grub-pc grub-pc/install_devices multiselect $ROOT_DEV" | debconf-set-selections
-        apt-get update -y
-        apt-get full-upgrade -y
-      SHELL
-      privileged: true,
-      run: 'once'
-
-    qemu_vm.vm.provision 'reload', name: 'Reboot after kernel upgrade'
-
-    qemu_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        set -e
-        apt-get install -y qemu-guest-agent spice-vdagent xserver-xorg-video-qxl
-        systemctl enable qemu-guest-agent
-        systemctl start qemu-guest-agent
+        apt-get install -y qemu-guest-agent spice-vdagent
+        systemctl enable --now qemu-guest-agent
       SHELL
       privileged: true
 
     qemu_vm.vm.provision 'reload', name: 'Reboot after guest tools install'
 
-    qemu_vm.vm.provision 'shell',
-      path: './install.sh',
-      args: [dev_arg, location_arg],
-      privileged: true
-
-    qemu_vm.vm.provision 'reload', name: 'Reboot after update kernel'
-
-    qemu_vm.vm.provision 'shell',
-      inline: <<~SHELL,
-        for K in $(dpkg --list | awk '/linux-image-[0-9]/{print $2}' | grep -v $(uname -r)); do sudo apt remove --purge -y $K; done
-        sudo dd if=/dev/zero of=/tmp/zerofile bs=1M || true
-        sudo rm -f /tmp/zerofile
-      SHELL
-      privileged: true,
-      run: 'once'
+    apply_install_and_cleanup(qemu_vm, dev_arg, location_arg)
   end
 end
