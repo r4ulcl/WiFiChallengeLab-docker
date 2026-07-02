@@ -11,7 +11,7 @@ if (!isset($_SESSION['UserData']['Username'])) {
     exit;
 }
 
-$user = $_SESSION['UserData']['Username'];
+$user = $_SESSION["Username"];
 ?>
 <!DOCTYPE html>
 <html>
