@@ -17,13 +17,15 @@ services:
       test:
         - CMD-SHELL
         - ip netns exec ns-ap /bin/bash -c '
-          curl -f -s http://localhost/login.php >/dev/null || exit 1;
-          curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+          curl -f -s -o /dev/null http://localhost/login.php || exit 1;
+          curl -s -o /dev/null http://localhost:8080 || exit 2;
+          pgrep -x freeradius >/dev/null || exit 3;
+          [ "$(pgrep -xc host_aps_apd)" -ge 18 ] || exit 4'
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+      start_interval: 3s
     network_mode: host #NETNS
     privileged: true #NETNS
 
@@ -45,12 +47,13 @@ services:
       test:
         - CMD-SHELL
         - ip netns exec ns-client /bin/bash -c '
-          curl -s http://localhost >/dev/null || exit 1;
-          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
+          curl -s -o /dev/null http://localhost || exit 1;
+          [ "$(pgrep -c wpa_wifichallen)" -ge 17 ] || exit 2'
+      interval: 15s
+      timeout: 10s
+      retries: 5
       start_period: 45s
+      start_interval: 3s
 
 
   nzyme:
@@ -73,21 +76,29 @@ services:
       - db
     environment:
       - TZ=Europe/Berlin
+      # Keep the JVM boxed inside the container so it can't thrash the whole VM:
+      # bounded heap+metaspace, single-threaded GC, and one worker CPU (host net
+      # otherwise makes the JVM size its thread pools to every host core), plus
+      # hard-exit on OOM so it restarts cleanly instead of GC death-spiralling.
+      - JAVA_TOOL_OPTIONS=-Xms64m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -XX:ActiveProcessorCount=1 -XX:+ExitOnOutOfMemoryError
     network_mode: host #USB Antena
     healthcheck:
-      test: ["CMD-SHELL", "curl -f -s http://localhost:22900 >/dev/null || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      test: ["CMD-SHELL", "curl -f -s -o /dev/null http://localhost:22900 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+      start_interval: 3s
     cap_add: # full access to wifi interface
       - NET_ADMIN
       - NET_RAW
+    cpu_shares: 256   # lower priority than APs/clients when the VM is busy
     deploy:
         resources:
             limits:
               cpus: "0.50"
               memory: 512M
+              pids: 200
             reservations:
               memory: 128M
 
@@ -108,9 +119,12 @@ services:
     ports:
       - 127.0.0.1:5432:5432 # Since we use host net on nzyme, listen only locally
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER"]
-      interval: 10s
-      start_period: 30s
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-nzyme} -d $${POSTGRES_DB:-nzyme}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+      start_interval: 3s
     deploy:
         resources:
             limits:

@@ -17,13 +17,15 @@ services:
       test:
         - CMD-SHELL
         - ip netns exec ns-ap /bin/bash -c '
-          curl -f -s http://localhost/login.php >/dev/null || exit 1;
-          curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+          curl -f -s -o /dev/null http://localhost/login.php || exit 1;
+          curl -s -o /dev/null http://localhost:8080 || exit 2;
+          pgrep -x freeradius >/dev/null || exit 3;
+          [ "$(pgrep -xc host_aps_apd)" -ge 18 ] || exit 4'
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+      start_interval: 3s
     network_mode: host #NETNS
     privileged: true #NETNS
 
@@ -45,9 +47,10 @@ services:
       test:
         - CMD-SHELL
         - ip netns exec ns-client /bin/bash -c '
-          curl -s http://localhost >/dev/null || exit 1;
-          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
+          curl -s -o /dev/null http://localhost || exit 1;
+          [ "$(pgrep -c wpa_wifichallen)" -ge 17 ]  || exit 2'
+      interval: 15s
+      timeout: 10s
+      retries: 5
       start_period: 45s
+      start_interval: 3s
