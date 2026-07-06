@@ -452,7 +452,7 @@ apt_install htop xpra tmux
 
 # Install RDP
 echo 'Install RDP server'
-sudo bash Attacker/installRDP.sh user
+sudo bash vagrant/installRDP.sh user
 
 # ---------- first login desktop setup ----------------------------------------
 sudo tee /etc/configureUser.sh >/dev/null <<'EOF'
@@ -926,7 +926,7 @@ for pkg in "${packages[@]}"; do
 done
 
 echo 'Install WiFi tools'
-sudo bash Attacker/installTools.sh || {
+sudo bash vagrant/installTools.sh || {
   echo "installTools.sh failed"
   exit 1
 }

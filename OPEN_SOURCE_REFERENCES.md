@@ -1,6 +1,6 @@
 # Open Source References for WiFiChallengeLab-docker
 
-Third-party projects used by the lab (Dockerfiles, vagrant/install.sh, and Attacker/installTools.sh).
+Third-party projects used by the lab (Dockerfiles, vagrant/install.sh, and vagrant/installTools.sh).
 
 | Project                            | Description                                                    | Source / Repo                                                          | License                          |
 | ---------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------|
