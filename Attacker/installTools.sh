@@ -387,12 +387,15 @@ apt-get install -y python3-dev libssl-dev libffi-dev build-essential \
   python3-termcolor python3-twisted python3-urwid
 cd "${TOOLS}"
 [ ! -d wifipumpkin3 ] && git clone https://github.com/P0cL4bs/wifipumpkin3.git
-cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && make install || true
+# PIP_IGNORE_INSTALLED: the makefile's `pip install` pins old deps (urwid 2.1.2,
+# dnslib, dhcplib...) and tries to uninstall the apt-provided ones, which fails
+# with "uninstall-no-record-file" for distro packages. Skip uninstalls instead.
+cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && PIP_IGNORE_INSTALLED=1 make install || true
 
 # convenience
 chown -R user:user "${TOOLS}"
 ln -sf "${TOOLS}" /home/user/tools || true
-apt-get install -y macchanger wireshark-qt
+apt-get install -y macchanger wireshark
 
 # Wacker
 cd "${TOOLS}"
