@@ -59,7 +59,7 @@ apt-get update
 apt-get install -y wget curl git ca-certificates build-essential
 
 # ---------- basic utilities ---------------------------------------------------
-apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full
+apt-get install -y nmap python3 python3-pip sqlite3 tshark jq p7zip-full
 
 # ---------- Python 2 availability check --------------------------------------
 have_py2_pkg=false
@@ -126,7 +126,8 @@ if [ ! -f hcxtools_6.0.2-1+b1_amd64.deb ]; then
 fi
 
 # ---------- wifi_db -----------------------------------------------------------
-apt-get install -y sqlitebrowser
+# sqlitebrowser (Qt GUI) skipped: headless container. The sqlite3 CLI installed
+# earlier is enough to inspect wifi_db's database.
 cd "${TOOLS}"
 if [ ! -d wifi_db ]; then
   git clone https://github.com/r4ulcl/wifi_db
@@ -255,7 +256,7 @@ bundle install || true
 install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
 
 # airgeddon
-apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
+apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
 systemctl disable --now lighttpd || true
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
@@ -399,7 +400,10 @@ cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && PIP_IGNORE_INSTALL
 # convenience
 chown -R user:user "${TOOLS}"
 ln -sf "${TOOLS}" /home/user/tools || true
-apt-get install -y macchanger wireshark
+# No GUI here: this is a headless docker-exec-only container. tshark (installed
+# above) already provides CLI capture/analysis and pulls wireshark-common/dumpcap;
+# the wireshark Qt GUI would drag in the whole Qt6 + ffmpeg + ALSA tree for nothing.
+apt-get install -y macchanger
 
 # Wacker
 cd "${TOOLS}"
