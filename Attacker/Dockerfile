@@ -17,9 +17,14 @@
 # Kali is the base because the toolset (eaphammer, hostapd-wpe, mdk3, bettercap,
 # asleap, the Realtek Alfa DKMS drivers, ...) ships as Kali packages.
 #
-# WARNING: like the rest of the lab, this image runs privileged and shares the
-# host kernel (/lib/modules, USB pass-through for real Alfa adapters). Never run
-# it privileged on a physical host you rely on — only inside a lab VM.
+# This image is meant to be used ALWAYS, not only against the lab. Run it
+# privileged with host networking and it drives real USB Wi-Fi adapters too: with
+# `--network host` the host's wlanX interfaces are visible inside the container
+# (no USB pass-through needed for normal monitor mode / injection), and mounting
+# /lib/modules + /usr/src lets the bundled DKMS drivers build against the host
+# kernel for adapters the host doesn't already support.
+# SECURITY: privileged + host networking can transmit on any radio it sees. Only
+# attack networks you own or are authorized to test.
 FROM kalilinux/kali-rolling
 
 LABEL org.opencontainers.image.title="WiFiChallengeLab Attacker" \
