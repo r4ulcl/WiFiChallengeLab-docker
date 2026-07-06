@@ -61,7 +61,7 @@ done
 if (( ${#require_cmds[@]} > 0 )); then
     if [[ "${AUTO_INSTALL_DEPS}" == "1" ]]; then
         echo "[i] Missing build tools (${require_cmds[*]}). Installing ..."
-        apt_noninteractive install -y gcc-12 g++-12 build-essential
+        apt_noninteractive install -y gcc g++ build-essential
     else
         echo "ERROR: Missing build tools: ${require_cmds[*]}"
         echo "Install them manually or run with AUTO_INSTALL_DEPS=1."
