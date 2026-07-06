@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Load WLAN definitions
+# Load WLAN definitions.
 WLAN_CONFIG_FILE="/root/wlan_config"
 
 if [[ -r "$WLAN_CONFIG_FILE" ]]; then
   # shellcheck disable=SC1090
   source "$WLAN_CONFIG_FILE"
-else
-  echo "[!] Cannot read $WLAN_CONFIG_FILE" >&2
-  exit 1
 fi
 
 # Validate required variables
