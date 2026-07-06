@@ -368,7 +368,11 @@ fi
 apt-get install -y pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 cd "${TOOLS}"
 [ ! -d mdk4 ] && git clone https://github.com/aircrack-ng/mdk4
-cd mdk4 && make -j"$(nproc)" && make install
+# -Wno-unterminated-string-initialization silences ~500 harmless warnings GCC 15
+# emits on mdk4's manufactor.h OUI table (no -Werror upstream, so cosmetic only).
+# Pass mdk4's own default CFLAGS + the suppression (src/Makefile uses ?=, so a
+# command-line CFLAGS overrides it and propagates to the sub-make).
+cd mdk4 && make -j"$(nproc)" CFLAGS="-g -O3 -Wall -Wextra -fcommon -Wno-unterminated-string-initialization" && make install
 
 # air-hammer with python2 if available
 cd "${TOOLS}"
