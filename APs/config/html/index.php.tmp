@@ -138,20 +138,7 @@ $rules = [
 </head>
 <body>
 
-<script>
-function copyFlagToClipboard(flag) {
-  var e = window.event;
-  var btn = e && e.target && e.target.closest ? e.target.closest('button') : null;
-  function ok() {
-    if (!btn) return;
-    btn.classList.add('copied');
-    setTimeout(function () { btn.classList.remove('copied'); }, 1500);
-  }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(flag).then(ok).catch(ok);
-  } else { ok(); }
-}
-</script>
+<script src="script.js"></script>
 
 <div class="content">
 
