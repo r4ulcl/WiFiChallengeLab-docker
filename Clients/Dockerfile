@@ -41,7 +41,30 @@ RUN update-rc.d apache2 defaults
 #RUN apt-get update && apt-get install -y linux-image-amd64 linux-headers-amd64
 
 #Change name of wpa_supplicant to avoid airmon-ng check kill and dhclient
-RUN cp /sbin/wpa_supplicant /sbin/wpa_wifichallenge_supplicant
+# Build wpa_supplicant 2.10 from source WITH TLS 1.3 (CONFIG_TLSV13=y) and use it
+# as the client binary. Debian's stock wpa_supplicant is NOT built with
+# CONFIG_TLSV13, so the EAP-TLS-over-TLS-1.3 client (wpa_TLS.conf) fails every
+# handshake with "SSL routines::unsupported protocol" while the AP (hostapd,
+# already built with TLSV13) offers 1.3 - only the TLS 1.2 client works otherwise.
+# Mirror the AP build: start from upstream defconfig and re-enable the features the
+# lab's clients use (nl80211 + WEP/SAE/OWE + EAP) alongside TLSV12/TLSV13.
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential wget \
+ && cd /tmp \
+ && wget -q https://w1.fi/releases/wpa_supplicant-2.10.tar.gz \
+ && tar xf wpa_supplicant-2.10.tar.gz \
+ && cd wpa_supplicant-2.10/wpa_supplicant \
+ && cp defconfig .config \
+ && printf '%s\n' \
+      'CONFIG_DRIVER_NL80211=y' \
+      'CONFIG_LIBNL32=y' \
+      'CONFIG_WEP=y' \
+      'CONFIG_SAE=y' \
+      'CONFIG_OWE=y' \
+      'CONFIG_TLSV12=y' \
+      'CONFIG_TLSV13=y' >> .config \
+ && make -j"$(nproc)" \
+ && install -m 0755 wpa_supplicant /sbin/wpa_wifichallenge_supplicant \
+ && rm -rf /tmp/wpa_supplicant-2.10*
 RUN cp /sbin/dhclient /sbin/dhclien-wifichallenge
 
 
