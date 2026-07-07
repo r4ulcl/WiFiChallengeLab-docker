@@ -48,7 +48,7 @@ RUN update-rc.d apache2 defaults
 # already built with TLSV13) offers 1.3 - only the TLS 1.2 client works otherwise.
 # Mirror the AP build: start from upstream defconfig and re-enable the features the
 # lab's clients use (nl80211 + WEP/SAE/OWE + EAP) alongside TLSV12/TLSV13.
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential wget \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential wget libnl-route-3-dev \
  && cd /tmp \
  && wget -q https://w1.fi/releases/wpa_supplicant-2.10.tar.gz \
  && tar xf wpa_supplicant-2.10.tar.gz \
