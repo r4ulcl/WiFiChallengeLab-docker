@@ -101,14 +101,14 @@ do
 	fi
 
 	# PSK NOAP
-	curl -s "http://$WLAN_PSK_NOAP.1/login.php" --interface $WLAN_PSK_NOAP --compressed \
+	curl -s "http://$IP_PSK_NOAP.1/login.php" --interface $WLAN_PSK_NOAP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=anon1" \
 		--data-urlencode "Password=$PASS_PSK_NOAP_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userAnon1 -b /tmp/userAnon1 &
 
-	curl -s "http://$WLAN_PSK_NOAP2.1/login.php" --interface $WLAN_PSK_NOAP2 --compressed \
+	curl -s "http://$IP_PSK_NOAP2.1/login.php" --interface $WLAN_PSK_NOAP2 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_PSK_NOAP" \
 		--data-urlencode "Password=$PASS_PSK_NOAP_CLEAR" \

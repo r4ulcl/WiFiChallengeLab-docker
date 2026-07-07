@@ -65,6 +65,7 @@ date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
+mkdir -p /root/logs/
 service apache2 start > /root/logs/apache2.log 2>&1 &
 
 freeradius -f -l /var/log/freeradius/radius.log &
@@ -73,7 +74,7 @@ freeradius -f -l /var/log/freeradius/radius.log &
 
 #F0:9F:C2:71 ubiquiti
 macchanger -m $MAC_OPN $WLAN_OPN > /root/logs/macchanger.log # OPN
-macchanger -m $MAC_OPN_HIDDEN $WLAN_OPN_HIDDEN > /root/logs/macchanger.log # OPN
+macchanger -m $MAC_OPN_HIDDEN $WLAN_OPN_HIDDEN >> /root/logs/macchanger.log # OPN
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # WEP
 macchanger -m $MAC_PSK $WLAN_PSK >> /root/logs/macchanger.log # PSK
 macchanger -m $MAC_WPS $WLAN_WPS >> /root/logs/macchanger.log # PSK WPS
@@ -94,7 +95,6 @@ macchanger -m $MAC_BRUTEFORCE $WLAN_BRUTEFORCE >> /root/logs/macchanger.log # WP
 macchanger -m $MAC_DOWNGRADE $WLAN_DOWNGRADE >> /root/logs/macchanger.log # WPA3 DOWNGRADE
 macchanger -m $MAC_6GHZ $WLAN_6GHZ >> /root/logs/macchanger.log # WPA3 6ghz
 #macchanger -r wlan24 >> /root/logs/macchanger.log # TODO
-macchanger -r $WLAN_NZYME >> /root/logs/macchanger.log # NZYME WIDS
 #macchanger -r wlan26 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 #macchanger -r wlan28 >> /root/logs/macchanger.log # TODO
@@ -102,7 +102,6 @@ macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_OWE $WLAN_OWE >> /root/logs/macchanger.log # TODO
 
 
-mkdir /root/logs/ 2> /dev/nil
 
 
 bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
@@ -112,7 +111,6 @@ bash /root/cronAPs.sh > /root/logs/cronAPs.log 2>&1 &
 bash  /root/patch_deauth_on_drop_dmesg.sh /run/hostapd- 5  > /root/logs/patch_deauth_on_drop_dmesg.log 2>&1 &
 
 
-mkdir /root/logs/ 2> /dev/nil
 
 #TODO RE ORDER ALL WLAN and IP -> 0 OPN, 1 WEP, 2 PSK, 3 PSK WPS, 4 MGT, 5 MGT_RELAY, 6 MGT TLS, 7 8 , 9,10,11,12,13 others
 
