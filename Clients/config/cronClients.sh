@@ -40,7 +40,7 @@ done &
 while :
 do
 	# MGT MSCHAP
-	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_CLIENT_MGT_MSCHAP --compressed \
+	curl -s "http://$IP_MGT.1/login.php" --interface $WLAN_CLIENT_MGT_MSCHAP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_MSCHAP" \
 		--data-urlencode "Password=$PASS_MGT_MSCHAP_CLEAR" \
@@ -48,7 +48,7 @@ do
 		-c /tmp/userjuan -b /tmp/userjuan &
 
 	# MGT GTC
-	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_CLIENT_MGT_GTC --compressed \
+	curl -s "http://$IP_MGT.1/login.php" --interface $WLAN_CLIENT_MGT_GTC --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_GTC" \
 		--data-urlencode "Password=$PASS_MGT_GTC_CLEAR" \

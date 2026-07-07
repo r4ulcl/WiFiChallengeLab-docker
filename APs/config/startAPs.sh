@@ -118,44 +118,44 @@ mkdir /root/logs/ 2> /dev/nil
 
 # Open
 ip addr add $IP_OPN.1/24 dev $WLAN_OPN
-host_aps_apd /root/open/hostapd_open.conf > /root/logs/hostapd_open.log &
+host_aps_apd /root/open/hostapd_open.conf > /root/logs/hostapd_open.log 2>&1 &
 # opennds
 opennds > /root/logs/opennds.log 2>&1
 
 # Open hidden
 ip addr add $IP_OPN_HIDDEN.1/24 dev $WLAN_OPN_HIDDEN
-host_aps_apd /root/open/hostapd_open_hidden.conf > /root/logs/hostapd_open_hidden.log &
+host_aps_apd /root/open/hostapd_open_hidden.conf > /root/logs/hostapd_open_hidden.log 2>&1 &
 
 # PSK
 ip addr add $IP_PSK.1/24 dev $WLAN_PSK
-host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log &
+host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log 2>&1 &
 
 # PSK WPS
 ip addr add $IP_WPS.1/24 dev $WLAN_WPS
-host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log &
+host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log 2>&1 &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT
-host_aps_apd /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log &
+host_aps_apd /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log 2>&1 &
 ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
-host_aps_apd /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log &
+host_aps_apd /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log 2>&1 &
 
 # MGT Relay
 ip addr add $IP_MGT_RELAY.1/24 dev $WLAN_MGT_RELAY
-host_aps_apd /root/mgt/hostapd_wpe_relay.conf > /root/logs/hostapd_wpe_relay.log &
+host_aps_apd /root/mgt/hostapd_wpe_relay.conf > /root/logs/hostapd_wpe_relay.log 2>&1 &
 
 # MGT Relay tablets
 ip addr add $IP_MGT_RELAY_TABLETS.1/24 dev $WLAN_MGT_RELAY_TABLETS
-host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_relay_tablets.log &
+host_aps_apd /root/mgt/hostapd_wpe_relay_tablets.conf > /root/logs/hostapd_wpe_relay_tablets.log 2>&1 &
 
 # MGT TLS
 ip addr add $IP_MGT_TLS.1/24 dev $WLAN_MGT_TLS
-host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log &
+host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log 2>&1 &
 
 
 # MGT MD5
 ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
-host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log &
+host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log 2>&1 &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGT_TLS
@@ -163,35 +163,35 @@ host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log &
 
 # PSK Other
 ip addr add $IP_OTHER0.1/24 dev $WLAN_OTHER0
-host_aps_apd /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log & 
+host_aps_apd /root/psk/hostapd_other0.conf > /root/logs/hostapd_other0.log 2>&1 &
 
 ip addr add $IP_OTHER1.1/24 dev $WLAN_OTHER1
-host_aps_apd /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log & 
+host_aps_apd /root/psk/hostapd_other1.conf > /root/logs/hostapd_other1.log 2>&1 &
 
 ip addr add $IP_OTHER2.1/24 dev $WLAN_OTHER2
-host_aps_apd /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log & 
+host_aps_apd /root/psk/hostapd_other2.conf > /root/logs/hostapd_other2.log 2>&1 &
 
 ip addr add $IP_OTHER3.1/24 dev $WLAN_OTHER3
-host_aps_apd /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log & 
+host_aps_apd /root/psk/hostapd_other3.conf > /root/logs/hostapd_other3.log 2>&1 &
 
 # WPA3 WPE
 ip addr add $IP_BRUTEFORCE.1/24 dev $WLAN_BRUTEFORCE
-host_aps_apd /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.log &
+host_aps_apd /root/wpa3/hostapd_bruteforce.conf > /root/logs/hostapd_bruteforce.log 2>&1 &
 
 ip addr add $IP_DOWNGRADE.1/24 dev $WLAN_DOWNGRADE
-host_aps_apd /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log &
+host_aps_apd /root/wpa3/hostapd_downgrade.conf > /root/logs/hostapd_downgrade.log 2>&1 &
 
 ip addr add $IP_6GHZ.1/24 dev $WLAN_6GHZ
-host_aps_apd /root/wpa3/hostapd_6ghz.conf > /root/logs/hostapd_6ghz.log &
+host_aps_apd /root/wpa3/hostapd_6ghz.conf > /root/logs/hostapd_6ghz.log 2>&1 &
 
 # WEP
 ip addr add $IP_WEP.1/24 dev $WLAN_WEP
-host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log &
+host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log 2>&1 &
 
 
 # OWE
 ip addr add $IP_OWE.1/24 dev $WLAN_OWE
-host_aps_apd /root/owe/hostapd_owe.conf > /root/logs/hostapd_owe.log &
+host_aps_apd /root/owe/hostapd_owe.conf > /root/logs/hostapd_owe.log 2>&1 &
 
 #ip addr del $IP_190.15/24 dev enp0s3
 

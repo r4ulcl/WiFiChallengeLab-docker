@@ -143,15 +143,29 @@ do
     wait $!
 done &
 
-# MGT Reg .6
+# MGT Reg .6 - ONE independent loop per relay interface.
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
+    wait $!
+    sleep 2
+done &
 
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
+    wait $!
+    sleep 2
+done &
+
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
     wait $!
+    sleep 2
 done &
 
 # MGT client TLS .7
@@ -234,7 +248,7 @@ fping -l -p 3000 -q \
   "$IP_MGT_RELAY_TABLETS.1" \
   "$IP_WEP.1" \
   "$IP_OWE.1" \
-  > /dev/null 2>&1
+  > /dev/null 2>&1 &
 
 sleep 10 && echo "ALL SET"
 
