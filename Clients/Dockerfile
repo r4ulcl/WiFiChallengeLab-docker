@@ -54,6 +54,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
  && tar xf wpa_supplicant-2.10.tar.gz \
  && cd wpa_supplicant-2.10/wpa_supplicant \
  && cp defconfig .config \
+ && sed -i '/^CONFIG_CTRL_IFACE_DBUS/d' .config \
  && printf '%s\n' \
       'CONFIG_DRIVER_NL80211=y' \
       'CONFIG_LIBNL32=y' \
@@ -63,7 +64,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
       'CONFIG_TLSV12=y' \
       'CONFIG_TLSV13=y' \
       'CFLAGS += -Wno-error' >> .config \
- && make -j"$(nproc)" \
+ && make -j"$(nproc)" wpa_supplicant \
  && install -m 0755 wpa_supplicant /sbin/wpa_wifichallenge_supplicant \
  && rm -rf /tmp/wpa_supplicant-2.10*
 RUN cp /sbin/dhclient /sbin/dhclien-wifichallenge
