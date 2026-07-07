@@ -1,11 +1,15 @@
 FROM debian
 #FROM kalilinux/kali-rolling
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq make gcc g++ build-essential libnl-3-dev libnl-genl-3-dev apache2 openssl php libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod iputils-ping gettext-base wget freeradius nano
-
-
-#opennds
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y php-cli  systemd
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      macchanger sudo iw libcurl4-openssl-dev curl libz-dev module-assistant \
+      libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git \
+      hostapd dnsmasq make gcc g++ build-essential apache2 openssl php \
+      libapache2-mod-php wpasupplicant iproute2 net-tools iptables kmod \
+      iputils-ping gettext-base wget freeradius nano \
+      php-cli systemd \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz \
 	; tar  -xf libmicrohttpd-0.9.71.tar.gz ; cd libmicrohttpd-0.9.71 \
@@ -80,9 +84,8 @@ RUN echo "<IfModule mod_ssl.c>\n\
 </VirtualHost>\n\
 </IfModule>" > /etc/apache2/sites-available/default-ssl.conf
 
-# Enable the SSL site
+# Enable the SSL site (ssl module already enabled above)
 RUN a2ensite default-ssl.conf
-RUN a2enmod ssl
 
 #WPS 
 RUN touch /var/run/hostapd_wps_pin_requests
