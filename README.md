@@ -15,17 +15,16 @@
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/network/members"><img src="https://img.shields.io/github/forks/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Forks"></a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/issues"><img src="https://img.shields.io/github/issues/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Open issues"></a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker/graphs/contributors"><img src="https://img.shields.io/github/contributors/r4ulcl/WiFiChallengeLab-docker?style=flat&logo=github" alt="Contributors"></a>
-  <a href="https://www.codefactor.io/repository/github/r4ulcl/WiFiChallengeLab-docker"><img src="https://www.codefactor.io/repository/github/r4ulcl/WiFiChallengeLab-docker/badge" alt="CodeFactor"></a>
   <a href="https://github.com/r4ulcl/WiFiChallengeLab-docker"><img src="https://sloc.xyz/github/r4ulcl/WiFiChallengeLab-docker" alt="Lines of code"></a>
 </p>
 
 <p align="center">
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-aps?style=flat&logo=docker&logoColor=white&label=aps%20image" alt="APs Docker image size"></a>
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-aps?style=flat&logo=docker&logoColor=white&label=aps%20pulls" alt="APs Docker pulls"></a>
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-clients?style=flat&logo=docker&logoColor=white&label=clients%20image" alt="Clients Docker image size"></a>
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-clients?style=flat&logo=docker&logoColor=white&label=clients%20pulls" alt="Clients Docker pulls"></a>
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-nzyme?style=flat&logo=docker&logoColor=white&label=nzyme%20image" alt="nzyme Docker image size"></a>
-  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-nzyme?style=flat&logo=docker&logoColor=white&label=nzyme%20pulls" alt="nzyme Docker pulls"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-aps?style=flat&logo=docker&logoColor=white&label=aps" alt="APs Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-aps"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-aps?style=flat&label=pulls" alt="APs Docker pulls"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-clients?style=flat&logo=docker&logoColor=white&label=clients" alt="Clients Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-clients"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-clients?style=flat&label=pulls" alt="Clients Docker pulls"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/image-size/r4ulcl/wifichallengelab-nzyme?style=flat&logo=docker&logoColor=white&label=nzyme" alt="nzyme Docker image size"></a>
+  <a href="https://hub.docker.com/r/r4ulcl/wifichallengelab-nzyme"><img src="https://img.shields.io/docker/pulls/r4ulcl/wifichallengelab-nzyme?style=flat&label=pulls" alt="nzyme Docker pulls"></a>
 </p>
 
 <p align="center">
