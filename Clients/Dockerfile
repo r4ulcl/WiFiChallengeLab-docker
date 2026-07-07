@@ -61,7 +61,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
       'CONFIG_SAE=y' \
       'CONFIG_OWE=y' \
       'CONFIG_TLSV12=y' \
-      'CONFIG_TLSV13=y' >> .config \
+      'CONFIG_TLSV13=y' \
+      'CFLAGS += -Wno-error' >> .config \
  && make -j"$(nproc)" \
  && install -m 0755 wpa_supplicant /sbin/wpa_wifichallenge_supplicant \
  && rm -rf /tmp/wpa_supplicant-2.10*

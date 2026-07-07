@@ -116,7 +116,8 @@ RUN cd /tmp \
       'CONFIG_OWE=y' \
       'CONFIG_EAP_FAST=y' \
       'CONFIG_TLSV12=y' \
-      'CONFIG_TLSV13=y' >> .config \
+      'CONFIG_TLSV13=y' \
+      'CFLAGS += -Wno-error' >> .config \
  && make -j"$(nproc)" \
  && install -m 0755 hostapd /usr/sbin/host_aps_apd \
  && install -m 0755 hostapd_cli /usr/sbin/hostapd_cli \
