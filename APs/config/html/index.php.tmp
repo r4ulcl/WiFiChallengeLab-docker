@@ -39,7 +39,7 @@ function matchnet($ip, $list) {
 
 function showflag($val, $a) {
     $decoded = decode($val, $a);
-    echo "Flag: <button onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button><br><br>";
+    echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Signal locked · key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button></div>";
 }
 
 $rules = [
@@ -129,8 +129,10 @@ $rules = [
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WiFi Router Configuration</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -138,20 +140,44 @@ $rules = [
 
 <script>
 function copyFlagToClipboard(flag) {
-    navigator.clipboard.writeText(flag).then(() => {
-        alert("Flag copied to clipboard!");
-    });
+  var e = window.event;
+  var btn = e && e.target && e.target.closest ? e.target.closest('button') : null;
+  function ok() {
+    if (!btn) return;
+    btn.classList.add('copied');
+    setTimeout(function () { btn.classList.remove('copied'); }, 1500);
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(flag).then(ok).catch(ok);
+  } else { ok(); }
 }
 </script>
 
 <div class="content">
 
+  <header class="dev">
+    <div class="leds">
+      <span class="led"><i class="dot g"></i>PWR</span>
+      <span class="led"><i class="dot a blink"></i>LINK</span>
+      <span class="led"><i class="dot g"></i>2.4G</span>
+      <span class="led"><i class="dot g"></i>5G</span>
+      <span class="led"><i class="dot b"></i>WAN</span>
+    </div>
+    <div class="dev-id">
+      <span class="dev-model">WCX-1900</span>
+      <span class="dev-fw">fw ${WIFICHALLENGE_VERSION}</span>
+    </div>
+  </header>
+
+  <div class="dev-body">
+
 <?php
-echo "Welcome " . htmlspecialchars($user) . "<br><br>";
+echo "<p class=\"eyebrow\">Session established</p>";
+echo "<p class=\"welcome\">Authenticated as <b>" . htmlspecialchars($user) . "</b></p>";
 
 if (!isset($rules[$user])) {
-    echo "No FLAG for this user";
-    echo "<a href=\"logout.php\">Click here</a> to Logout.";
+    echo "<p class=\"msg\">No key bound to this credential.</p>";
+    echo "<p><a href=\"logout.php\">Sign out</a></p>";
     exit;
 }
 
@@ -161,51 +187,51 @@ if (isset($r['multi'])) {
     foreach ($r['multi'] as $net => $flag) {
         if (strpos($ip, $net) === 0) {
             if ($flag === null) {
-                echo "Hello<br><br>";
+                echo "<p class=\"welcome\">Link up. No key exposed on this segment.</p>";
             } else {
                 showflag($flag, $a);
             }
+            echo "<p><a href=\"logout.php\">Sign out</a></p>";
             exit;
         }
     }
-    echo "No FLAG, try logging in with another user ;)  ";
-    echo "<a href=\"logout.php\">Click here</a> to Logout.";
+    echo "<p class=\"msg\">No key on this segment. Try another credential ;)</p>";
+    echo "<p><a href=\"logout.php\">Sign out</a></p>";
     exit;
 }
 
 if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
-    echo "Your Princess Is in Another Castle!";
+    echo "<p class=\"msg\">Your princess is in another castle. Wrong segment.</p>";
+    echo "<p><a href=\"logout.php\">Sign out</a></p>";
     exit;
 }
 
 showflag($r['flag'], $a);
 
 if (!empty($r['extra'])) {
-    echo "<br>AP CONFIG:<br><br>
-    eap_user_file=/root/mgt/hostapd_wpe.eap_user<br>
-    ca_cert=/root/certs/ca.crt<br>
-    server_cert=/root/certs/server.crt<br>
-    private_key=/root/certs/server.key<br>
-    private_key_passwd=whatever<br>
-    dh_file=/etc/hostapd-wpe/dh<br><br>
-    ssid=wifi-corp<br>
-    channel=44<br><br>
-    Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a>";
+    echo "<p class=\"eyebrow\">AP config</p>";
+    echo "<pre class=\"confdump\">eap_user_file = /root/mgt/hostapd_wpe.eap_user
+ca_cert         = /root/certs/ca.crt
+server_cert     = /root/certs/server.crt
+private_key     = /root/certs/server.key
+private_key_passwd = whatever
+dh_file         = /etc/hostapd-wpe/dh
+
+ssid    = wifi-corp
+channel = 44</pre>";
+    echo "<p>Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a></p>";
 }
 
-echo "<br><br>Congratulation! You have logged into password protected page. 
-<a href=\"logout.php\">Click here</a> to Logout.";
+echo "<p><a href=\"logout.php\">Sign out</a></p>";
 ?>
 
-<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
-  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
-    WiFiChallenge ${WIFICHALLENGE_VERSION} 
-  </a>
-  © 
-  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
-    <?php echo date('Y'); ?> r4ulcl
-  </a>
-</div>
+  </div>
+
+  <footer class="dev-foot">
+    <a href="https://wifichallenge.com" target="_blank" rel="noopener">WiFiChallenge ${WIFICHALLENGE_VERSION}</a>
+    &nbsp;©&nbsp;
+    <a href="https://r4ulcl.com" target="_blank" rel="noopener"><?php echo date('Y'); ?> r4ulcl</a>
+  </footer>
 
 </div>
 </body>

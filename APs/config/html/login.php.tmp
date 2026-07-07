@@ -62,8 +62,10 @@ if (isset($_POST['Submit'])) {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WiFi Router Configuration</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -72,6 +74,22 @@ if (isset($_POST['Submit'])) {
 <script src="script.js"></script>
 
 <div class="content">
+
+  <header class="dev">
+    <div class="leds">
+      <span class="led"><i class="dot g"></i>PWR</span>
+      <span class="led"><i class="dot a blink"></i>LINK</span>
+      <span class="led"><i class="dot g"></i>2.4G</span>
+      <span class="led"><i class="dot g"></i>5G</span>
+      <span class="led"><i class="dot b"></i>WAN</span>
+    </div>
+    <div class="dev-id">
+      <span class="dev-model">WCX-1900</span>
+      <span class="dev-fw">fw ${WIFICHALLENGE_VERSION}</span>
+    </div>
+  </header>
+
+  <div class="dev-body">
 <?php
 
 # AUTO-LOGIN FOR GLOBAL ADMIN
@@ -91,60 +109,65 @@ $flag_bruteforce          = decode('${FLAG_BRUTEFORCE}', $a);
 $flag_downgrade           = decode('${FLAG_DOWNGRADE}', $a);
 $flag_6ghz                = decode('${FLAG_6GHZ}', $a);
 
+function loginflag($flag) {
+  echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Signal locked · key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$flag}')\">{$flag}</button></div>";
+}
+
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tls')\">$FLAG_MGT_RELAY_tls</button>";
+  loginflag($FLAG_MGT_RELAY_tls);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY_TABLETS}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$FLAG_MGT_RELAY_tablets')\">$FLAG_MGT_RELAY_tablets</button>";
+  loginflag($FLAG_MGT_RELAY_tablets);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WPS}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wps')\">$flag_wps</button>";
+  loginflag($flag_wps);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_WEP}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_wep')\">$flag_wep</button>";
+  loginflag($flag_wep);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_BRUTEFORCE}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_bruteforce')\">$flag_bruteforce</button>";
+  loginflag($flag_bruteforce);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_downgrade')\">$flag_downgrade</button>";
+  loginflag($flag_downgrade);
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') === 0)
-  echo "Flag: <button onclick=\"copyFlagToClipboard('$flag_6ghz')\">$flag_6ghz</button>";
+  loginflag($flag_6ghz);
 
 ?>
 
-<!-- LOGIN UI -->
-<form action="login.php" method="post" name="Login_Form">
-  <table width="400" border="0" align="center" cellpadding="5" cellspacing="1" class="Table">
-    <?php if (isset($msg)) { ?>
-    <tr><td colspan="2" align="center"><?php echo $msg; ?></td></tr><?php } ?>
+    <p class="eyebrow">Authentication required</p>
 
-    <tr><td colspan="2"><h3>Login</h3></td></tr>
+    <div class="plate">
+      <div class="plate-row"><span class="k">Model</span><span class="v">WCX-1900 · dual-band AP</span></div>
+      <div class="plate-row"><span class="k">Mgmt IP</span><span class="v"><?php echo htmlspecialchars($_SERVER['SERVER_ADDR'] ?? 'router.local'); ?></span></div>
+      <div class="plate-row"><span class="k">Session</span><span class="v sig">● unauthenticated</span></div>
+    </div>
 
-    <tr><td align="right">Username</td>
-    <td><input name="Username" type="text" class="Input"></td></tr>
+    <!-- LOGIN UI -->
+    <form action="login.php" method="post" name="Login_Form">
+      <?php if (isset($msg)) { ?><div class="msg"><?php echo $msg; ?></div><?php } ?>
 
-    <tr><td align="right">Password</td>
-    <td><input name="Password" type="password" class="Input"></td></tr>
+      <div class="field">
+        <label for="Username">Username</label>
+        <input id="Username" name="Username" type="text" class="Input" autocomplete="username" placeholder="recovered credential">
+      </div>
 
-    <tr><td></td><td><input name="Submit" type="submit" value="Login" class="Button3"></td></tr>
+      <div class="field">
+        <label for="Password">Password</label>
+        <input id="Password" name="Password" type="password" class="Input" autocomplete="current-password" placeholder="••••••••">
+      </div>
 
-  </table>
-</form>
+      <input name="Submit" type="submit" value="Authenticate" class="Button3">
+    </form>
+  </div>
 
-<!-- FOOTER COPYRIGHT -->
-<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
-  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
-    WiFiChallenge ${WIFICHALLENGE_VERSION} 
-  </a>
-  © 
-  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
-    <?php echo date('Y'); ?> r4ulcl
-  </a>
-</div>
-
-
+  <!-- FOOTER COPYRIGHT -->
+  <footer class="dev-foot">
+    <a href="https://wifichallenge.com" target="_blank" rel="noopener">WiFiChallenge ${WIFICHALLENGE_VERSION}</a>
+    &nbsp;©&nbsp;
+    <a href="https://r4ulcl.com" target="_blank" rel="noopener"><?php echo date('Y'); ?> r4ulcl</a>
+  </footer>
 
 </div>
 </body>
