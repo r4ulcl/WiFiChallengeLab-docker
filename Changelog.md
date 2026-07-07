@@ -4,39 +4,39 @@
 
 ### Modifications
 
-* Consolidated host networking on **NetworkManager + systemd-resolved** for consistent internet, DNS and IP across VirtualBox, VMware, QEMU and Hyper-V
-* Added **host-only networks** for RDP: `192.168.56.10` (VirtualBox) and `192.168.59.10` (VMware)
-* Made the **Nzyme web UI reachable from other computers** (external URL auto-detects the host IP instead of `localhost`)
-* Added **Start/Stop Nzyme** desktop launchers and helper scripts
-* Added an **EAP-TLS identity-leak scenario**: a privacy-hardened client (`GLOBAL\GlobalAdmin`) alongside a leaking client (`GLOBAL\franz.ka`) whose certificate exposes username, email and organization details
-* Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**: TLS 1.3 clients keep the certificate encrypted, while a forced-TLS-1.2 client demonstrates the cleartext-certificate leak
-* Added **Vagrant audio support** for non-Windows hosts (QEMU and VirtualBox), plus noninteractive `grub-pc` / `debconf-set-selections` to keep provisioning fully unattended
+* Consolidated host networking on **NetworkManager + systemd-resolved** across VirtualBox, VMware, QEMU and Hyper-V
+* Added **host-only networks** for RDP (VirtualBox and VMware)
+* Made the **Nzyme web UI reachable from other computers** (auto-detects host IP)
+* Added **Start/Stop Nzyme** desktop launchers
+* Added an **EAP-TLS identity-leak scenario** (hardened vs. leaking client certificates)
+* Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**
+* Added **Vagrant audio support** for QEMU and VirtualBox
 
 ### Bug Fixes
 
-* Fixed **DNS** breaking on networks that block public resolvers (removed the immutable `/etc/resolv.conf` lock)
+* Fixed **DNS** breaking on networks that block public resolvers
 * Fixed **AP internet sharing** to use name-independent uplink detection
-* Fixed **EAP-TLS client certificates** missing the `clientAuth` Extended Key Usage
-* Made the **CA certificate RFC 5280-conformant** (`keyCertSign`/`cRLSign`) and corrected the **server certificate** subject/SAN to `radius.wifichallenge.com`
-* Fixed **PHP errors, session handling and conditionals** across the AP and client web portals (index, login, logout and lab pages)
+* Fixed **EAP-TLS client certificates** missing the `clientAuth` EKU
+* Made the **CA certificate RFC 5280-conformant** and corrected the **server certificate** subject/SAN
+* Fixed **PHP errors and session handling** across the AP and client web portals
 * Fixed **`lab.php` not showing the username**
-* Fixed a **regional/locale error when connecting** to MGT (EAP relay) networks
-* Made the **`ath_masker` build best-effort** so the container image build no longer aborts when the kernel module cannot be loaded
-* Removed the **hardcoded gcc/g++ version 12** so builds track the distribution compiler
-* Fixed a **stale exit** in the deauth-on-drop patch (env vars are now read directly from ENV instead of a file)
+* Fixed a **regional/locale error** when connecting to MGT (EAP relay) networks
+* Made the **`ath_masker` build best-effort** so image builds no longer abort
+* Removed the **hardcoded gcc/g++ version 12**
+* Fixed a **stale exit** in the deauth-on-drop patch
 * Fixed an **image tag error** in the challenge compose file
-* Fixed the **MGT MSCHAP/GTC simulated logins** posting to a MAC-derived host instead of the gateway IP (`$IP_MGT.1`)
-* Removed the **PMF requirement (`ieee80211w`) from the MSCHAPv2 relay client** so it matches the relay AP
+* Fixed the **MGT MSCHAP/GTC simulated logins** using a MAC instead of the gateway IP
+* Removed **`ieee80211w`** from the MSCHAPv2 relay client to match the AP
 
 ### Miscellaneous Improvements
 
-* Added **network self-heal** service to recover the uplink via DHCP on boot
-* Disabled **Debian automatic updates** (apt timers, unattended-upgrades, periodic config)
-* Removed **email/PII and legacy Netscape fields** from generated certificates and hardened `createCert.sh` extensions (explicit `CA:FALSE`, critical `keyUsage`)
-* Reworked **healthchecks and compose files** across all variants (challenge, local, dev and minimal) for more reliable startup
-* Made **hostapd per-SSID logs capture stderr** (`2>&1`) so AP errors land in the log files
-* Ran **each MGT relay supplicant in its own loop** (relay, tablets-W, tablets) so a stalled one no longer blocks the others
-* **Backgrounded the client `fping` keepalive** so client startup reaches "ALL SET" without blocking
+* Added **network self-heal** service to recover the uplink on boot
+* Disabled **Debian automatic updates**
+* Removed **email/PII and legacy Netscape fields** from generated certificates
+* Reworked **healthchecks and compose files** across all variants
+* Made **hostapd per-SSID logs capture stderr** (`2>&1`)
+* Ran **each MGT relay supplicant in its own loop** so a stalled one no longer blocks the others
+* **Backgrounded the client `fping` keepalive**
 * Updated **OPEN_SOURCE_REFERENCES.md**
 
 ## Changelog: WiFiChallengeLab v2.4
