@@ -27,6 +27,7 @@
 * Fixed an **image tag error** in the challenge compose file
 * Fixed the **MGT MSCHAP/GTC simulated logins** using a MAC instead of the gateway IP
 * Removed **`ieee80211w`** from the MSCHAPv2 relay client to match the AP
+* **Deduplicated the TLS certificates** into a single generated set and fixed a **stray `wget`** in the AP `Dockerfile`
 
 ### Miscellaneous Improvements
 

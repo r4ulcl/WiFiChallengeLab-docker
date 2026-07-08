@@ -59,7 +59,7 @@ apt-get update
 apt-get install -y wget curl git ca-certificates build-essential
 
 # ---------- basic utilities ---------------------------------------------------
-apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full
+apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full iptables
 
 # ---------- Python 2 availability check --------------------------------------
 have_py2_pkg=false
@@ -158,7 +158,10 @@ if [ ! -d eaphammer ]; then
   apt-get install -y dsniff apache2 libffi-dev python3-openssl
   systemctl disable --now apache2 || true
   ./ubuntu-unattended-setup || echo "eaphammer unattended setup failed, continuing"
-  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl gevent netifaces || true
+  # Pin pyopenssl<25: eaphammer's cert_wizard uses crypto.X509Req(), which was
+  # deprecated in pyOpenSSL 24.x and REMOVED in 25.0.0 (AttributeError: module
+  # 'OpenSSL.crypto' has no attribute 'X509Req'). 24.x still ships it.
+  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy 'pyopenssl<25' gevent netifaces || true
   wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini || true
 fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
