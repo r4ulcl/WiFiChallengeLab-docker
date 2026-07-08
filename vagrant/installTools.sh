@@ -59,7 +59,7 @@ apt-get update
 apt-get install -y wget curl git ca-certificates build-essential
 
 # ---------- basic utilities ---------------------------------------------------
-apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full iptables
+apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full iptables dnsmasq-base
 
 # ---------- Python 2 availability check --------------------------------------
 have_py2_pkg=false
