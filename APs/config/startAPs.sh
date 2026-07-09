@@ -106,6 +106,11 @@ macchanger -m $MAC_MGT_MD5 $WLAN_MGT_MD5 >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_WEP $WLAN_WEP >> /root/logs/macchanger.log # TODO
 macchanger -m $MAC_OWE $WLAN_OWE >> /root/logs/macchanger.log # TODO
 
+# Campus roaming ESS (wifi-campus): 3 BSSIDs, same ESSID, client-less PMKID
+macchanger -m $MAC_ROAM1 $WLAN_ROAM1 >> /root/logs/macchanger.log # ROAM AP1
+macchanger -m $MAC_ROAM2 $WLAN_ROAM2 >> /root/logs/macchanger.log # ROAM AP2
+macchanger -m $MAC_ROAM3 $WLAN_ROAM3 >> /root/logs/macchanger.log # ROAM AP3
+
 
 
 
@@ -136,6 +141,15 @@ host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log 2>&1 &
 # PSK WPS
 ip addr add $IP_WPS.1/24 dev $WLAN_WPS
 host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log 2>&1 &
+
+# Campus roaming ESS (wifi-campus): 3 APs share one ESSID (802.11r FT-PSK).
+# Client-less PMKID target — no client is attached on purpose.
+ip addr add $IP_ROAM1.1/24 dev $WLAN_ROAM1
+host_aps_apd /root/psk/hostapd_roam1.conf > /root/logs/hostapd_roam1.log 2>&1 &
+ip addr add $IP_ROAM2.1/24 dev $WLAN_ROAM2
+host_aps_apd /root/psk/hostapd_roam2.conf > /root/logs/hostapd_roam2.log 2>&1 &
+ip addr add $IP_ROAM3.1/24 dev $WLAN_ROAM3
+host_aps_apd /root/psk/hostapd_roam3.conf > /root/logs/hostapd_roam3.log 2>&1 &
 
 # MGT
 ip addr add $IP_MGT.1/24 dev $WLAN_MGT

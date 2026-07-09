@@ -20,6 +20,14 @@ dhcp-range=$IP_PSK.2,$IP_PSK.100,24h
 dhcp-host=$WLAN_WPS,$MAC_WPS,$IP_WPS.1
 dhcp-range=$IP_WPS.2,$IP_WPS.100,24h
 
+# CAMPUS ROAMING ESS (wifi-campus): 3 APs, one ESSID, client-less PMKID
+dhcp-host=$WLAN_ROAM1,$MAC_ROAM1,$IP_ROAM1.1
+dhcp-range=$IP_ROAM1.2,$IP_ROAM1.100,24h
+dhcp-host=$WLAN_ROAM2,$MAC_ROAM2,$IP_ROAM2.1
+dhcp-range=$IP_ROAM2.2,$IP_ROAM2.100,24h
+dhcp-host=$WLAN_ROAM3,$MAC_ROAM3,$IP_ROAM3.1
+dhcp-range=$IP_ROAM3.2,$IP_ROAM3.100,24h
+
 # MGT
 dhcp-host=$WLAN_MGT,$MAC_MGT,$IP_MGT.1
 dhcp-range=$IP_MGT.2,$IP_MGT.100,24h

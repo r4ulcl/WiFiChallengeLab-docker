@@ -128,6 +128,9 @@ AP_ROWS=(
   "WEP old          |wlan11|ESSID_WEP|CHANNEL_WEP|MAC_WEP|192.168.1|WEP|wep/hostapd_wep.conf"
   "PSK mobile       |wlan12|ESSID_PSK|CHANNEL_PSK|MAC_PSK|192.168.2|PSK|psk/hostapd_wpa.conf"
   "PSK event        |wlan13|ESSID_WPS|CHANNEL_WPS|MAC_WPS|192.168.3|PSK|psk/hostapd_wps.conf"
+  "PSK campus roam1 |wlan31|ESSID_ROAM|CHANNEL_ROAM1|MAC_ROAM1|192.168.21|PSK|psk/hostapd_roam1.conf"
+  "PSK campus roam2 |wlan32|ESSID_ROAM|CHANNEL_ROAM2|MAC_ROAM2|192.168.22|PSK|psk/hostapd_roam2.conf"
+  "PSK campus roam3 |wlan33|ESSID_ROAM|CHANNEL_ROAM3|MAC_ROAM3|192.168.23|PSK|psk/hostapd_roam3.conf"
   "MGT corp         |wlan15|ESSID_MGT|CHANNEL_MGT|MAC_MGT|192.168.5|MGT|mgt/hostapd_wpe.conf"
   "MGT corp #2      |wlan16|ESSID_MGT2|CHANNEL_MGT2|MAC_MGT2|192.168.6|MGT|mgt/hostapd_wpe2.conf"
   "MGT regional     |wlan17|ESSID_MGT_RELAY|CHANNEL_MGT_RELAY|MAC_MGT_RELAY|192.168.7|MGT|mgt/hostapd_wpe_relay.conf"
@@ -144,7 +147,7 @@ AP_ROWS=(
   "ISP vodafone     |wlan22|ESSID_OTHER2|CHANNEL_OTHER2||192.168.12|PSK|psk/hostapd_other2.conf"
   "ISP MiFibra      |wlan23|ESSID_OTHER3|CHANNEL_OTHER3||192.168.13|PSK|psk/hostapd_other3.conf"
 )
-EXPECTED_AP_PROCS=20
+EXPECTED_AP_PROCS=23
 
 # Client rows: wlan|expected_ESSID_var|supplicant_conf|associates(yes/no)|logfile
 # logfile is the supplicant output under /root/logs/ (naming is not derivable

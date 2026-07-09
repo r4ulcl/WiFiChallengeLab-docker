@@ -504,7 +504,44 @@ IDENTITY_MGT_SIM_ROGUE='6214070313370001@wlan.mnc007.mcc214.wifichallenge.com'
 
 
 ############################################################
+# CAMPUS ROAMING ESS — wifi-campus (multi-AP, client-less PMKID)
+############################################################
+# One ESSID advertised by THREE APs (BSSIDs) on channels 1/6/11, forming a real
+# roaming ESS with 802.11r Fast Transition (FT-PSK) enabled next to classic
+# WPA2-PSK. There is NO client on this network on purpose: the PMKID travels in
+# the AP's first EAPOL frame, so a student harvests it straight from any BSSID
+# (client-less, e.g. hcxdumptool/hcxpcapngtool), cracks the shared PSK, then
+# associates to any of the three APs and reads the flag from the router portal.
+# All three APs share the same PSK, so one cracked PMKID unlocks the whole ESS.
+ESSID_ROAM='wifi-campus'
+NZYME_FINGERPRINT_ROAM=''
+PASS_ROAM='KFIXXgAADS8eFQ=='                                   # basketball
+FLAG_ROAM='LF8FUh5DCX0RQBZoKGcIaDNreEFzAmMdc1VTBQRHDXgWSxRhKGULbzFjfUh0HA=='
+
+# AP 1
+WLAN_ROAM1='wlan31'
+CHANNEL_ROAM1='1'
+MAC_ROAM1='F0:9F:C2:71:22:31'
+IP_ROAM1='192.168.21'
+
+# AP 2
+WLAN_ROAM2='wlan32'
+CHANNEL_ROAM2='6'
+MAC_ROAM2='F0:9F:C2:71:22:32'
+IP_ROAM2='192.168.22'
+
+# AP 3
+WLAN_ROAM3='wlan33'
+CHANNEL_ROAM3='11'
+MAC_ROAM3='F0:9F:C2:71:22:33'
+IP_ROAM3='192.168.23'
+
+############ CLIENTS ############
+# none — client-less on purpose (PMKID is captured directly from the APs)
+
+
+############################################################
 # FREE RADIOS  (radios=71 -> wlan0-70; nzyme WIDS tap = wlan70)
 ############################################################
-# ns-ap free (wlan6-39):     wlan31 wlan32 wlan33 wlan34 wlan35 wlan36 wlan37 wlan38 wlan39  (+ wlan6-9 attacker-spare)
+# ns-ap free (wlan6-39):     wlan34 wlan35 wlan36 wlan37 wlan38 wlan39  (+ wlan6-9 attacker-spare; wlan31-33 = wifi-campus roaming ESS)
 # ns-client free (wlan40-69): wlan62 wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69  (wlan61 = MGT SIM rogue-lure)

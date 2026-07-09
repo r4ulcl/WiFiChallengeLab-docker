@@ -480,6 +480,12 @@ SIM_MGT_OPC='171c81b1d2e86fd17173829c2ed7191e'
 SIM_MGT_LEAK_IMSI='214033390218475'
 SIM_MGT_LEAK_KI='f953a22c3ebe2d181a7bb677eee7e0a0'
 SIM_MGT_LEAK_OPC='135eaa72bef65ce3cb3c9f0dd02f0d7f'
+# Rogue-lure subscriber: valid on the real AP (authenticates normally), anonymous
+# outer identity so no passive leak, but its client discloses this IMSI to an active
+# evil-twin/rogue AP (AT_PERMANENT_ID_REQ). Mirrors wlan_config; keep the two in sync.
+SIM_MGT_ROGUE_IMSI='214039313370001'
+SIM_MGT_ROGUE_KI='a1b4c7d0e3f6091c2f5a8d0b3e6114a7'
+SIM_MGT_ROGUE_OPC='b2c5d8e1f4071a3d6092b5e8014b7e0a'
 
 ############ CLIENTS ############
 # Secure EAP-AKA' client: anonymous outer identity, IMSI not sent in the clear.
@@ -491,3 +497,47 @@ IDENTITY_MGT_SIM='6214031547762093@wlan.mnc003.mcc214.wifichallenge.com'
 WLAN_CLIENT_MGT_SIM_LEAK=wlan59
 MAC_CLIENT_MGT_SIM_LEAK='64:32:A8:F2:9C:68'
 IDENTITY_MGT_SIM_LEAK='6214033390218475@wlan.mnc003.mcc214.wifichallenge.com'
+# Rogue-lure EAP-AKA' client: anonymous outer identity (no passive leak, like the
+# secure client) but surrenders its IMSI to an active rogue/evil-twin AP (see the
+# RogueAP-SIM lesson). Reuses ANON_IDENTITY_MGT_SIM as the shared anonymous NAI.
+WLAN_CLIENT_MGT_SIM_ROGUE=wlan61
+MAC_CLIENT_MGT_SIM_ROGUE='64:32:A8:3B:7C:61'
+IDENTITY_MGT_SIM_ROGUE='6214039313370001@wlan.mnc003.mcc214.wifichallenge.com'
+
+
+############################################################
+# CAMPUS ROAMING ESS — wifi-university (multi-AP, client-less PMKID)
+############################################################
+# One ESSID advertised by THREE APs (BSSIDs) on channels 1/6/11, forming a real
+# roaming ESS with 802.11r Fast Transition (FT-PSK) enabled next to classic
+# WPA2-PSK. There is NO client on this network on purpose: the PMKID travels in
+# the AP's first EAPOL frame, so a student harvests it straight from any BSSID
+# (client-less, e.g. hcxdumptool/hcxpcapngtool), cracks the shared PSK, then
+# associates to any of the three APs and reads the flag from the router portal.
+# All three APs share the same PSK, so one cracked PMKID unlocks the whole ESS.
+# Mirrors wlan_config; keep the variable NAME set identical between the two files.
+ESSID_ROAM='wifi-university'
+NZYME_FINGERPRINT_ROAM=''
+PASS_ROAM='KVsLVgoYDjoX'                                        # chocolate
+FLAG_ROAM='LF8FUh5GDXYXSBNtejBaOW5gKkdzUGIcLwRWV1EXVy9LH0RpfGcObzJjL0ZyHA=='
+
+# AP 1
+WLAN_ROAM1='wlan31'
+CHANNEL_ROAM1='1'
+MAC_ROAM1='F0:9F:C2:3C:B1:31'
+IP_ROAM1='192.168.21'
+
+# AP 2
+WLAN_ROAM2='wlan32'
+CHANNEL_ROAM2='6'
+MAC_ROAM2='F0:9F:C2:3C:B1:32'
+IP_ROAM2='192.168.22'
+
+# AP 3
+WLAN_ROAM3='wlan33'
+CHANNEL_ROAM3='11'
+MAC_ROAM3='F0:9F:C2:3C:B1:33'
+IP_ROAM3='192.168.23'
+
+############ CLIENTS ############
+# none — client-less on purpose (PMKID is captured directly from the APs)

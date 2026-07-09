@@ -108,6 +108,7 @@ $flag_wep                 = decode('${FLAG_WEP}', $a);
 $flag_bruteforce          = decode('${FLAG_BRUTEFORCE}', $a);
 $flag_downgrade           = decode('${FLAG_DOWNGRADE}', $a);
 $flag_6ghz                = decode('${FLAG_6GHZ}', $a);
+$flag_roam                = decode('${FLAG_ROAM}', $a);
 
 function loginflag($flag) {
   echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Signal locked · key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$flag}')\">{$flag}</button></div>";
@@ -133,6 +134,12 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') === 0)
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') === 0)
   loginflag($flag_6ghz);
+
+# Campus roaming ESS: same flag from any of the three wifi-campus AP subnets.
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0
+ || strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM2}.') === 0
+ || strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM3}.') === 0)
+  loginflag($flag_roam);
 
 ?>
 
