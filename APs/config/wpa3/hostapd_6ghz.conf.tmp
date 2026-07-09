@@ -1,17 +1,25 @@
-### 6 GHz, WPA3-SAE ###
+### 6 GHz, WPA3-SAE — real 802.11ax (HE) on the 6 GHz band ####################
+
 interface=$WLAN_6GHZ
 driver=nl80211
+
+# Regulatory / band -----------------------------------------------------------
 country_code=ES
+ieee80211d=1
+
+# 6 GHz PHY: 802.11ax (HE), 20 MHz on 6 GHz operating class 131 ---------------
 hw_mode=a
-channel=$CHANNEL_6GHZ
 op_class=131
+channel=$CHANNEL_6GHZ
 ieee80211ax=1
+he_oper_chwidth=0
+he_oper_centr_freq_seg0_idx=$CHANNEL_6GHZ
 wmm_enabled=1
 
 # SSID ------------------------------------------------------------------------
 ssid=$ESSID_6GHZ
 
-# Mandatory 6 GHz security: WPA3-Personal (SAE) -------------------------------
+# Mandatory 6 GHz security: WPA3-Personal (SAE, H2E, PMF-required) -------------
 wpa=2
 wpa_key_mgmt=SAE
 ieee80211w=2
@@ -22,6 +30,15 @@ sae_pwe=1
 
 # (optional) group-rekey every 30 min
 wpa_group_rekey=1800
+
+# Optional 6 GHz realism — enable only if your hwsim/hostapd build supports it -
+# 6 GHz has no active probing on non-PSC channels, so out-of-band discovery lets
+# scanners find the BSS. Pick ONE (unsolicited broadcast Probe Response OR FILS
+# Discovery), interval in TU (max 20):
+#unsol_bcast_probe_resp_interval=20
+#fils_discovery_max_interval=20
+# WPA3 beacon protection (signed beacons; needs NL80211 beacon-protection support):
+#beacon_prot=1
 
 
 ctrl_interface=/run/hostapd-$WLAN_6GHZ
