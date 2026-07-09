@@ -85,8 +85,10 @@ sudo modprobe mac80211_hwsim_WiFiChallenge radios=71
 # Add WiFi interfaces 10-39
 # 6-9 are for attacker but unnused, so ap
 for I in `seq 6 39` ; do
-	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
-	iw phy $PHY set netns name /run/netns/$NS
+	# Exact-name phy lookup; grep wlan$I also matched wlan60-70 (I=6/7)
+	[ -e /sys/class/net/wlan$I ] || continue
+	PHY=$(cat /sys/class/net/wlan$I/phy80211/name 2>/dev/null)
+	[ -n "$PHY" ] && iw phy "$PHY" set netns name /run/netns/$NS
 done
 
 #--------------------------------------------------------------------------------------------------

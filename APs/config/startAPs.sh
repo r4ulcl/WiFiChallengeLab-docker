@@ -207,9 +207,7 @@ host_aps_apd /root/owe/hostapd_owe.conf > /root/logs/hostapd_owe.log 2>&1 &
 #Generate WEP traffic
 ping $IP_WEP.2 > /dev/null 2>&1 &
 
-# start captive portal open network
-sudo systemctl enable dnsmasq
-service dnsmasq start
+# dnsmasq is supervised by cronAPs.sh (sole owner); do not start it here
 
 #systemctl stop networking
 echo "ALL SET"
