@@ -566,7 +566,7 @@ gsettings set org.gnome.desktop.background show-desktop-icons false || true
 gsettings set org.gnome.nautilus.preferences show-delete-permanently true || true
 
 # Allow launching .desktop / scripts on double-click and trust our Nzyme launchers
-gsettings set org.gnome.nautilus.preferences executable-text-activation 'launch' || true
+gsettings set org.gnome.nautilus.preferences executable-text-activation 'launch' 2>/dev/null || true
 gsettings set org.gnome.shell.extensions.ding show-link-emblem false 2>/dev/null || true
 for launcher in "$HOME"/Desktop/StartNzyme.desktop "$HOME"/Desktop/StopNzyme.desktop; do
   if [ -f "$launcher" ]; then
