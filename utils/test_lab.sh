@@ -204,7 +204,7 @@ TOOLS=(
   "wifi_db|test -e /root/tools/wifi_db/wifi_db.py"
   "arp-scan|command -v arp-scan"             "macchanger|command -v macchanger"
   "nmap|command -v nmap"
-  "wordlist rockyou|test -s /usr/share/wordlists/rockyou.txt.gz || test -s /usr/share/wordlists/rockyou.txt"
+  "wordlist rockyou|test -s /usr/share/wordlists/rockyou.txt.gz || test -s /usr/share/wordlists/rockyou.txt || test -s /root/rockyou-top100000.txt"
 )
 TOOL_CTX="host"; container_running "$ATT_C" && TOOL_CTX="attacker"
 tool_run() { if [ "$TOOL_CTX" = attacker ]; then docker exec "$ATT_C" bash -lc "$1" >/dev/null 2>&1; else bash -lc "$1" >/dev/null 2>&1; fi; }
