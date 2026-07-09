@@ -477,6 +477,12 @@ SIM_MGT_OPC='cd63cb71954a9f4e48a5994e37a02baf'
 SIM_MGT_LEAK_IMSI='214070936554128'
 SIM_MGT_LEAK_KI='8baf473f2f8fd09487cccbd7097c6862'
 SIM_MGT_LEAK_OPC='8e27b6af0e692e750f32667a3b14605d'
+# Rogue-lure subscriber: valid subscriber (authenticates fine on the real AP) whose
+# client keeps an anonymous outer identity - no passive leak - but surrenders this
+# IMSI to a student's evil-twin/rogue AP that requests the permanent identity.
+SIM_MGT_ROGUE_IMSI='214070313370001'
+SIM_MGT_ROGUE_KI='107ebf6135576a9ed61eb2eb067571f5'
+SIM_MGT_ROGUE_OPC='bd8cea1e234e228b1455e4653208c318'
 
 ############ CLIENTS ############
 # Secure EAP-AKA' client: anonymous outer identity, IMSI not sent in the clear.
@@ -488,10 +494,17 @@ IDENTITY_MGT_SIM='6214070028194561@wlan.mnc007.mcc214.wifichallenge.com'
 WLAN_CLIENT_MGT_SIM_LEAK=wlan59
 MAC_CLIENT_MGT_SIM_LEAK='64:32:A8:BA:18:59'
 IDENTITY_MGT_SIM_LEAK='6214070936554128@wlan.mnc007.mcc214.wifichallenge.com'
+# Rogue-lure EAP-AKA' client: anonymous outer identity (no passive leak, like the
+# secure client), but discloses its permanent IDENTITY (IMSI) only on active request -
+# so an evil-twin/rogue "wifi-passpoint" AP harvests the IMSI. Reuses the shared
+# ANON_IDENTITY_MGT_SIM as its anonymous NAI (as real subscribers do).
+WLAN_CLIENT_MGT_SIM_ROGUE=wlan61
+MAC_CLIENT_MGT_SIM_ROGUE='64:32:A8:BA:18:61'
+IDENTITY_MGT_SIM_ROGUE='6214070313370001@wlan.mnc007.mcc214.wifichallenge.com'
 
 
 ############################################################
 # FREE RADIOS  (radios=71 -> wlan0-70; nzyme WIDS tap = wlan70)
 ############################################################
 # ns-ap free (wlan6-39):     wlan31 wlan32 wlan33 wlan34 wlan35 wlan36 wlan37 wlan38 wlan39  (+ wlan6-9 attacker-spare)
-# ns-client free (wlan40-69): wlan61 wlan62 wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69
+# ns-client free (wlan40-69): wlan62 wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69  (wlan61 = MGT SIM rogue-lure)

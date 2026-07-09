@@ -108,6 +108,7 @@ macchanger -m $MAC_TLS_LEAK $WLAN_CLIENT_MGT_TLS_LEAK >> /root/logs/macchanger.l
 
 macchanger -m $MAC_CLIENT_MGT_SIM $WLAN_CLIENT_MGT_SIM >> /root/logs/macchanger.log # MGT SIM AKA' secure
 macchanger -m $MAC_CLIENT_MGT_SIM_LEAK $WLAN_CLIENT_MGT_SIM_LEAK >> /root/logs/macchanger.log # MGT SIM AKA' leak
+macchanger -m $MAC_CLIENT_MGT_SIM_ROGUE $WLAN_CLIENT_MGT_SIM_ROGUE >> /root/logs/macchanger.log # MGT SIM AKA' rogue-lure
 
 sleep 5
 
@@ -236,6 +237,12 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OWE -c /root/oweClien
 # Persistent (no re-auth loop) so the IMSI is not needlessly re-exposed; the
 # supplicant auto-reconnects on its own.
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM -c /root/mgtClient/wpa_sim.conf > /root/logs/supplicantSIM.log &
+
+# MGT SIM rogue-lure .9 - EAP-AKA' with anonymous identity, no IMSI privacy.
+# Persistent (like the secure client) so it does NOT re-expose the IMSI to passive
+# sniffers on the real AP; it only surrenders the IMSI when a student's evil-twin/rogue
+# AP actively requests the permanent identity. Auto-reconnects (e.g. after a deauth).
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM_ROGUE -c /root/mgtClient/wpa_sim_rogue.conf > /root/logs/supplicantSIM_rogue.log &
 
 
 sleep 10

@@ -1,0 +1,26 @@
+# Rogue-lure EAP-AKA' client - IMSI 214 07 0313370001.
+# MIDDLE ground between wpa_sim_leak.conf (leaks to any sniffer) and wpa_sim.conf
+# (privacy-preserving): it surrenders the IMSI ONLY to an active evil-twin / rogue AP.
+#   * anonymous_identity keeps the IMSI out of EAP-Response/Identity, so a PASSIVE
+#     sniffer near the real AP only ever sees "anonymous@realm" - no passive leak.
+#   * The permanent identity ("6"<IMSI>@realm) is sent only when the network ACTIVELY
+#     asks for it (AT_PERMANENT_ID_REQ). A student's rogue "wifi-passpoint" AP
+#     (eaphammer / hostapd-wpe) asks and harvests the IMSI in the clear; AKA' mutual
+#     auth then fails there (no Ki), but the IMSI is already caught. No SUCI /
+#     imsi_privacy_cert is exactly why that capture works.
+# Software (U)SIM, no PC/SC: password = Ki:OPc:SQN, matched in the AP milenage_db.
+
+ap_scan=1
+fast_reauth=0
+
+network={
+	ssid="$ESSID_MGT_SIM"
+	scan_ssid=1
+	key_mgmt=WPA-EAP
+	proto=RSN
+	pairwise=CCMP
+	eap=AKA'
+	anonymous_identity="$ANON_IDENTITY_MGT_SIM"
+	identity="$IDENTITY_MGT_SIM_ROGUE"
+	password="$SIM_MGT_ROGUE_KI:$SIM_MGT_ROGUE_OPC:$SIM_MGT_SQN"
+}
