@@ -1,11 +1,9 @@
 #!/bin/bash
 
-#Load variables
-set -a
-source /root/wlan_config
+# Variables are inherited from the environment (docker-compose env_file: ./wlan_config)
+# via the parent startClients.sh, so there is no /root/wlan_config file to source here.
 
-
-function retry { 
+function retry {
     $1 && echo "success" || (echo "fail" && retry $1) 
 }
 
@@ -224,7 +222,7 @@ done &
 while :
 do
 	#Infine traffic WEP
-	dhclien-wifichallenge $WLAN_CLIENT_WEP -v
+	dhclien-wifichallenge $WLAN_CLIENT_WEP -v >> /root/logs/dhclientWEP.log 2>&1
 	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f & 
     timeout -k 1 60s fping -l -p 1000 -b 1000 -q "$IP_WEP.1"
 done &
