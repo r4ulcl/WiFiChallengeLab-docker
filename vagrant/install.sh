@@ -482,7 +482,7 @@ sudo env \
   apt-get -o Dpkg::Use-Pty=0 install -y \
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confnew" \
-    gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales libnss3-tools firefox-esr \
+    gnome-shell-extension-dashtodock gnome-tweaks dconf-cli locales firefox-esr \
     </dev/null >/dev/null || true
 
 sudo mkdir -p /opt/background
