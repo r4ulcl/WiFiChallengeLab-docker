@@ -529,25 +529,16 @@ gsettings set org.gnome.shell favorite-apps "[
   'gnome-control-center.desktop'
 ]" || true
 
-sudo cp /var/WiFiChallengeLab-docker/certs/ca.crt /usr/local/share/ca-certificates/ 2>/dev/null || true
-sudo update-ca-certificates || true
-
-firefox-esr & disown || true
-sleep 10
-
-CA=/var/WiFiChallengeLab-docker/certs/ca.crt
-PROFILE_DIR=$(find ~/.mozilla/firefox -maxdepth 1 -type d -name '*.default-release' -print -quit 2>/dev/null || true)
-if [ -n "$PROFILE_DIR" ] && [ -f "$CA" ]; then
-  command -v certutil >/dev/null 2>&1 || sudo env \
-    DEBIAN_FRONTEND="$DEBIAN_FRONTEND" \
-    DEBCONF_NONINTERACTIVE_SEEN="$DEBCONF_NONINTERACTIVE_SEEN" \
-    DEBCONF_NOWARNINGS="$DEBCONF_NOWARNINGS" \
-    DEBIAN_PRIORITY="$DEBIAN_PRIORITY" \
-    NEEDRESTART_MODE="$NEEDRESTART_MODE" \
-    UCF_FORCE_CONFFNEW="$UCF_FORCE_CONFFNEW" \
-    APT_LISTCHANGES_FRONTEND="$APT_LISTCHANGES_FRONTEND" \
-    apt-get -o Dpkg::Use-Pty=0 install -y libnss3-tools </dev/null || true
-  certutil -A -n "WiFiChallenge CA" -t "C,," -d sql:"$PROFILE_DIR" -i "$CA" 2>/dev/null || true
+# The WiFiChallenge CA is trusted system-wide and in Firefox during
+# provisioning (see the CA/policies.json section in install.sh), so no per-login
+# certutil dance is needed here. Re-assert the system trust store in case this
+# profile predates that step; Firefox picks up the CA from its enterprise policy
+# on first launch.
+if [ -f /var/WiFiChallengeLab-docker/certs/ca.crt ] \
+   && [ ! -f /usr/local/share/ca-certificates/WiFiChallenge-CA.crt ]; then
+  sudo install -m 0644 /var/WiFiChallengeLab-docker/certs/ca.crt \
+    /usr/local/share/ca-certificates/WiFiChallenge-CA.crt 2>/dev/null || true
+  sudo update-ca-certificates || true
 fi
 
 # Auto-run alerts script
@@ -601,7 +592,24 @@ fi
 sudo sed -i -E 's/^#?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
 sudo systemctl restart ssh 2>/dev/null || sudo systemctl restart sshd 2>/dev/null || true
 
+# ---------- Trust the WiFiChallenge CA (website / captive-portal TLS) ---------
+# The lab website and captive portals are served over HTTPS by the AP/Client
+# containers with a certificate signed by the WiFiChallenge CA (certs/ca.crt).
+# Install it into the host trust store (curl / chromium / GNOME) here, and into
+# Firefox via the enterprise policy below, so every profile trusts it without
+# launching the browser or editing cert9.db by hand.
+if [ -f /var/WiFiChallengeLab-docker/certs/ca.crt ]; then
+  run_as_root install -m 0644 /var/WiFiChallengeLab-docker/certs/ca.crt \
+    /usr/local/share/ca-certificates/WiFiChallenge-CA.crt
+  run_as_root update-ca-certificates || true
+fi
+
 # ---------- Firefox ESR policies ---------------------------------------------
+# Certificates.Install trusts the WiFiChallenge CA in every Firefox profile
+# (present and future) as soon as the browser starts, so the lab HTTPS pages no
+# longer show the self-signed warning. Absolute paths are honoured by Firefox
+# 65+ (ESR on Debian 12 is 115+); both paths are listed so it works whether the
+# CA is read from the system trust dir or straight from the repo.
 sudo mkdir -p /usr/lib/firefox-esr/distribution
 sudo tee /usr/lib/firefox-esr/distribution/policies.json >/dev/null <<'EOF'
 {
@@ -610,6 +618,13 @@ sudo tee /usr/lib/firefox-esr/distribution/policies.json >/dev/null <<'EOF'
       "URL": "http://127.0.0.1:22900",
       "StartPage": "homepage",
       "Locked": false
+    },
+    "Certificates": {
+      "ImportEnterpriseRoots": true,
+      "Install": [
+        "/usr/local/share/ca-certificates/WiFiChallenge-CA.crt",
+        "/var/WiFiChallengeLab-docker/certs/ca.crt"
+      ]
     }
   }
 }
