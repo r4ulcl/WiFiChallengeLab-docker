@@ -7,12 +7,12 @@ function retry {
     $1 && echo "success" || (echo "fail" && retry $1) 
 }
 
-#40-59 skip OPN
+#40-61 skip OPN (60-61 = SIM secure/rogue, need a DHCP lease to pass data)
 killall dhclien-wifichallenge 2> /dev/null &
 for N in `seq 40 46`; do
 	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
-for N in `seq 50 59`; do
+for N in `seq 50 61`; do
 	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
 
@@ -28,7 +28,7 @@ do
 	for N in `seq 40 46`; do
 		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
-	for N in `seq 50 59`; do
+	for N in `seq 50 61`; do
 		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
     wait $!

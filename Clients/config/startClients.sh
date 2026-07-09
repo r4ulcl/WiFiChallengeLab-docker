@@ -268,6 +268,7 @@ fping -l -p 3000 -q \
   "$IP_MGT_RELAY_TABLETS.1" \
   "$IP_WEP.1" \
   "$IP_OWE.1" \
+  "$IP_MGT_SIM.1" \
   > /dev/null 2>&1 &
 
 sleep 10 && echo "ALL SET"
