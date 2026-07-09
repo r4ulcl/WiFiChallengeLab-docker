@@ -86,16 +86,32 @@ if ! $have_py2_pkg; then
   ln -sf "$(pyenv root)/versions/2.7.18/bin/pip" /usr/local/bin/pip2 || true
 fi
 
-# Default python alternative for legacy tools that expect python -> python2
+# Default python alternative for legacy tools that expect python -> python2.
+# Use the RESOLVED path: on Debian 12/13 python2 comes from pyenv at
+# /usr/local/bin/python2, not /usr/bin/python2, so hardcoding /usr/bin/python2
+# made update-alternatives fail with "alternative path ... doesn't exist".
 if command -v python2 >/dev/null 2>&1; then
-  update-alternatives --install /usr/bin/python python /usr/bin/python2 1 || true
-  update-alternatives --set python /usr/bin/python2 || true
+  PY2_BIN="$(command -v python2)"
+  update-alternatives --install /usr/bin/python python "$PY2_BIN" 1 || true
+  update-alternatives --set python "$PY2_BIN" || true
 fi
 
 # ---------- wordlists ---------------------------------------------------------
+# These downloads are non-critical and use flaky public endpoints (GitHub release
+# CDN + raw.githubusercontent). Under `set -e` an unguarded transient failure here
+# silently aborts the whole toolkit build, so each download is guarded.
+# NOTE: `curl | head` makes curl exit 23 ("Failure writing output to destination")
+# by design once head closes the pipe after 1,000,000 lines -- that is expected and
+# harmless; -sL keeps curl quiet so it is not mistaken for the real error.
 cd "${FOLDER}"
-curl -sSL https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt | head -n 1000000 > rockyou-top100000.txt
-wget -q https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
+curl -sL --retry 3 --retry-delay 2 \
+  https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt \
+  | head -n 1000000 > rockyou-top100000.txt || true
+[ -s rockyou-top100000.txt ] || echo "Warning: rockyou-top100000.txt is empty; check network/disk"
+
+wget -q --tries=3 --timeout=30 \
+  https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt \
+  || echo "Warning: top-usernames-shortlist.txt download failed, continuing"
 
 # ---------- EAP_buster --------------------------------------------------------
 cd "${TOOLS}"
