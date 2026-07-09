@@ -51,6 +51,11 @@ RUN update-rc.d apache2 defaults
 # CONFIG_EAP_SIM/AKA/AKA_PRIME let the leaking wifi-passpoint client authenticate
 # with a software (U)SIM: wpa_supplicant runs Milenage from the Ki:OPc:SQN in its
 # config, so no PC/SC card reader is needed. These are OFF in upstream defconfig.
+# NOTE: the EAP_* options only compile in the methods; the software Milenage engine
+# that consumes Ki:OPc:SQN is a SEPARATE pair of flags - CONFIG_SIM_SIMULATOR
+# (EAP-SIM) and CONFIG_USIM_SIMULATOR (EAP-AKA/AKA'). Without them wpa_supplicant
+# has "no UMTS authentication algorithm enabled" and every challenge fails with
+# "EAP-AKA: UMTS authentication failed (AUTN)".
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential wget libnl-route-3-dev \
  && cd /tmp \
  && wget -q https://w1.fi/releases/wpa_supplicant-2.10.tar.gz \
@@ -67,6 +72,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
       'CONFIG_EAP_SIM=y' \
       'CONFIG_EAP_AKA=y' \
       'CONFIG_EAP_AKA_PRIME=y' \
+      'CONFIG_SIM_SIMULATOR=y' \
+      'CONFIG_USIM_SIMULATOR=y' \
       'CONFIG_TLSV12=y' \
       'CONFIG_TLSV13=y' \
       'CFLAGS += -Wno-error' >> .config \
