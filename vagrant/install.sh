@@ -432,9 +432,9 @@ fi
 # ---------- monitor mode helper ----------------------------------------------
 sudo tee /var/aux.sh >/dev/null <<'EOF'
 #!/bin/bash
-sudo ip link set wlan60 down || exit 0
-sudo iw wlan60 set type monitor || exit 0
-sudo ip link set wlan60 up || exit 0
+sudo ip link set wlan70 down || exit 0
+sudo iw wlan70 set type monitor || exit 0
+sudo ip link set wlan70 up || exit 0
 EOF
 sudo chmod +x /var/aux.sh
 
@@ -871,7 +871,7 @@ sudo sed -i -E 's/^#?\s*WaylandEnable\s*=.*/WaylandEnable=false/' "$GDM_CONF"
 # Fixes "isc-dhcp-server.service failed" when INTERFACESv4 is empty or wrong.
 if [ -f /etc/default/isc-dhcp-server ]; then
   IFACE=""
-  for candidate in wlan60 wlan0 eth0 ens33 enp0s3; do
+  for candidate in wlan70 wlan0 eth0 ens33 enp0s3; do
     if ip link show "$candidate" >/dev/null 2>&1; then
       IFACE="$candidate"
       break

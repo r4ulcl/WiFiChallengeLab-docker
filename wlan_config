@@ -458,14 +458,40 @@ PASS_PSK_NOAP_EXTRA='ewdXAFZBWHg='
 
 
 ############################################################
-# UNUSED / EMPTY CLIENT PLACEHOLDERS
+# MOBILE SIM/USIM — wifi-passpoint (AP: EAP-SIM/AKA/AKA')
 ############################################################
+ESSID_MGT_SIM='wifi-passpoint'
+WLAN_MGT_SIM='wlan19'
+IP_MGT_SIM='192.168.9'
+MAC_MGT_SIM='F0:9F:C2:71:22:19'
+CHANNEL_MGT_SIM='44'
 
-PLACEHOLDER_WLAN_=wlan59
-PLACEHOLDER_MAC_=''
-PLACEHOLDER_IP_=''
+# Software Milenage subscribers (WiFiChallenge realm wlan.mnc007.mcc214.wifichallenge.com; IMSI MCC 214 ES, MNC 07). AMF/SQN shared.
+SIM_MGT_AMF='8000'
+SIM_MGT_SQN='000000000000'
+# Secure subscriber (privacy-preserving client)
+SIM_MGT_IMSI='214070028194561'
+SIM_MGT_KI='465b5ce8b199b49faa5f0a2ee238a6bc'
+SIM_MGT_OPC='cd63cb71954a9f4e48a5994e37a02baf'
+# Leaking subscriber
+SIM_MGT_LEAK_IMSI='214070936554128'
+SIM_MGT_LEAK_KI='8baf473f2f8fd09487cccbd7097c6862'
+SIM_MGT_LEAK_OPC='8e27b6af0e692e750f32667a3b14605d'
 
-PLACEHOLDER_ESSID_MGT_=''
-PLACEHOLDER_ANON_IDENTITY_MGT_=''
-PLACEHOLDER_IDENTITY_MGT_=''
-PLACEHOLDER_PASS_MGT_=''
+############ CLIENTS ############
+# Secure EAP-AKA' client: anonymous outer identity, IMSI not sent in the clear.
+WLAN_CLIENT_MGT_SIM=wlan60
+MAC_CLIENT_MGT_SIM='64:32:A8:BA:18:60'
+ANON_IDENTITY_MGT_SIM='anonymous@wlan.mnc007.mcc214.wifichallenge.com'
+IDENTITY_MGT_SIM='6214070028194561@wlan.mnc007.mcc214.wifichallenge.com'
+# Leaking EAP-AKA' client: sends its permanent identity (IMSI) in the clear.
+WLAN_CLIENT_MGT_SIM_LEAK=wlan59
+MAC_CLIENT_MGT_SIM_LEAK='64:32:A8:BA:18:59'
+IDENTITY_MGT_SIM_LEAK='6214070936554128@wlan.mnc007.mcc214.wifichallenge.com'
+
+
+############################################################
+# FREE RADIOS  (radios=71 -> wlan0-70; nzyme WIDS tap = wlan70)
+############################################################
+# ns-ap free (wlan6-39):     wlan31 wlan32 wlan33 wlan34 wlan35 wlan36 wlan37 wlan38 wlan39  (+ wlan6-9 attacker-spare)
+# ns-client free (wlan40-69): wlan61 wlan62 wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69

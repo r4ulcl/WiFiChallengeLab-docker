@@ -9,8 +9,11 @@
 * Made the **Nzyme web UI reachable from other computers** (auto-detects host IP)
 * Added **Start/Stop Nzyme** desktop launchers
 * Added an **EAP-TLS identity-leak scenario** (hardened vs. leaking client certificates)
+* Added a **SIM/USIM AP (`wifi-passpoint`, EAP-SIM/AKA/AKA')** with a **leaking vs. privacy-preserving client pair** (permanent-IMSI-in-the-clear vs. anonymous identity + pseudonym/fast-reauth), backed by a software HLR/AuC (`hlr_auc_gw` + Milenage, no physical SIM)
+* Grew the **client radio pool from 20 to 30** (`wlan40-69`, `radios=71`) and moved the **nzyme WIDS tap to `wlan70`**, freeing 10 client slots for new scenarios
 * Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**
 * Added **Vagrant audio support** for QEMU and VirtualBox
+* Updated **wifi_db** to v1.6
 
 ### Bug Fixes
 

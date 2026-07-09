@@ -48,6 +48,9 @@ RUN update-rc.d apache2 defaults
 # already built with TLSV13) offers 1.3 - only the TLS 1.2 client works otherwise.
 # Mirror the AP build: start from upstream defconfig and re-enable the features the
 # lab's clients use (nl80211 + WEP/SAE/OWE + EAP) alongside TLSV12/TLSV13.
+# CONFIG_EAP_SIM/AKA/AKA_PRIME let the leaking wifi-passpoint client authenticate
+# with a software (U)SIM: wpa_supplicant runs Milenage from the Ki:OPc:SQN in its
+# config, so no PC/SC card reader is needed. These are OFF in upstream defconfig.
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential wget libnl-route-3-dev \
  && cd /tmp \
  && wget -q https://w1.fi/releases/wpa_supplicant-2.10.tar.gz \
@@ -61,6 +64,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
       'CONFIG_WEP=y' \
       'CONFIG_SAE=y' \
       'CONFIG_OWE=y' \
+      'CONFIG_EAP_SIM=y' \
+      'CONFIG_EAP_AKA=y' \
+      'CONFIG_EAP_AKA_PRIME=y' \
       'CONFIG_TLSV12=y' \
       'CONFIG_TLSV13=y' \
       'CFLAGS += -Wno-error' >> .config \

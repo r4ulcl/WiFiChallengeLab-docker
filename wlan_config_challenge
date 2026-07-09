@@ -9,7 +9,7 @@ ADMIN_PASSWORD_HASH='8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab44
 DATABASE_URL='postgresql://localhost:5432/nzyme?user=nzyme&password=6iQ8TeFVPQE12ToyyEjf'
 
 EXTERNAL_URL='http://localhost:22900'
-WLAN='wlan60'
+WLAN='wlan70'
 
 ############################################################
 # OPEN NETWORK — wifi-guest (AP)
@@ -461,14 +461,33 @@ PASS_PSK_NOAP_EXTRA='ewdXAFZBWHg='
 
 
 ############################################################
-# UNUSED / EMPTY CLIENT PLACEHOLDERS
+# MOBILE SIM/USIM — wifi-sim (AP: EAP-SIM/AKA/AKA')
 ############################################################
+ESSID_MGT_SIM='wifi-sim'
+WLAN_MGT_SIM='wlan19'
+IP_MGT_SIM='192.168.9'
+MAC_MGT_SIM='F0:9F:C2:2C:BA:DC'
+CHANNEL_MGT_SIM='44'
 
-PLACEHOLDER_WLAN_=wlan59
-PLACEHOLDER_MAC_=''
-PLACEHOLDER_IP_=''
+# Software Milenage subscribers (WiFiChallenge realm wlan.mnc003.mcc214.wifichallenge.com; IMSI MCC 214 ES, MNC 03). AMF/SQN shared.
+SIM_MGT_AMF='8000'
+SIM_MGT_SQN='000000000000'
+# Secure subscriber (privacy-preserving client)
+SIM_MGT_IMSI='214031547762093'
+SIM_MGT_KI='dd0f8b488d97b537c2448ffb3a61361e'
+SIM_MGT_OPC='171c81b1d2e86fd17173829c2ed7191e'
+# Leaking subscriber
+SIM_MGT_LEAK_IMSI='214033390218475'
+SIM_MGT_LEAK_KI='f953a22c3ebe2d181a7bb677eee7e0a0'
+SIM_MGT_LEAK_OPC='135eaa72bef65ce3cb3c9f0dd02f0d7f'
 
-PLACEHOLDER_ESSID_MGT_=''
-PLACEHOLDER_ANON_IDENTITY_MGT_=''
-PLACEHOLDER_IDENTITY_MGT_=''
-PLACEHOLDER_PASS_MGT_=''
+############ CLIENTS ############
+# Secure EAP-AKA' client: anonymous outer identity, IMSI not sent in the clear.
+WLAN_CLIENT_MGT_SIM=wlan60
+MAC_CLIENT_MGT_SIM='64:32:A8:BD:37:0E'
+ANON_IDENTITY_MGT_SIM='anonymous@wlan.mnc003.mcc214.wifichallenge.com'
+IDENTITY_MGT_SIM='6214031547762093@wlan.mnc003.mcc214.wifichallenge.com'
+# Leaking EAP-AKA' client: sends its permanent identity (IMSI) in the clear.
+WLAN_CLIENT_MGT_SIM_LEAK=wlan59
+MAC_CLIENT_MGT_SIM_LEAK='64:32:A8:F2:9C:68'
+IDENTITY_MGT_SIM_LEAK='6214033390218475@wlan.mnc003.mcc214.wifichallenge.com'

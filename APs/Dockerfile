@@ -102,6 +102,11 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 # and re-enable every feature the lab uses (WEP/WPS/SAE/OWE/EAP server + nl80211 +
 # HT/VHT/HE) alongside TLSV13. Build deps (make, gcc, libssl-dev, libnl-*-dev,
 # pkg-config, wget) are already installed above.
+# EAP-SIM/AKA/AKA' (CONFIG_EAP_SIM/AKA/AKA_PRIME) drive the SIM/USIM AP
+# (wifi-passpoint): upstream defconfig ships them commented-out, so we turn them on
+# here and additionally build hlr_auc_gw - the software HLR/AuC that answers
+# hostapd's eap_sim_db socket with Milenage vectors, so no physical SIM or PC/SC
+# reader is required.
 RUN cd /tmp \
  && wget -q https://w1.fi/releases/hostapd-2.10.tar.gz \
  && tar xf hostapd-2.10.tar.gz \
@@ -118,12 +123,17 @@ RUN cd /tmp \
       'CONFIG_SAE=y' \
       'CONFIG_OWE=y' \
       'CONFIG_EAP_FAST=y' \
+      'CONFIG_EAP_SIM=y' \
+      'CONFIG_EAP_AKA=y' \
+      'CONFIG_EAP_AKA_PRIME=y' \
       'CONFIG_TLSV12=y' \
       'CONFIG_TLSV13=y' \
       'CFLAGS += -Wno-error' >> .config \
  && make -j"$(nproc)" \
+ && make -j"$(nproc)" hlr_auc_gw \
  && install -m 0755 hostapd /usr/sbin/host_aps_apd \
  && install -m 0755 hostapd_cli /usr/sbin/hostapd_cli \
+ && install -m 0755 hlr_auc_gw /usr/sbin/hlr_auc_gw \
  && rm -rf /tmp/hostapd-2.10*
 
 

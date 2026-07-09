@@ -1,0 +1,26 @@
+# Secure EAP-AKA' client (wifi-passpoint) - privacy-preserving counterpart of
+# wpa_sim_leak.conf. Same operator, a different (U)SIM.
+#   * anonymous_identity keeps the permanent IMSI OUT of the cleartext
+#     EAP-Response/Identity - a passive sniffer only sees "anonymous@realm".
+#   * fast_reauth=1 reuses the server-issued pseudonym / fast re-authentication, so
+#     the permanent identity is not re-sent on later authentications.
+# Launched once (persistent), like a real handset that attaches and stays: the IMSI
+# is only ever exchanged - protected inside the AKA' identity request - at the
+# initial attach, never on the routine identity frames the leaking client
+# broadcasts every time. Full first-contact IMSI hiding needs pseudonyms / 5G SUCI.
+# Software (U)SIM, no PC/SC: password = Ki:OPc:SQN, matched in the AP milenage_db.
+
+ap_scan=1
+fast_reauth=1
+
+network={
+	ssid="$ESSID_MGT_SIM"
+	scan_ssid=1
+	key_mgmt=WPA-EAP
+	proto=RSN
+	pairwise=CCMP
+	eap=AKA'
+	anonymous_identity="$ANON_IDENTITY_MGT_SIM"
+	identity="$IDENTITY_MGT_SIM"
+	password="$SIM_MGT_KI:$SIM_MGT_OPC:$SIM_MGT_SQN"
+}

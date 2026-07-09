@@ -5,7 +5,7 @@ envsubst_tmp () {
     VARS=$(printf '${%s} ' \
         KEY_J3D5ETO \
         WIFICHALLENGE_VERSION \
-        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
+        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_|SIM_)') \
     )
 
     for F in ./*.tmp; do
@@ -106,8 +106,8 @@ macchanger -m $MAC_CLIENT_OWE $WLAN_CLIENT_OWE >> /root/logs/macchanger.log
 
 macchanger -m $MAC_TLS_LEAK $WLAN_CLIENT_MGT_TLS_LEAK >> /root/logs/macchanger.log # MGT TLS leak (franz.ka)
 
-#TODO
-macchanger -r wlan59 >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_SIM $WLAN_CLIENT_MGT_SIM >> /root/logs/macchanger.log # MGT SIM AKA' secure
+macchanger -m $MAC_CLIENT_MGT_SIM_LEAK $WLAN_CLIENT_MGT_SIM_LEAK >> /root/logs/macchanger.log # MGT SIM AKA' leak
 
 sleep 5
 
@@ -200,6 +200,14 @@ do
     wait $!
 done &
 
+# MGT SIM leak .9 - leaking EAP-AKA' (re-sends IMSI 214070936554128 in the clear)
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM_LEAK -c /root/mgtClient/wpa_sim_leak.conf >> /root/logs/supplicantSIM_leak.log &
+    wait $!
+done &
+
 # Wait for this ID at the end
 LAST=$!
 
@@ -223,6 +231,11 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_WEP -c /root/wepClien
 
 # OWE
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OWE -c /root/oweClient/owe.conf > /root/logs/supplicantOWE.log &
+
+# MGT SIM secure .9 - EAP-AKA' with anonymous identity (IMSI stays hidden).
+# Persistent (no re-auth loop) so the IMSI is not needlessly re-exposed; the
+# supplicant auto-reconnects on its own.
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM -c /root/mgtClient/wpa_sim.conf > /root/logs/supplicantSIM.log &
 
 
 sleep 10

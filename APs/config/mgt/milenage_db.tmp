@@ -1,0 +1,6 @@
+# hlr_auc_gw Milenage subscriber database (software HLR/AuC).
+# One line per (U)SIM, whitespace-separated: IMSI Ki OPc AMF SQN
+# Ki/OPc must match each client's wpa_supplicant password (Ki:OPc:SQN). AMF 8000
+# sets the AKA' separation bit; hlr_auc_gw advances SQN in memory across reconnects.
+$SIM_MGT_IMSI $SIM_MGT_KI $SIM_MGT_OPC $SIM_MGT_AMF $SIM_MGT_SQN
+$SIM_MGT_LEAK_IMSI $SIM_MGT_LEAK_KI $SIM_MGT_LEAK_OPC $SIM_MGT_AMF $SIM_MGT_SQN

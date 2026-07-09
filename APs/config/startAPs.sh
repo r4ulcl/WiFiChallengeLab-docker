@@ -5,7 +5,7 @@ envsubst_tmp () {
     VARS=$(printf '${%s} ' \
         KEY_J3D5ETO \
         WIFICHALLENGE_VERSION \
-        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
+        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_|SIM_)') \
     )
 
     for F in ./*.tmp; do
@@ -70,6 +70,10 @@ service apache2 start > /root/logs/apache2.log 2>&1 &
 
 freeradius -f -l /var/log/freeradius/radius.log &
 
+# Software HLR/AuC for the SIM/USIM AP (EAP-SIM/AKA/AKA').
+rm -f /tmp/hlr_auc_gw.sock
+hlr_auc_gw -s /tmp/hlr_auc_gw.sock -m /root/mgt/milenage_db > /root/logs/hlr_auc_gw.log 2>&1 &
+
 # Wlan first 6 for attacker, next 14 for AP, rest for client
 
 #F0:9F:C2:71 ubiquiti
@@ -86,6 +90,7 @@ macchanger -m $MAC_MGT_RELAY $WLAN_MGT_RELAY >> /root/logs/macchanger.log # MGT 
 macchanger -m $MAC_MGT_RELAY_TABLETS $WLAN_MGT_RELAY_TABLETS >> /root/logs/macchanger.log # MGT Relay tablets
 
 macchanger -m $MAC_MGT_TLS $WLAN_MGT_TLS >> /root/logs/macchanger.log # MGT TLS
+macchanger -m $MAC_MGT_SIM $WLAN_MGT_SIM >> /root/logs/macchanger.log # MGT SIM/AKA'
 
 macchanger -r $WLAN_OTHER0  >> /root/logs/macchanger.log # Other 0
 macchanger -r $WLAN_OTHER1 >> /root/logs/macchanger.log # Other 1
@@ -154,6 +159,10 @@ host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log 2>&
 # MGT MD5
 ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
 host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log 2>&1 &
+
+# MGT SIM / AKA / AKA' (wifi-passpoint)
+ip addr add $IP_MGT_SIM.1/24 dev $WLAN_MGT_SIM
+host_aps_apd /root/mgt/hostapd_wpe_sim.conf > /root/logs/hostapd_wpe_sim.log 2>&1 &
 
 #TODO
 #ip addr add $IP_8.1/24 dev $WLAN_MGT_TLS

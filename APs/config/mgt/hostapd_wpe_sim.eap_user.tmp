@@ -1,0 +1,22 @@
+# hostapd integrated EAP server - SIM/USIM identities.
+#
+# The EAP method is chosen by the FIRST digit of the permanent identity (the
+# 3GPP NAI decoration prefix):
+#     "1" -> EAP-SIM   (2G GSM triplets)
+#     "0" -> EAP-AKA   (3G/4G USIM quintuplets)
+#     "6" -> EAP-AKA'  (RFC 5448, modern - what carriers use today)
+# "<prefix>"* is a prefix match, so every IMSI under that method matches one line
+# and hostapd skips method negotiation. Milenage vectors come from hlr_auc_gw
+# (eap_sim_db); no password belongs here.
+#
+# The permanent identity carries the IMSI in CLEARTEXT inside EAP-Response/Identity,
+# so it is trivially harvested by a passive sniffer. Leaking subscriber below (kept
+# verbatim so the identity<->credential cross-check in utils/test_lab.sh matches the
+# "6"* wildcard): $IDENTITY_MGT_SIM $IDENTITY_MGT_SIM_LEAK
+
+# Secure client starts with an anonymous outer identity; match it to AKA' so the
+# server then requests the (protected) permanent identity / accepts a pseudonym.
+"anonymous"*	AKA'
+"0"*	AKA
+"1"*	SIM
+"6"*	AKA'

@@ -69,15 +69,15 @@ ip netns add $NS
 # Define vlan for all dockers (in host, is the same mac80211_hwsim)
 #0-9 for the attacker
 #10-39 radios for AP
-#40-59 radios for Clients
-#60 for nzyme in attacker
+#40-69 radios for Clients
+#70 for nzyme in attacker
 
 #if wlan < 20 (AP wifis) no executed 
 if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; then
    sudo modprobe mac80211_hwsim_WiFiChallenge -r
 fi
 
-sudo modprobe mac80211_hwsim_WiFiChallenge radios=61
+sudo modprobe mac80211_hwsim_WiFiChallenge radios=71
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?

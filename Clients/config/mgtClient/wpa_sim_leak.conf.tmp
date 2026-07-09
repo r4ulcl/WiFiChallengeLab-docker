@@ -1,0 +1,22 @@
+# Leaking EAP-AKA' client (wifi-passpoint) - IMSI 214 07 0936554128.
+# INSECURE counterpart of wpa_sim.conf:
+#   * eap=AKA' with a PERMANENT identity ("6"<IMSI>@realm), sent in the CLEAR in
+#     EAP-Response/Identity - any passive sniffer harvests the IMSI (the classic
+#     Wi-Fi "IMSI catcher" exposure).
+#   * fast_reauth=0 forces a FULL authentication every time, so the IMSI is re-sent
+#     on every reconnect instead of using a pseudonym.
+# Software (U)SIM, no PC/SC: password = Ki:OPc:SQN, matched in the AP milenage_db.
+
+ap_scan=1
+fast_reauth=0
+
+network={
+	ssid="$ESSID_MGT_SIM"
+	scan_ssid=1
+	key_mgmt=WPA-EAP
+	proto=RSN
+	pairwise=CCMP
+	eap=AKA'
+	identity="$IDENTITY_MGT_SIM_LEAK"
+	password="$SIM_MGT_LEAK_KI:$SIM_MGT_LEAK_OPC:$SIM_MGT_SQN"
+}

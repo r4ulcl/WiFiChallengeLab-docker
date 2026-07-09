@@ -1,0 +1,38 @@
+# SIM/USIM AP (wifi-passpoint) - EAP-SIM / EAP-AKA / EAP-AKA'.
+# hostapd's integrated EAP server does NOT compute GSM/Milenage itself; it asks an
+# external HLR/AuC (hlr_auc_gw) over the eap_sim_db UNIX socket. startAPs.sh must
+# launch hlr_auc_gw (see /root/mgt/milenage_db) before this AP. No TLS server
+# certificate is needed - SIM/AKA/AKA' are not TLS-based.
+interface=$WLAN_MGT_SIM
+ssid=$ESSID_MGT_SIM
+channel=$CHANNEL_MGT_SIM
+
+eap_server=1
+ieee8021x=1
+eap_user_file=/root/mgt/hostapd_wpe_sim.eap_user
+# Software HLR/AuC gateway (Milenage). Started by startAPs.sh.
+eap_sim_db=unix:/tmp/hlr_auc_gw.sock
+
+wpa=2
+wpa_key_mgmt=WPA-EAP
+wpa_pairwise=CCMP
+rsn_pairwise=CCMP
+
+ieee80211d=1
+country_code=ES
+hw_mode=a
+beacon_int=100
+dtim_period=2
+max_num_sta=255
+macaddr_acl=0
+auth_algs=3
+ignore_broadcast_ssid=0
+wmm_enabled=1
+
+logger_syslog=-1
+logger_syslog_level=2
+logger_stdout=-1
+logger_stdout_level=2
+ctrl_interface=/run/hostapd-$WLAN_MGT_SIM
+ctrl_interface_group=0
+own_ip_addr=127.0.0.1
