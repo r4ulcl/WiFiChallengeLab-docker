@@ -1,4 +1,4 @@
-# SIM/USIM AP (wifi-passpoint) - EAP-SIM / EAP-AKA / EAP-AKA'.
+# SIM/USIM AP - EAP-SIM / EAP-AKA / EAP-AKA'.
 # hostapd's integrated EAP server does NOT compute GSM/Milenage itself; it asks an
 # external HLR/AuC (hlr_auc_gw) over the eap_sim_db UNIX socket. startAPs.sh must
 # launch hlr_auc_gw (see /root/mgt/milenage_db) before this AP. No TLS server

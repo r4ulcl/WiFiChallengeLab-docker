@@ -160,7 +160,7 @@ host_aps_apd /root/mgt/hostapd_wpe_tls.conf > /root/logs/hostapd_wpe_tls.log 2>&
 ip addr add $IP_MGT_MD5.1/24 dev $WLAN_MGT_MD5
 host_aps_apd /root/mgt/hostapd_wpe_md5.conf > /root/logs/hostapd_wpe_md5.log 2>&1 &
 
-# MGT SIM / AKA / AKA' (wifi-passpoint)
+# MGT SIM / AKA / AKA'
 ip addr add $IP_MGT_SIM.1/24 dev $WLAN_MGT_SIM
 host_aps_apd /root/mgt/hostapd_wpe_sim.conf > /root/logs/hostapd_wpe_sim.log 2>&1 &
 

@@ -1,4 +1,4 @@
-# Leaking EAP-AKA' client (wifi-passpoint) - IMSI 214 07 0936554128.
+# Leaking EAP-AKA' client - IMSI 214 07 0936554128.
 # INSECURE counterpart of wpa_sim.conf:
 #   * eap=AKA' with a PERMANENT identity ("6"<IMSI>@realm), sent in the CLEAR in
 #     EAP-Response/Identity - any passive sniffer harvests the IMSI (the classic

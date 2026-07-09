@@ -48,7 +48,7 @@ RUN update-rc.d apache2 defaults
 # already built with TLSV13) offers 1.3 - only the TLS 1.2 client works otherwise.
 # Mirror the AP build: start from upstream defconfig and re-enable the features the
 # lab's clients use (nl80211 + WEP/SAE/OWE + EAP) alongside TLSV12/TLSV13.
-# CONFIG_EAP_SIM/AKA/AKA_PRIME let the leaking wifi-passpoint client authenticate
+# CONFIG_EAP_SIM/AKA/AKA_PRIME let the leaking client authenticate
 # with a software (U)SIM: wpa_supplicant runs Milenage from the Ki:OPc:SQN in its
 # config, so no PC/SC card reader is needed. These are OFF in upstream defconfig.
 # NOTE: the EAP_* options only compile in the methods; the software Milenage engine

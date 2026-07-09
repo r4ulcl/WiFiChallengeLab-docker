@@ -103,7 +103,7 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 # HT/VHT/HE) alongside TLSV13. Build deps (make, gcc, libssl-dev, libnl-*-dev,
 # pkg-config, wget) are already installed above.
 # EAP-SIM/AKA/AKA' (CONFIG_EAP_SIM/AKA/AKA_PRIME) drive the SIM/USIM AP
-# (wifi-passpoint): upstream defconfig ships them commented-out, so we turn them on
+# upstream defconfig ships them commented-out, so we turn them on
 # here and additionally build hlr_auc_gw - the software HLR/AuC that answers
 # hostapd's eap_sim_db socket with Milenage vectors, so no physical SIM or PC/SC
 # reader is required.

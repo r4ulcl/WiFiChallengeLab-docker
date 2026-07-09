@@ -467,7 +467,7 @@ ESSID_MGT_SIM='wifi-sim'
 WLAN_MGT_SIM='wlan19'
 IP_MGT_SIM='192.168.9'
 MAC_MGT_SIM='F0:9F:C2:2C:BA:DC'
-CHANNEL_MGT_SIM='44'
+CHANNEL_MGT_SIM='48'
 
 # Software Milenage subscribers (WiFiChallenge realm wlan.mnc003.mcc214.wifichallenge.com; IMSI MCC 214 ES, MNC 03). AMF/SQN shared.
 SIM_MGT_AMF='8000'

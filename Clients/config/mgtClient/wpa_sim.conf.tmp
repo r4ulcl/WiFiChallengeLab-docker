@@ -1,4 +1,4 @@
-# Secure EAP-AKA' client (wifi-passpoint) - privacy-preserving counterpart of
+# Secure EAP-AKA' client - privacy-preserving counterpart of
 # wpa_sim_leak.conf. Same operator, a different (U)SIM.
 #   * anonymous_identity keeps the permanent IMSI OUT of the cleartext
 #     EAP-Response/Identity - a passive sniffer only sees "anonymous@realm".

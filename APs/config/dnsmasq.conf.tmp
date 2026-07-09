@@ -44,7 +44,7 @@ dhcp-range=$IP_MGT_TLS.2,$IP_MGT_TLS.100,24h
 dhcp-host=$WLAN_MGT_MD5,$MAC_MGT_MD5,$IP_MGT_MD5.1
 dhcp-range=$IP_MGT_MD5.2,$IP_MGT_MD5.100,24h
 
-# MGT SIM (wifi-passpoint)
+# MGT SIM
 dhcp-host=$WLAN_MGT_SIM,$MAC_MGT_SIM,$IP_MGT_SIM.1
 dhcp-range=$IP_MGT_SIM.2,$IP_MGT_SIM.100,24h
 
