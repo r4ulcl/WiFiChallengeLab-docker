@@ -72,12 +72,27 @@ ip netns add $NS
 #40-69 radios for Clients
 #70 for nzyme in attacker
 
-#if wlan < 20 (AP wifis) no executed 
-if [[ $(iw dev | grep wlan | wc -l) -lt 20 ]] ; then
-   sudo modprobe mac80211_hwsim_WiFiChallenge -r
-fi
+# mac80211_hwsim_WiFiChallenge is the stock mac80211_hwsim under a new filename,
+# but it still registers the SAME kernel-global resources (the MAC80211_HWSIM
+# genetlink family and the mac80211_hwsim sysfs class). So it cannot coexist with
+# the stock module: if stock mac80211_hwsim was autoloaded (base image / udev /
+# wireless tooling, default 2 radios -> < 20 wlan), inserting our module on top
+# fails with "Device or resource busy". Only (re)load when the full radio set
+# isn't already up, and when we do, evict EVERY hwsim variant first.
+if [[ $(iw dev | grep -c wlan) -lt 20 ]] ; then
+   # Remove our renamed module and the stock one (either can hold the resources).
+   sudo modprobe -r mac80211_hwsim_WiFiChallenge 2>/dev/null || true
+   sudo modprobe -r mac80211_hwsim 2>/dev/null || true
 
-sudo modprobe mac80211_hwsim_WiFiChallenge radios=71
+   # Wait for the module to fully leave: inserting while a same-named module is
+   # still in MODULE_STATE_GOING also returns EBUSY.
+   for _ in $(seq 1 50); do
+      lsmod | grep -q '^mac80211_hwsim' || break
+      sleep 0.1
+   done
+
+   sudo modprobe mac80211_hwsim_WiFiChallenge radios=71
+fi
 
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?

@@ -231,6 +231,13 @@ echo "==> Updating depmod …"
 sudo depmod -a
 
 echo "==> Reloading module …"
+# The renamed module shares the stock module's kernel-global resources
+# (MAC80211_HWSIM genetlink family + mac80211_hwsim sysfs class), so a loaded
+# stock mac80211_hwsim would make the later insert fail with EBUSY. Evict both.
+if lsmod | grep -q "^${STOCK_MODNAME}\b"; then
+    echo "==> Stock ${STOCK_MODNAME} is loaded; removing it first …"
+    sudo modprobe -r "${STOCK_MODNAME}" 2>/dev/null || true
+fi
 sudo modprobe -r "${ALT_MODNAME}" 2>/dev/null || true
 #sudo insmod "${DEST_DIR}/${ALT_MODNAME}.ko" radios=2 channels=1
 
