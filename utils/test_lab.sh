@@ -17,6 +17,9 @@
 #   - startup completion: the "ALL SET" marker + fatal errors in container stdout
 #   - nzyme WIDS: web, tap radio (monitor mode), postgres, migrated schema, log
 #   - attacker toolkit + monitor-mode capability
+#   - client-less PMKID target (roam APs): the mac80211_hwsim ACK patch is loaded
+#     and hcxdumptool is new enough for -w/--rds; with --scan, a live end-to-end
+#     PMKID capture that also proves the hostapd msg1 PMKID patch
 #   - a per-challenge infra-readiness matrix (only with --challenges; never shown
 #     in a normal run, and it lists no objectives/techniques - just up/down)
 #
@@ -33,6 +36,7 @@
 #   ./test_lab.sh                 # full check
 #   ./test_lab.sh --quick         # skip slow network probes (web, associations, DHCP, internet)
 #   ./test_lab.sh --scan          # also scan over the air from an attacker radio (SCAN_IFACE, default wlan0)
+#                                 # and run a live client-less PMKID capture on the roam APs
 #   ./test_lab.sh --no-tools      # skip the attacker toolkit inventory
 #   ./test_lab.sh --challenges    # only print the per-challenge infra-readiness matrix
 #                                 # (opt-in; a normal run never prints challenge rows)
@@ -654,6 +658,59 @@ if [ "$DO_TOOLS" = 1 ]; then
     docker exec "$ATT_C" iw dev 2>/dev/null | grep -qw wlan0 && pass "attacker radio wlan0 present" || warn "attacker radio wlan0 not visible"
     docker exec "$ATT_C" bash -lc 'iw phy 2>/dev/null | grep -q monitor' && pass "monitor mode supported" || warn "monitor mode not reported by iw phy"
   fi
+fi
+
+########################################
+# 7b. Client-less PMKID target (roam APs)
+########################################
+# The wifi-campus/wifi-university roaming ESS is a client-less PMKID target that
+# needs TWO patches (see APs/PMKID_TESTING.md): the mac80211_hwsim ACK patch (so
+# the AP's EAPOL msg1 reaches hcxdumptool under hwsim) and the hostapd 2.10 PMKID
+# patch (so msg1 carries the PMKID KDE for WPA2-PSK). hcxdumptool must also be new
+# enough for -w/--rds (the distro 6.2.6 build lacks both).
+section "Client-less PMKID target (roam APs)"
+# (a) hwsim ACK patch: the LOADED module must be the WiFiChallenge build. The patch
+# stamps MODULE_VERSION("...-WiFiChallengeLab-version"); stock hwsim has none.
+HWVER=""; container_running "$APS_C" && HWVER="$(dexec "$APS_C" 'cat /sys/module/mac80211_hwsim*/version 2>/dev/null | head -1')"
+if grep -qi 'WiFiChallengeLab' <<<"$HWVER"; then
+  pass "hwsim ACK patch loaded (mac80211_hwsim version: $HWVER)"
+elif container_running "$APS_C"; then
+  fail "mac80211_hwsim is not the patched WiFiChallenge build (version: '${HWVER:-none}') - client-less PMKID msg1 won't be ACKed" \
+    "docker exec $APS_C cat /sys/module/mac80211_hwsim*/version   # rebuild: cd /root/mac80211_hwsim_WiFiChallenge && bash install.sh"
+else
+  info "AP container down - skipping hwsim ACK-patch check"
+fi
+# (b) hcxdumptool new enough for -w/--rds (this is what broke on the distro 6.2.6).
+HCXV=""
+if [ "$TOOL_CTX" = attacker ]; then HCXV="$(docker exec "$ATT_C" bash -lc 'hcxdumptool --version 2>/dev/null' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
+elif command -v hcxdumptool >/dev/null 2>&1; then HCXV="$(hcxdumptool --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"; fi
+if [ -n "$HCXV" ]; then
+  IFS=. read -r hmaj hmin _ <<<"$HCXV"
+  if [ "${hmaj:-0}" -gt 6 ] || { [ "${hmaj:-0}" -eq 6 ] && [ "${hmin:-0}" -ge 3 ]; }; then
+    pass "hcxdumptool $HCXV supports -w/--rds (client-less PMKID)"
+  else warn "hcxdumptool $HCXV predates -w/--rds (need >= 6.3; distro 6.2.6 lacks them) - rebuild from ZerBea source" \
+    "docker exec $ATT_C hcxdumptool --version"; fi
+else warn "hcxdumptool not found to version-check (client-less PMKID capture unavailable)"; fi
+# (c) Optional live end-to-end capture - proves BOTH patches at once. Gated behind
+# --scan (it actively associates/injects). Channel + BSSID come from the loaded
+# wlan_config, so this follows any channel/BSSID change automatically.
+if [ "$DO_SCAN" = 1 ] && [ "$TOOL_CTX" = attacker ] && [ "$HAVE_CONF" = 1 ]; then
+  pm_bssid="$(val MAC_ROAM1)"; pm_ch="$(val CHANNEL_ROAM1)"; pm_nc="$(tr -d ':' <<<"${pm_bssid,,}")"
+  if [ -n "$pm_bssid" ] && [ -n "$pm_ch" ] && docker exec "$ATT_C" iw dev 2>/dev/null | grep -qw "$SCAN_IFACE"; then
+    info "live PMKID capture on $SCAN_IFACE ch ${pm_ch}a bssid $pm_bssid (~22s) ..."
+    GOTP="$(docker exec "$ATT_C" bash -lc '
+      rm -f /tmp/pmkidtest.* 2>/dev/null
+      hcxdumptool --bpfc="wlan addr3 '"$pm_nc"'" > /tmp/pmkidtest.bpf 2>/dev/null
+      timeout 22 hcxdumptool -i '"$SCAN_IFACE"' -c '"$pm_ch"'a -w /tmp/pmkidtest.pcapng --bpf=/tmp/pmkidtest.bpf >/dev/null 2>&1
+      hcxpcapngtool -o /tmp/pmkidtest.22000 /tmp/pmkidtest.pcapng* >/dev/null 2>&1
+      grep -c "^WPA\*01\*" /tmp/pmkidtest.22000 2>/dev/null')"
+    GOTP="${GOTP//[!0-9]/}"
+    if [ "${GOTP:-0}" -gt 0 ]; then pass "live client-less PMKID captured (WPA*01* x${GOTP}) - hwsim ACK + hostapd PMKID patches both working"
+    else fail "live capture produced NO PMKID (roam1 $pm_bssid ch $pm_ch) - hostapd PMKID patch missing or roam1 AP down" \
+      "docker exec $ATT_C bash -lc 'hcxdumptool -i $SCAN_IFACE -c ${pm_ch}a -w /tmp/p.pcapng --rds=1'   # watch the P column; see APs/PMKID_TESTING.md"; fi
+  else warn "live PMKID capture skipped (need roam1 MAC+channel in wlan_config and $SCAN_IFACE on attacker)"; fi
+elif [ "$DO_SCAN" = 0 ]; then
+  info "live PMKID capture skipped (add --scan to run the end-to-end capture that also proves the hostapd PMKID patch)"
 fi
 fi  # end !ONLY_CHALLENGES
 
