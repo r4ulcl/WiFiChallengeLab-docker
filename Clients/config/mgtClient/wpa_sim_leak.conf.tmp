@@ -1,3 +1,16 @@
+# --- Probe-request fingerprint persona: modern smartphone (Passpoint / Hotspot 2.0) ---
+# wpa_supplicant appends these to probe requests (wpa_supplicant_extra_ies):
+#   interworking=1 -> Interworking element (IE 107)
+#   hs20=1         -> Hotspot 2.0 Indication (vendor IE 221, WFA OUI)
+# This shifts the IE tag-number list that wifi_db hashes, giving this device a
+# distinct fingerprint. Probe-only: auto_interworking stays off and there are no
+# cred{} blocks, so association to the lab's non-Passpoint APs is unaffected.
+# (Note: disable_ht/vht/he would NOT help here - those only affect the assoc
+# request, not the probe request the fingerprint is built from.)
+interworking=1
+hs20=1
+access_network_type=2
+
 # Leaking EAP-AKA' client - IMSI 214 07 0936554128.
 # INSECURE counterpart of wpa_sim.conf:
 #   * eap=AKA' with a PERMANENT identity ("6"<IMSI>@realm), sent in the CLEAR in

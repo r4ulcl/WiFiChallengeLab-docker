@@ -1,3 +1,9 @@
+# --- Probe-request fingerprint persona: enterprise laptop (Interworking, no HS2.0) ---
+# interworking=1 adds the Interworking element (IE 107) to probe requests, giving a
+# distinct wifi_db fingerprint. Probe-only; association behaviour is unchanged
+# (auto_interworking off, no cred{} blocks).
+interworking=1
+
 # Cleaned up example, see original wpa_supplicant.conf for comments.
 #
 # Leaking EAP-TLS client (GLOBAL\franz.ka).
