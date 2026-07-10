@@ -142,8 +142,8 @@ host_aps_apd /root/psk/hostapd_wpa.conf > /root/logs/hostapd_wpa.log 2>&1 &
 ip addr add $IP_WPS.1/24 dev $WLAN_WPS
 host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log 2>&1 &
 
-# Campus roaming ESS (wifi-campus): 3 APs share one ESSID (802.11r FT-PSK).
-# Client-less PMKID target — no client is attached on purpose.
+# Campus roaming ESS (wifi-campus): 3 APs share one ESSID and one PSK (WPA2-PSK).
+# Client-less PMKID target: no client is attached on purpose.
 ip addr add $IP_ROAM1.1/24 dev $WLAN_ROAM1
 host_aps_apd /root/psk/hostapd_roam1.conf > /root/logs/hostapd_roam1.log 2>&1 &
 ip addr add $IP_ROAM2.1/24 dev $WLAN_ROAM2

@@ -507,8 +507,8 @@ IDENTITY_MGT_SIM_ROGUE='6214070313370001@wlan.mnc007.mcc214.wifichallenge.com'
 # CAMPUS ROAMING ESS — wifi-campus (multi-AP, client-less PMKID)
 ############################################################
 # One ESSID advertised by THREE APs (BSSIDs) on channels 1/6/11, forming a real
-# roaming ESS with 802.11r Fast Transition (FT-PSK) enabled next to classic
-# WPA2-PSK. There is NO client on this network on purpose: the PMKID travels in
+# roaming ESS on plain WPA2-PSK (no 802.11r; FT is intentionally omitted on this
+# PMKID target). There is NO client on this network on purpose: the PMKID travels in
 # the AP's first EAPOL frame, so a student harvests it straight from any BSSID
 # (client-less, e.g. hcxdumptool/hcxpcapngtool), cracks the shared PSK, then
 # associates to any of the three APs and reads the flag from the router portal.

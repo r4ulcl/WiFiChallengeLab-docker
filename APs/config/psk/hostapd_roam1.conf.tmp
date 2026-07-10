@@ -1,7 +1,16 @@
-# wifi-campus — roaming ESS, AP 1 of 3 (WPA2-PSK + 802.11r FT-PSK)
-# Client-less PMKID target: hostapd puts the PMKID in EAPOL message 1, so the
-# shared PSK can be captured and cracked without any associated client. All
-# three campus APs share this PSK, so one cracked PMKID unlocks the whole ESS.
+# wifi-campus - roaming ESS, AP 1 of 3 (WPA2-PSK, client-less PMKID target)
+# Three APs share one ESSID on channels 1/6/11 and one PSK. There is NO client
+# on this network on purpose: hostapd puts the PMKID in EAPOL message 1, so it
+# is harvested straight from any BSSID (client-less, e.g. hcxdumptool), cracked
+# offline, and because the PSK is shared one cracked PMKID unlocks the whole ESS.
+#
+# Kept as plain WPA2-PSK (no 802.11r / FT-PSK): mixing FT-PSK into the AKM list
+# makes the client-less PMKID capture unreliable, and under mac80211_hwsim the
+# capture also relies on the campus-scoped ACK patch in
+# mac80211_hwsim/patch80211.sh (otherwise the AP's Assoc Resp / EAPOL msg 1 to
+# hcxdumptool's random client MAC is never ACKed and hostapd drops the STA
+# before the PMKID is sent). A real 802.11r FT roaming scenario should live on
+# its own separate BSSID rather than on this PMKID target.
 interface=$WLAN_ROAM1
 driver=nl80211
 
@@ -10,20 +19,10 @@ channel=$CHANNEL_ROAM1
 ssid=$ESSID_ROAM
 
 wpa=2
-# WPA-PSK keeps the classic client-less PMKID; FT-PSK makes this a real
-# 802.11r roaming domain (fast transition between the three BSSIDs).
-wpa_key_mgmt=WPA-PSK FT-PSK
+wpa_key_mgmt=WPA-PSK
 wpa_pairwise=CCMP
 rsn_pairwise=CCMP
 wpa_passphrase=$PASS_ROAM_CLEAR
-
-# 802.11r Fast Transition — one mobility domain shared by all three campus APs.
-# PMK-R0/R1 are derived locally from the PSK (ft_psk_generate_local) because the
-# APs live on isolated /24s and cannot push/pull PMK-R1 over the DS.
-mobility_domain=ca11
-nas_identifier=campus-ap1
-ft_psk_generate_local=1
-ft_over_ds=0
 
 ctrl_interface=/run/hostapd-$WLAN_ROAM1
 ctrl_interface_group=0
