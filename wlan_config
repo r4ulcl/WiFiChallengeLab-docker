@@ -506,7 +506,7 @@ IDENTITY_MGT_SIM_ROGUE='6214070313370001@wlan.mnc007.mcc214.wifichallenge.com'
 ############################################################
 # CAMPUS ROAMING ESS — wifi-campus (multi-AP, client-less PMKID)
 ############################################################
-# One ESSID advertised by THREE APs (BSSIDs) on channels 1/6/11, forming a real
+# One ESSID advertised by THREE APs (BSSIDs) on channels 3/6/11, forming a real
 # roaming ESS on plain WPA2-PSK (no 802.11r; FT is intentionally omitted on this
 # PMKID target). There is NO client on this network on purpose: the PMKID travels in
 # the AP's first EAPOL frame, so a student harvests it straight from any BSSID
@@ -520,7 +520,7 @@ FLAG_ROAM='LF8FUh5DCX0RQBZoKGcIaDNreEFzAmMdc1VTBQRHDXgWSxRhKGULbzFjfUh0HA=='
 
 # AP 1
 WLAN_ROAM1='wlan31'
-CHANNEL_ROAM1='1'
+CHANNEL_ROAM1='3'
 MAC_ROAM1='F0:9F:C2:71:22:31'
 IP_ROAM1='192.168.21'
 

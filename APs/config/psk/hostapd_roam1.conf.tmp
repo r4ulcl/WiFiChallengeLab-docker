@@ -1,16 +1,8 @@
-# wifi-campus - roaming ESS, AP 1 of 3 (WPA2-PSK, client-less PMKID target)
-# Three APs share one ESSID on channels 1/6/11 and one PSK. There is NO client
-# on this network on purpose: hostapd puts the PMKID in EAPOL message 1, so it
-# is harvested straight from any BSSID (client-less, e.g. hcxdumptool), cracked
-# offline, and because the PSK is shared one cracked PMKID unlocks the whole ESS.
-#
-# Kept as plain WPA2-PSK (no 802.11r / FT-PSK): mixing FT-PSK into the AKM list
-# makes the client-less PMKID capture unreliable, and under mac80211_hwsim the
-# capture also relies on the campus-scoped ACK patch in
-# mac80211_hwsim/patch80211.sh (otherwise the AP's Assoc Resp / EAPOL msg 1 to
-# hcxdumptool's random client MAC is never ACKed and hostapd drops the STA
-# before the PMKID is sent). A real 802.11r FT roaming scenario should live on
-# its own separate BSSID rather than on this PMKID target.
+# Roaming ESS - AP 1 of 3 (WPA2-PSK, client-less PMKID target).
+# ESSID / channel / BSSID / PSK are templated from wlan_config(_challenge)
+# (ESSID_ROAM, CHANNEL_ROAM1, MAC_ROAM1, PASS_ROAM) - keep this file agnostic.
+# Plain WPA2-PSK on purpose (no 802.11r/FT-PSK). Needs the mac80211_hwsim ACK
+# patch and the hostapd PMKID patch; see APs/PMKID_TESTING.md.
 interface=$WLAN_ROAM1
 driver=nl80211
 
