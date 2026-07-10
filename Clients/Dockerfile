@@ -1,13 +1,17 @@
 FROM debian
 #FROM kalilinux/kali-rolling
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y macchanger iw sudo libcurl4-openssl-dev curl libz-dev module-assistant libssl-dev libnl-genl-3-dev libnl-3-dev pkg-config libsqlite3-dev git hostapd dnsmasq curl kmod make g++ libnl-3-dev libnl-genl-3-dev wpasupplicant apache2 php iproute2 net-tools iptables cpulimit gettext-base nano
-
-RUN apt-get install -y inetutils-ping isc-dhcp-client fping
-
-RUN apt-get install -y smbmap
-
-# autoremove any dependencies that are no longer needed
-RUN sudo apt-get --yes autoremove ; sudo apt-get autoclean ; sudo apt-get clean
+# php-cli provides the `php` CLI used by decode_passwords.sh; libapache2-mod-php
+# serves the portal pages; ca-certificates lets the HTTPS source build below
+# fetch its tarball.
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      apache2 ca-certificates cpulimit curl dnsmasq fping g++ gettext-base git \
+      hostapd inetutils-ping iproute2 iptables isc-dhcp-client iw kmod \
+      libapache2-mod-php libcurl4-openssl-dev libnl-3-dev libnl-genl-3-dev \
+      libsqlite3-dev libssl-dev libz-dev macchanger make module-assistant nano \
+      net-tools php-cli pkg-config smbmap sudo wpasupplicant \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 #RUN date
 
