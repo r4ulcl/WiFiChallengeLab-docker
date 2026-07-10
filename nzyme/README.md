@@ -53,4 +53,4 @@ http://IP:22900
 - privileged: true → Needed to have permissions over network interfaces (mode switching).
 
 ## Login Pass web
-admin:V6Slon4QrrM8RzzPrpluqZ8iI
+admin:admin
