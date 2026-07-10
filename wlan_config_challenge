@@ -506,15 +506,14 @@ IDENTITY_MGT_SIM_ROGUE='6214039313370001@wlan.mnc003.mcc214.wifichallenge.com'
 
 
 ############################################################
-# CAMPUS ROAMING ESS — wifi-university (multi-AP, client-less PMKID)
+# CAMPUS PMKID AP — wifi-university (single AP, client-less PMKID)
 ############################################################
-# One ESSID advertised by THREE APs (BSSIDs) on channels 3/6/11, forming a real
-# roaming ESS on plain WPA2-PSK (no 802.11r; FT is intentionally omitted on this
-# PMKID target). There is NO client on this network on purpose: the PMKID travels in
-# the AP's first EAPOL frame, so a student harvests it straight from any BSSID
-# (client-less, e.g. hcxdumptool/hcxpcapngtool), cracks the shared PSK, then
-# associates to any of the three APs and reads the flag from the router portal.
-# All three APs share the same PSK, so one cracked PMKID unlocks the whole ESS.
+# One ESSID on a single BSSID (channel 7) on plain WPA2-PSK (no 802.11r; FT is
+# intentionally omitted on this PMKID target). There is NO client on this network
+# on purpose: the PMKID travels in the AP's first EAPOL frame, so a student
+# harvests it straight from the BSSID (client-less, e.g. hcxdumptool/
+# hcxpcapngtool), cracks the PSK, then associates and reads the flag from the
+# router portal.
 # Mirrors wlan_config; keep the variable NAME set identical between the two files.
 ESSID_ROAM='wifi-university'
 NZYME_FINGERPRINT_ROAM=''
@@ -523,21 +522,9 @@ FLAG_ROAM='LF8FUh5GDXYXSBNtejBaOW5gKkdzUGIcLwRWV1EXVy9LH0RpfGcObzJjL0ZyHA=='
 
 # AP 1
 WLAN_ROAM1='wlan31'
-CHANNEL_ROAM1='3'
+CHANNEL_ROAM1='7'
 MAC_ROAM1='F0:9F:C2:3C:B1:31'
 IP_ROAM1='192.168.21'
-
-# AP 2
-WLAN_ROAM2='wlan32'
-CHANNEL_ROAM2='6'
-MAC_ROAM2='F0:9F:C2:3C:B1:32'
-IP_ROAM2='192.168.22'
-
-# AP 3
-WLAN_ROAM3='wlan33'
-CHANNEL_ROAM3='11'
-MAC_ROAM3='F0:9F:C2:3C:B1:33'
-IP_ROAM3='192.168.23'
 
 ############ CLIENTS ############
 # none — client-less on purpose (PMKID is captured directly from the APs)

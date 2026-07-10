@@ -10,7 +10,7 @@
 * Added **Start/Stop Nzyme** desktop launchers
 * Added an **EAP-TLS identity-leak scenario** (hardened vs. leaking client certificates)
 * Added a **SIM/USIM AP (`wifi-passpoint`, EAP-SIM/AKA/AKA')** with **three EAP-AKA' clients** on the same AP: a **leaking** client (permanent IMSI in the clear, any passive sniffer), a **rogue-lure** client (anonymous identity, so no passive leak, but it surrenders its IMSI to a student-built evil-twin/rogue AP that actively requests the permanent identity), and a **privacy-preserving** client (anonymous identity + pseudonym/fast-reauth), backed by a software HLR/AuC (`hlr_auc_gw` + Milenage, no physical SIM)
-* Added a **client-less PMKID roaming ESS (`wifi-campus`)**: one ESSID on **three WPA2-PSK BSSIDs** (channels 3/6/11, shared PSK, no client on purpose) using the free AP radios `wlan31-33`. Capture the PMKID client-lessly from any BSSID, crack the shared PSK offline, one PMKID unlocks the whole ESS. See `APs/PMKID_TESTING.md`
+* Added a **client-less PMKID AP (`wifi-campus`)**: one WPA2-PSK BSSID (channel 7, no client on purpose) on AP radio `wlan31`. Capture the PMKID client-lessly straight from the BSSID and crack the PSK offline. See `APs/PMKID_TESTING.md`
 * Grew the **client radio pool from 20 to 30** (`wlan40-69`, `radios=71`) and moved the **nzyme WIDS tap to `wlan70`**, freeing 10 client slots for new scenarios
 * Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**
 * Added **Vagrant audio support** for QEMU and VirtualBox

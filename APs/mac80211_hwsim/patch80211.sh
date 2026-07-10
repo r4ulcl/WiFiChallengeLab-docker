@@ -98,35 +98,31 @@ else
   echo "  • Extra monitor-ACK block already present"
 fi
 
-# Client-less PMKID for the wifi-campus roaming ESS.
-# The three campus BSSIDs run WPA2-PSK with NO real client on purpose. hcxdumptool
+# Client-less PMKID for the wifi-campus AP.
+# The campus BSSID runs WPA2-PSK with NO real client on purpose. hcxdumptool
 # associates from its own random client MAC, so the Assoc Resp + EAPOL msg 1
 # (carrying the PMKID) that hostapd sends are addressed to a MAC no hwsim radio
 # owns; mac80211_hwsim_tx_frame_no_nl() then reports the frame as un-ACKed and
 # hostapd drops the STA before the PMKID goes out. Force ack=true for frames
-# *sourced* from the campus BSSIDs so the association completes and the PMKID is
-# captured client-lessly. Scoped to those BSSIDs only (keep in sync with
-# MAC_ROAM1/2/3 in wlan_config) so every other AP keeps real ACK semantics.
+# *sourced* from the campus BSSID so the association completes and the PMKID is
+# captured client-lessly. Scoped to that BSSID only (keep in sync with
+# MAC_ROAM1 in wlan_config) so every other AP keeps real ACK semantics.
 if ! grep -q 'WiFiChallenge] Client-less PMKID campus ACK' "$CFILE"; then
   IFS= read -r -d '' PMKID_CAMPUS_ACK_BLOCK <<'EOF' || true
 	/* [WiFiChallenge] Client-less PMKID campus ACK.
-	 * wifi-campus BSSIDs have no real client, so hostapd's Assoc Resp and
+	 * The wifi-campus BSSID has no real client, so hostapd's Assoc Resp and
 	 * EAPOL msg 1 (with the PMKID) are addressed to hcxdumptool's random client
 	 * MAC that no hwsim radio owns and would never be ACKed. Force-ACK frames
-	 * sourced from these BSSIDs so the association completes and the PMKID is
-	 * captured client-lessly. One shared .ko serves both deploys, so BOTH BSSID
-	 * sets are listed. Keep in sync with MAC_ROAM1/2/3 in wlan_config (dev) AND
+	 * sourced from this BSSID so the association completes and the PMKID is
+	 * captured client-lessly. One shared .ko serves both deploys, so BOTH BSSIDs
+	 * are listed. Keep in sync with MAC_ROAM1 in wlan_config (dev) AND
 	 * wlan_config_challenge (CTF). */
 	if (!ack) {
 		static const u8 wifichallenge_pmkid_bssids[][ETH_ALEN] = {
 			/* wlan_config (dev/local) */
 			{ 0xf0, 0x9f, 0xc2, 0x71, 0x22, 0x31 },
-			{ 0xf0, 0x9f, 0xc2, 0x71, 0x22, 0x32 },
-			{ 0xf0, 0x9f, 0xc2, 0x71, 0x22, 0x33 },
 			/* wlan_config_challenge (CTF deploy) */
 			{ 0xf0, 0x9f, 0xc2, 0x3c, 0xb1, 0x31 },
-			{ 0xf0, 0x9f, 0xc2, 0x3c, 0xb1, 0x32 },
-			{ 0xf0, 0x9f, 0xc2, 0x3c, 0xb1, 0x33 },
 		};
 		int wc_i;
 

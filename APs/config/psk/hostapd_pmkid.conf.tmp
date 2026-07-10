@@ -1,13 +1,13 @@
-# Roaming ESS - AP 3 of 3 (WPA2-PSK, client-less PMKID target).
+# Campus PMKID AP (WPA2-PSK, client-less PMKID target).
 # ESSID / channel / BSSID / PSK are templated from wlan_config(_challenge)
-# (ESSID_ROAM, CHANNEL_ROAM3, MAC_ROAM3, PASS_ROAM) - keep this file agnostic.
+# (ESSID_ROAM, CHANNEL_ROAM1, MAC_ROAM1, PASS_ROAM) - keep this file agnostic.
 # Plain WPA2-PSK on purpose (no 802.11r/FT-PSK). Needs the mac80211_hwsim ACK
 # patch and the hostapd PMKID patch; see APs/PMKID_TESTING.md.
-interface=$WLAN_ROAM3
+interface=$WLAN_ROAM1
 driver=nl80211
 
 hw_mode=g
-channel=$CHANNEL_ROAM3
+channel=$CHANNEL_ROAM1
 ssid=$ESSID_ROAM
 
 wpa=2
@@ -16,5 +16,5 @@ wpa_pairwise=CCMP
 rsn_pairwise=CCMP
 wpa_passphrase=$PASS_ROAM_CLEAR
 
-ctrl_interface=/run/hostapd-$WLAN_ROAM3
+ctrl_interface=/run/hostapd-$WLAN_ROAM1
 ctrl_interface_group=0

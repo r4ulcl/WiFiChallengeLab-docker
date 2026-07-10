@@ -132,9 +132,7 @@ AP_ROWS=(
   "WEP old          |wlan11|ESSID_WEP|CHANNEL_WEP|MAC_WEP|192.168.1|WEP|wep/hostapd_wep.conf"
   "PSK mobile       |wlan12|ESSID_PSK|CHANNEL_PSK|MAC_PSK|192.168.2|PSK|psk/hostapd_wpa.conf"
   "PSK event        |wlan13|ESSID_WPS|CHANNEL_WPS|MAC_WPS|192.168.3|PSK|psk/hostapd_wps.conf"
-  "PSK campus roam1 |wlan31|ESSID_ROAM|CHANNEL_ROAM1|MAC_ROAM1|192.168.21|PSK|psk/hostapd_roam1.conf"
-  "PSK campus roam2 |wlan32|ESSID_ROAM|CHANNEL_ROAM2|MAC_ROAM2|192.168.22|PSK|psk/hostapd_roam2.conf"
-  "PSK campus roam3 |wlan33|ESSID_ROAM|CHANNEL_ROAM3|MAC_ROAM3|192.168.23|PSK|psk/hostapd_roam3.conf"
+  "PSK campus       |wlan31|ESSID_ROAM|CHANNEL_ROAM1|MAC_ROAM1|192.168.21|PSK|psk/hostapd_roam1.conf"
   "MGT corp         |wlan15|ESSID_MGT|CHANNEL_MGT|MAC_MGT|192.168.5|MGT|mgt/hostapd_wpe.conf"
   "MGT corp #2      |wlan16|ESSID_MGT2|CHANNEL_MGT2|MAC_MGT2|192.168.6|MGT|mgt/hostapd_wpe2.conf"
   "MGT regional     |wlan17|ESSID_MGT_RELAY|CHANNEL_MGT_RELAY|MAC_MGT_RELAY|192.168.7|MGT|mgt/hostapd_wpe_relay.conf"
@@ -661,14 +659,14 @@ if [ "$DO_TOOLS" = 1 ]; then
 fi
 
 ########################################
-# 7b. Client-less PMKID target (roam APs)
+# 7b. Client-less PMKID target (campus AP)
 ########################################
-# The wifi-campus/wifi-university roaming ESS is a client-less PMKID target that
+# The wifi-campus/wifi-university AP is a client-less PMKID target that
 # needs TWO patches (see APs/PMKID_TESTING.md): the mac80211_hwsim ACK patch (so
 # the AP's EAPOL msg1 reaches hcxdumptool under hwsim) and the hostapd 2.10 PMKID
 # patch (so msg1 carries the PMKID KDE for WPA2-PSK). hcxdumptool must also be new
 # enough for -w/--rds (the distro 6.2.6 build lacks both).
-section "Client-less PMKID target (roam APs)"
+section "Client-less PMKID target (campus AP)"
 # (a) hwsim ACK patch: the LOADED module must be the WiFiChallenge build. The patch
 # stamps MODULE_VERSION("...-WiFiChallengeLab-version"); stock hwsim has none.
 HWVER=""; container_running "$APS_C" && HWVER="$(dexec "$APS_C" 'cat /sys/module/mac80211_hwsim*/version 2>/dev/null | head -1')"

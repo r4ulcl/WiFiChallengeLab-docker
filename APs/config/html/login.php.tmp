@@ -135,10 +135,8 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_DOWNGRADE}.') === 0)
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') === 0)
   loginflag($flag_6ghz);
 
-# Campus roaming ESS: same flag from any of the three wifi-campus AP subnets.
-if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0
- || strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM2}.') === 0
- || strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM3}.') === 0)
+# Campus PMKID AP: flag from the wifi-campus AP subnet.
+if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0)
   loginflag($flag_roam);
 
 ?>
