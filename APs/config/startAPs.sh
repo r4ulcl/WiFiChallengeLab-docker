@@ -143,12 +143,23 @@ host_aps_apd /root/psk/hostapd_wps.conf > /root/logs/hostapd_wps.log 2>&1 &
 # Campus PMKID AP (wifi-campus): single AP on WPA2-PSK.
 # Client-less PMKID target: no client is attached on purpose.
 ip addr add $IP_ROAM1.1/24 dev $WLAN_ROAM1
-host_aps_apd /root/psk/hostapd_roam1.conf > /root/logs/hostapd_roam1.log 2>&1 &
+host_aps_apd /root/psk/hostapd_pmkid.conf > /root/logs/hostapd_pmkid.log 2>&1 &
 
-# MGT
-ip addr add $IP_MGT.1/24 dev $WLAN_MGT
+# MGT — wifi-corp as a real roaming ESS (L2 bridge)
+# AP1 (wlan15) and AP2 (wlan16) advertise the same ESSID on the same channel but
+# are TWO BSSIDs. Instead of giving each radio its own /24, both are enslaved to a
+# single Linux bridge (br-mgt) so they form ONE L2 segment. Only the bridge holds
+# the gateway IP ($IP_MGT.1 = 192.168.5.1), so a client reaches the SAME portal no
+# matter which AP it associates to or roams between. Each hostapd adds its wlan to
+# br-mgt via the 'bridge=br-mgt' line in its config, so the bridge must exist
+# BEFORE hostapd starts (hostapd enslaves the iface after switching it to AP mode).
+ip link add name br-mgt type bridge
+# Pin the bridge MAC so the gateway's L2 address is stable (a bridge otherwise
+# adopts the lowest port MAC as radios enslave, changing the gateway MAC mid-run).
+ip link set br-mgt address $MAC_MGT
+ip link set br-mgt up
+ip addr add $IP_MGT.1/24 dev br-mgt
 host_aps_apd /root/mgt/hostapd_wpe.conf > /root/logs/hostapd_wpe.log 2>&1 &
-ip addr add $IP_MGT2.1/24 dev $WLAN_MGT2
 host_aps_apd /root/mgt/hostapd_wpe2.conf > /root/logs/hostapd_wpe2.log 2>&1 &
 
 # MGT Relay

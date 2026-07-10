@@ -24,13 +24,14 @@ dhcp-range=$IP_WPS.2,$IP_WPS.100,24h
 dhcp-host=$WLAN_ROAM1,$MAC_ROAM1,$IP_ROAM1.1
 dhcp-range=$IP_ROAM1.2,$IP_ROAM1.100,24h
 
-# MGT
-dhcp-host=$WLAN_MGT,$MAC_MGT,$IP_MGT.1
+# MGT — wifi-corp. wlan15 (AP1) + wlan16 (AP2) are bridged (br-mgt) into ONE L2
+# subnet, so a SINGLE DHCP scope serves clients from both APs: they all get a
+# 192.168.5.0/24 lease and reach the same 192.168.5.1 portal, whichever AP they
+# associate to or roam between. dnsmasq binds this range to br-mgt (the only iface
+# that owns a 192.168.5.x address); there is deliberately NO separate 192.168.6
+# scope any more. The dhcp-host just pins .1 (the gateway) so it is never leased.
+dhcp-host=$MAC_MGT,$IP_MGT.1
 dhcp-range=$IP_MGT.2,$IP_MGT.100,24h
-
-# MGT 2
-dhcp-host=$WLAN_MGT2,$MAC_MGT2,$IP_MGT2.1
-dhcp-range=$IP_MGT2.2,$IP_MGT2.100,24h
 
 # MGT RELAY
 dhcp-host=$WLAN_MGT_RELAY,$MAC_MGT_RELAY,$IP_MGT_RELAY.1
