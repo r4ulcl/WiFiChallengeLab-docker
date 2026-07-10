@@ -462,7 +462,8 @@ bzip2 -d assless-chaps/10-million-password-list-top-1000000.db.bz2 || true
 
 # dragondrain
 cd "${TOOLS}"
-git clone  https://github.com/vanhoefm/dragondrain-and-time
+# Skip clone if already present (re-provision) and tolerate transient failures.
+[ ! -d dragondrain-and-time ] && git clone https://github.com/vanhoefm/dragondrain-and-time || true
 apt-get update
 apt-get install autoconf automake libtool shtool libssl-dev pkg-config -y
 
