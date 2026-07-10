@@ -219,29 +219,10 @@ host_aps_apd /root/wep/hostapd_wep.conf > /root/logs/hostapd_wep.log 2>&1 &
 ip addr add $IP_OWE.1/24 dev $WLAN_OWE
 host_aps_apd /root/owe/hostapd_owe.conf > /root/logs/hostapd_owe.log 2>&1 &
 
-# --- Per-AP signal variation (±10% around a base TX power) --------------------
-# mac80211_hwsim reports  RSSI = receiver.rx_rssi(-50) + sender.bss_conf.txpower.
-# Every AP otherwise defaults to the 2.4GHz reg max (20 dBm), so all APs show an
-# identical PWR in a scan. Giving each AP vif a slightly different fixed txpower
-# makes each BSSID appear at its own signal level. Transmitter-side only: this
-# sets how strongly THIS AP is heard by clients/attacker.
-SIGNAL_BASE_DBM="${SIGNAL_BASE_DBM:-12}"   # center TX power (dBm); keep base+jitter <= 20 on 2.4GHz
-SIGNAL_JITTER_PCT="${SIGNAL_JITTER_PCT:-10}"
-set_random_txpower() {
-    local dev="$1"
-    # Wait for hostapd to create/switch the vif before setting power.
-    for _ in $(seq 1 30); do ip link show "$dev" &>/dev/null && break; sleep 0.5; done
-    local base_mbm=$(( SIGNAL_BASE_DBM * 100 ))                 # iw uses mBm (dBm*100)
-    local span=$(( base_mbm * SIGNAL_JITTER_PCT / 100 ))        # ±10% in mBm
-    local mbm=$(( base_mbm - span + (RANDOM % (2 * span + 1)) ))
-    iw dev "$dev" set txpower fixed "$mbm" 2>/dev/null \
-        && echo "txpower $dev -> ${mbm} mBm"
-}
-# Let the hostapd instances above finish creating their vifs, then jitter each.
-sleep 5
-for d in $(iw dev 2>/dev/null | awk '/Interface/{print $2}'); do
-    set_random_txpower "$d"
-done > /root/logs/txpower.log 2>&1
+# Per-AP signal variation is done in the driver (mac80211_hwsim.c, patched by
+# patch80211.sh): each radio gets a small, stable per-radio RSSI offset so every
+# BSSID shows a distinct PWR. Done in the kernel so it is immune to the hostapd
+# txpower race an `iw set txpower` loop hit here.
 
 #ip addr del $IP_190.15/24 dev enp0s3
 

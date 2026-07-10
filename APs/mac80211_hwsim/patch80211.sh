@@ -146,4 +146,38 @@ else
   echo "  • Client-less PMKID campus ACK block already present"
 fi
 
+# Per-radio RSSI jitter so every AP/client shows a distinct signal.
+# Stock mac80211_hwsim reports the SAME signal for every radio on a channel
+# (rx_status.signal = data->rx_rssi + vif txpower), so a scan shows all BSSIDs
+# clustered at one or two identical PWR values. Add a small, STABLE per-radio
+# offset (~±10% => ±3 dB) hashed from the radio's own hw MAC, right where the
+# base signal is set. Being in the driver, this is immune to the hostapd/iw
+# txpower race a userspace `iw set txpower` loop suffered, and deterministic per
+# radio so a given BSSID's PWR stays constant across beacons (no flicker).
+if ! grep -q 'WiFiChallenge] Per-radio RSSI jitter' "$CFILE"; then
+  IFS= read -r -d '' WC_JITTER_BLOCK <<'EOF' || true
+	/* [WiFiChallenge] Per-radio RSSI jitter: give each radio a small, STABLE
+	 * signal offset (~+/-10%, i.e. +/-3 dB) hashed from its own hw MAC, so every
+	 * AP/client shows a distinct PWR in a scan instead of all radios reporting
+	 * an identical level. Deterministic per radio (no per-frame flicker). */
+	{
+		u32 wc_h = 0;
+		int wc_i;
+
+		for (wc_i = 0; wc_i < ETH_ALEN; wc_i++)
+			wc_h = wc_h * 131u + data->addresses[0].addr[wc_i];
+		rx_status.signal += (int)(wc_h % 7) - 3;
+	}
+EOF
+  export WC_JITTER_BLOCK
+  perl -0777 -i -pe '
+    my $blk = $ENV{WC_JITTER_BLOCK};
+    s/(rx_status\.signal \+= info->control\.vif->bss_conf\.txpower;\n)/$1$blk/;
+  ' "$CFILE"
+  unset WC_JITTER_BLOCK
+  echo "  • Per-radio RSSI jitter block inserted"
+else
+  echo "  • Per-radio RSSI jitter block already present"
+fi
+
 echo "✔ mac80211_hwsim.c patched successfully"

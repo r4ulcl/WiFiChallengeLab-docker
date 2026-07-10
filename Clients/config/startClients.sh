@@ -296,28 +296,10 @@ fping -l -p 3000 -q \
   "$IP_MGT_SIM.1" \
   > /dev/null 2>&1 &
 
-# --- Per-client signal variation (±10% around a base TX power) ----------------
-# mac80211_hwsim reports  RSSI = receiver.rx_rssi(-50) + sender.bss_conf.txpower.
-# Each station otherwise transmits at the 2.4GHz reg max (20 dBm), so every STA
-# shows an identical PWR to an attacker/AP. A slightly different fixed txpower
-# per client interface makes each station appear at its own signal level.
-# Transmitter-side only: sets how strongly THIS client is heard by others.
-# NB: interfaces the re-auth loops take down/up (e.g. the randmac station) reset
-# to reg max on the next association; that is acceptable for the lab.
-SIGNAL_BASE_DBM="${SIGNAL_BASE_DBM:-12}"   # center TX power (dBm); keep base+jitter <= 20 on 2.4GHz
-SIGNAL_JITTER_PCT="${SIGNAL_JITTER_PCT:-10}"
-set_random_txpower() {
-    local dev="$1"
-    for _ in $(seq 1 30); do ip link show "$dev" &>/dev/null && break; sleep 0.5; done
-    local base_mbm=$(( SIGNAL_BASE_DBM * 100 ))                 # iw uses mBm (dBm*100)
-    local span=$(( base_mbm * SIGNAL_JITTER_PCT / 100 ))        # ±10% in mBm
-    local mbm=$(( base_mbm - span + (RANDOM % (2 * span + 1)) ))
-    iw dev "$dev" set txpower fixed "$mbm" 2>/dev/null \
-        && echo "txpower $dev -> ${mbm} mBm"
-}
-for d in $(iw dev 2>/dev/null | awk '/Interface/{print $2}'); do
-    set_random_txpower "$d"
-done > /root/logs/txpower.log 2>&1
+# Per-client signal variation is done in the driver (mac80211_hwsim.c, patched
+# by patch80211.sh in the AP image): each radio gets a small, stable per-radio
+# RSSI offset so every station shows a distinct PWR. Done in the kernel so it is
+# immune to the hostapd/supplicant txpower race an `iw set txpower` loop hit here.
 
 sleep 10 && echo "ALL SET"
 
