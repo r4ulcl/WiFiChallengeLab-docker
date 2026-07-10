@@ -100,7 +100,10 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 # unavailable and every EAP-TLS handshake would fall back to cleartext TLS 1.2.
 # NOTE: this one binary serves ALL lab SSIDs, so we start from upstream defconfig
 # and re-enable every feature the lab uses (WEP/WPS/SAE/OWE/EAP server + nl80211 +
-# HT/VHT/HE) alongside TLSV13. Build deps (make, gcc, libssl-dev, libnl-*-dev,
+# HT/VHT/HE + 802.11r FT for the wifi-campus roaming ESS) alongside TLSV13.
+# CONFIG_IEEE80211R is off in upstream defconfig, so without it hostapd rejects the
+# 'FT-PSK' wpa_key_mgmt in hostapd_roam1/2/3 and the three campus APs fail to start.
+# Build deps (make, gcc, libssl-dev, libnl-*-dev,
 # pkg-config, wget) are already installed above.
 # EAP-SIM/AKA/AKA' (CONFIG_EAP_SIM/AKA/AKA_PRIME) drive the SIM/USIM AP
 # upstream defconfig ships them commented-out, so we turn them on
@@ -118,6 +121,7 @@ RUN cd /tmp \
       'CONFIG_IEEE80211N=y' \
       'CONFIG_IEEE80211AC=y' \
       'CONFIG_IEEE80211AX=y' \
+      'CONFIG_IEEE80211R=y' \
       'CONFIG_WEP=y' \
       'CONFIG_WPS=y' \
       'CONFIG_SAE=y' \
