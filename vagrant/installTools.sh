@@ -280,7 +280,7 @@ bundle install || true
 install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
 
 # airgeddon
-apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
+apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only mdk3 mdk4 arping ccze
 systemctl disable --now lighttpd || true
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
@@ -445,6 +445,15 @@ cd wpa_supplicant-2.10/wpa_supplicant && make -j"$(nproc)" || true
 cd "${TOOLS}"
 [ ! -d hcxtools-src ] && git clone https://salsa.debian.org/pkg-security-team/hcxtools hcxtools-src
 cd hcxtools-src && make -j"$(nproc)" && make install || true
+
+# hcxdumptool from upstream source (latest). The distro package is 6.2.6 (2022)
+cd "${TOOLS}"
+apt-get install -y libpcap-dev pkg-config gcc make
+[ ! -d hcxdumptool-src ] && git clone https://github.com/ZerBea/hcxdumptool.git hcxdumptool-src
+cd hcxdumptool-src && git fetch --tags || true
+git checkout "$(git describe --tags "$(git rev-list --tags --max-count=1)")" || true
+make -j"$(nproc)" && make install || true
+hash -r || true
 
 # Wifiphisher
 cd "${TOOLS}"
