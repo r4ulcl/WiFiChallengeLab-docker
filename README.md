@@ -61,7 +61,7 @@ Docker version of WiFiChallenge Lab with reworked challenges and improved stabil
 - Runs entirely on Docker, removing the nested VMs of v1.0: the lab and its networks are virtualized with `mac80211_hwsim`, making it lighter and more stable.
 - Targets the full range of modern WiFi security: OPN, WPA2, WPA3 and Enterprise (MGT) networks.
 - Realistic attack scenarios, including WPA3 bruteforce and downgrade, multiple Enterprise (MGT) APs, real captive-portal evasion (not just MAC filtering), and client phishing with a fake website.
-- Gives the attacker 6 virtual WiFi adapters (`wlan0` to `wlan5`), backed by ~61 `mac80211_hwsim` radios that drive the many simultaneous APs and clients.
+- Gives the attacker 6 virtual WiFi adapters (`wlan0` to `wlan5`), backed by 71 `mac80211_hwsim` radios that drive the many simultaneous APs and clients.
 - Built-in monitoring and intrusion detection with the nzyme WIDS.
 - Deploy it your way: download a prebuilt VM, build your own with Vagrant (VirtualBox, VMware or Hyper-V), or run the containers directly on a Linux host or Kali.
 - Works on both x86-64 and ARM hosts, including Apple Silicon (M1, M2, etc.).
