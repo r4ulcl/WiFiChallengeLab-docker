@@ -78,7 +78,11 @@ rm /root/wlan_config.clear
 
 #sudo modprobe mac80211_hwsim radios=13
 #40-59
-macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.log 
+
+# The macchanger calls below log into /root/logs, so the dir must exist first.
+mkdir -p /root/logs/
+
+macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.log
 macchanger -m $MAC_MGT_GTC $WLAN_CLIENT_MGT_GTC >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS $WLAN_CLIENT_MGT_TLS >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS_PHISHING $WLAN_CLIENT_MGT_TLS_PHISHING >> /root/logs/macchanger.log
@@ -117,7 +121,6 @@ sleep 5
 #sleep 15
 
 # Delete logs to >> always
-mkdir /root/logs/ 2> /dev/null
 rm /root/logs/ 2> /dev/null
 
 # Exec cronClient
