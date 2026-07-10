@@ -183,7 +183,11 @@ fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
 #python3 -m pip install aioquic || true
 pip3 install tqdm pem aioquic --break-system-packages || true
-python3 -m pip install --break-system-packages -r pip.req
+if [ -f "${TOOLS}/eaphammer/pip.req" ]; then
+  python3 -m pip install --break-system-packages -r "${TOOLS}/eaphammer/pip.req" || python3 -m pip install -r "${TOOLS}/eaphammer/pip.req"
+else
+  echo "Warning: ${TOOLS}/eaphammer/pip.req not found; skipping eaphammer pip.req install"
+fi
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
