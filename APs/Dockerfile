@@ -100,9 +100,10 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 # unavailable and every EAP-TLS handshake would fall back to cleartext TLS 1.2.
 # NOTE: this one binary serves ALL lab SSIDs, so we start from upstream defconfig
 # and re-enable every feature the lab uses (WEP/WPS/SAE/OWE/EAP server + nl80211 +
-# HT/VHT/HE + 802.11r FT for the wifi-campus roaming ESS) alongside TLSV13.
-# CONFIG_IEEE80211R is off in upstream defconfig, so without it hostapd rejects the
-# 'FT-PSK' wpa_key_mgmt in hostapd_roam1/2/3 and the three campus APs fail to start.
+# HT/VHT/HE) alongside TLSV13.
+# CONFIG_IEEE80211R (below) is now a harmless leftover: the wifi-campus roam APs
+# were switched to plain WPA2-PSK (no FT-PSK) so the client-less PMKID target is
+# reliable under mac80211_hwsim, and no active hostapd config requires FT anymore.
 # Build deps (make, gcc, libssl-dev, libnl-*-dev,
 # pkg-config, wget) are already installed above.
 # EAP-SIM/AKA/AKA' (CONFIG_EAP_SIM/AKA/AKA_PRIME) drive the SIM/USIM AP
@@ -110,10 +111,20 @@ RUN mv /usr/sbin/hostapd /usr/sbin/host_aps_apd
 # here and additionally build hlr_auc_gw - the software HLR/AuC that answers
 # hostapd's eap_sim_db socket with Milenage vectors, so no physical SIM or PC/SC
 # reader is required.
+# wifi-campus client-less PMKID patch: since hostapd 2.10, wpa_auth.c deliberately
+# omits the PMKID KDE from EAPOL msg 1/4 for plain WPA2-PSK (anti-PMKID-attack
+# hardening) -- it is only added for 802.1X/EAP, SAE and OWE. That makes the
+# client-less PMKID target (APs/PMKID_TESTING.md) impossible: hostapd sends msg1
+# with "WPA Key Data Length: 0" and hcxdumptool captures no PMKID. Re-add PSK to
+# that condition so the PMKID KDE (derived from the PMK in the else branch) is
+# emitted again, matching typical real-world/consumer AP behaviour. Applies to all
+# lab WPA2-PSK APs; the grep guard fails the build if upstream renames the anchor.
 RUN cd /tmp \
  && wget -q https://w1.fi/releases/hostapd-2.10.tar.gz \
  && tar xf hostapd-2.10.tar.gz \
  && cd hostapd-2.10/hostapd \
+ && sed -i 's#(wpa_key_mgmt_wpa_ieee8021x(sm->wpa_key_mgmt) ||#(wpa_key_mgmt_wpa_psk(sm->wpa_key_mgmt) || /* WiFiChallenge: PMKID in M1/4 for WPA2-PSK (client-less PMKID lab target) */\n\t     wpa_key_mgmt_wpa_ieee8021x(sm->wpa_key_mgmt) ||#' ../src/ap/wpa_auth.c \
+ && grep -q 'WiFiChallenge: PMKID in M1/4 for WPA2-PSK' ../src/ap/wpa_auth.c \
  && cp defconfig .config \
  && printf '%s\n' \
       'CONFIG_DRIVER_NL80211=y' \
