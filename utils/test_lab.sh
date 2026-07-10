@@ -175,8 +175,9 @@ CLIENT_ROWS=(
   "59|ESSID_MGT_SIM|wpa_sim_leak.conf|yes|supplicantSIM_leak.log"
   "60|ESSID_MGT_SIM|wpa_sim.conf|yes|supplicantSIM.log"
   "61|ESSID_MGT_SIM|wpa_sim_rogue.conf|yes|supplicantSIM_rogue.log"
+  "62||randmac.conf|no|supplicantRANDMAC.log"
 )
-EXPECTED_CLIENT_PROCS=20
+EXPECTED_CLIENT_PROCS=21
 
 ########################################
 # Attacker toolkit
@@ -511,8 +512,9 @@ if container_running "$CLI_C"; then
         [ "${lrf:-0}" -gt 0 ] && problems+=("${lrf} recent auth-fail line(s)")
       fi
     fi
-    # NB: clients 45/46 (PSK_NOAP) and 51 (phishing) are *designed* not to
-    # associate, so auth failures in their logs are expected - don't flag them.
+    # NB: clients 45/46 (PSK_NOAP), 51 (phishing) and 62 (randomized-MAC probe)
+    # are *designed* not to associate, so auth failures / no connect in their logs
+    # are expected - don't flag them.
     if [ "${#problems[@]}" -eq 0 ]; then
       tag=""; [ -n "$rotated" ] && tag=" ($rotated)" || { [ "$connected_log" = 1 ] && tag=" (connected)"; }
       pass "client $wlan ${essid:-probe-only} ok${tag}"
