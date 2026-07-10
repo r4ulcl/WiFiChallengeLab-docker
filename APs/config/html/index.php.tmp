@@ -204,8 +204,8 @@ private_key     = /root/certs/server.key
 private_key_passwd = whatever
 dh_file         = /etc/hostapd-wpe/dh
 
-ssid    = wifi-corp
-channel = 44</pre>";
+ssid    = $ESSID_MGT
+channel = $CHANNEL_MGT</pre>";
     echo "<p>Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a></p>";
 }
 
