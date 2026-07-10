@@ -19,7 +19,7 @@ STOCK_MODNAME="mac80211_hwsim"
 AUTO_INSTALL_DEPS="${AUTO_INSTALL_DEPS:-0}"
 HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
 # Version stamped into the patched module by patch80211.sh (single source of truth).
-TARGET_VERSION="2.4.1-WiFiChallengeLab-version"
+TARGET_VERSION="2.5-WiFiChallengeLab-version"
 # ----------------------------------------------------------------------
 
 ### ---- Fast path: already installed? -------------------------------
@@ -185,7 +185,7 @@ fi
 
 PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 
-TARGET_VERSION_ERROR="2.4.1-WiFiChallengeLab-version"
+TARGET_VERSION_ERROR="2.5-WiFiChallengeLab-version"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install

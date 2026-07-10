@@ -3,7 +3,7 @@ set -euo pipefail
 
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
-TARGET_VERSION="2.4.1-WiFiChallengeLab-version"
+TARGET_VERSION="2.5-WiFiChallengeLab-version"
 
 REMOVE_ANY_VERSION=0
 
@@ -13,7 +13,7 @@ Usage:
   sudo bash uninstall.sh [--remove-any-version]
 
 Options:
-  --remove-any-version  Remove the custom module file even if version != 2.4.1
+  --remove-any-version  Remove the custom module file even if version != 2.5
   -h, --help            Show this help
 EOF
 }
