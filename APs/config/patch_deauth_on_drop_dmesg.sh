@@ -103,7 +103,10 @@ patch_phy_is_target() {
 }
 
 sudo dmesg -wH | while IFS= read -r patch_line; do
-  if [[ "$patch_line" =~ \[HWSIM-PATCH\]\[(phy[0-9]+)\]\ Flood\ window\ \(([0-9]+)/([0-9]+)\) ]]; then
+  # Match the kernel patch's actual print format:
+  #   [HWSIM-PATCH][phyN] Flood window auth=.. sae_auth=.. assoc=.. total=.. (streak=N/M)
+  # (.* absorbs the auth/sae_auth/assoc/total fields; captures phy, streak-now, streak-max)
+  if [[ "$patch_line" =~ \[HWSIM-PATCH\]\[(phy[0-9]+)\]\ Flood\ window\ .*\(streak=([0-9]+)/([0-9]+)\) ]]; then
     patch_phy="${BASH_REMATCH[1]}"
     patch_window="${BASH_REMATCH[2]}"
     patch_total="${BASH_REMATCH[3]}"
