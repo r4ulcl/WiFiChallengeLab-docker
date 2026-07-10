@@ -1,0 +1,22 @@
+# Preferred-network list: each network is a directed probe (scan_ssid=1). None of
+# these SSIDs exist in the lab, so the station keeps probing without associating.
+network={
+    ssid="Andres-iPhone"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=3
+}
+
+network={
+    ssid="MOVISTAR_A31F"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=2
+}
+
+network={
+    ssid="AeropuertoT4-WiFi"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=1
+}

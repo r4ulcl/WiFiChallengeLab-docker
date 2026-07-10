@@ -72,6 +72,9 @@ envsubst_tmp
 cd /root/oweClient/
 envsubst_tmp
 
+cd /root/randmacClient/
+envsubst_tmp
+
 rm /root/wlan_config.clear
 
 #sleep 5
@@ -214,6 +217,25 @@ done &
 
 # Wait for this ID at the end
 LAST=$!
+
+# MAC-randomizing station: every cycle it picks a new locally-administered MAC,
+# but its probe requests keep the same IEs and preferred-network list, so it can
+# still be fingerprinted and tracked across MAC changes.
+while :
+do
+    # Random unicast, locally-administered MAC (first octet bit1=1 => x2/x6/xA/xE).
+    RANDMAC=$(printf '%02x:%02x:%02x:%02x:%02x:%02x' \
+        "$(( (RANDOM & 0xFC) | 0x02 ))" \
+        "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))" \
+        "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))")
+    # macchanger needs the interface down; wpa_supplicant brings it back up.
+    ip link set $WLAN_CLIENT_RANDMAC down 2> /dev/null
+    macchanger -m "$RANDMAC" $WLAN_CLIENT_RANDMAC >> /root/logs/macchanger_randmac.log 2>&1
+    # Fixed dwell keeps the probe cadence regular (part of the fingerprint).
+    sudo timeout -k 1s 90s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_RANDMAC -c /root/randmacClient/randmac.conf >> /root/logs/supplicantRANDMAC.log 2>&1 &
+    wait $!
+    sleep 2
+done &
 
 # PSK .2
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_PSK  -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &

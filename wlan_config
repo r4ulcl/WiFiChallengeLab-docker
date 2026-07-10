@@ -541,7 +541,16 @@ IP_ROAM3='192.168.23'
 
 
 ############################################################
+# RANDOMIZED-MAC CLIENT — trackable by probe fingerprint (client-less, no AP)
+############################################################
+# MAC-randomizing station: picks a new locally-administered MAC each cycle but
+# keeps the same probe fingerprint + PNL, so it stays trackable. No MAC_ var
+# because the MAC is randomized at runtime.
+WLAN_CLIENT_RANDMAC=wlan62
+
+
+############################################################
 # FREE RADIOS  (radios=71 -> wlan0-70; nzyme WIDS tap = wlan70)
 ############################################################
 # ns-ap free (wlan6-39):     wlan34 wlan35 wlan36 wlan37 wlan38 wlan39  (+ wlan6-9 attacker-spare; wlan31-33 = wifi-campus roaming ESS)
-# ns-client free (wlan40-69): wlan62 wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69  (wlan61 = MGT SIM rogue-lure)
+# ns-client free (wlan40-69): wlan63 wlan64 wlan65 wlan66 wlan67 wlan68 wlan69  (wlan61 = MGT SIM rogue-lure; wlan62 = randomized-MAC probe client)

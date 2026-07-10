@@ -541,3 +541,12 @@ IP_ROAM3='192.168.23'
 
 ############ CLIENTS ############
 # none — client-less on purpose (PMKID is captured directly from the APs)
+
+
+############################################################
+# RANDOMIZED-MAC CLIENT — trackable by probe fingerprint (client-less, no AP)
+############################################################
+# MAC-randomizing station: picks a new locally-administered MAC each cycle but
+# keeps the same probe fingerprint + PNL, so it stays trackable. No MAC_ var
+# because the MAC is randomized at runtime.
+WLAN_CLIENT_RANDMAC=wlan62
