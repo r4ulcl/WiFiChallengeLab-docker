@@ -31,6 +31,7 @@
 * Fixed an **image tag error** in the challenge compose file
 * Fixed the **MGT MSCHAP/GTC simulated logins** using a MAC instead of the gateway IP
 * Removed **`ieee80211w`** from the MSCHAPv2 relay client to match the AP
+* Set **MFP optional** (`ieee80211w=1`) on the **WPA3 downgrade AP** so its `SAE`/`WPA2-PSK` transition mode works — mandatory MFP would block the WPA2-PSK downgrade path
 * **Deduplicated the TLS certificates** into a single generated set and fixed a **stray `wget`** in the AP `Dockerfile`
 
 ### Miscellaneous Improvements
@@ -40,6 +41,7 @@
 * Removed **email/PII and legacy Netscape fields** from generated certificates
 * Reworked **healthchecks and compose files** across all variants
 * Made **hostapd per-SSID logs capture stderr** (`2>&1`)
+* Gave **each AP and client a distinct, stable signal level** via per-radio RSSI jitter (~±3 dB) in the `mac80211_hwsim` driver, so scans no longer show every BSSID/station clustered at one identical PWR; done in-kernel (deterministic per radio, no per-beacon flicker) instead of a racy userspace `iw txpower` loop that hostapd overrode
 * Ran **each MGT relay supplicant in its own loop** so a stalled one no longer blocks the others
 * **Backgrounded the client `fping` keepalive**
 * Updated **OPEN_SOURCE_REFERENCES.md**
