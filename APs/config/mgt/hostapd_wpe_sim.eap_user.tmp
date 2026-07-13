@@ -12,7 +12,7 @@
 # The permanent identity carries the IMSI in CLEARTEXT inside EAP-Response/Identity,
 # so it is trivially harvested by a passive sniffer. Subscribers below (kept verbatim
 # so the identity<->credential cross-check in utils/test_lab.sh matches the "6"*
-# wildcard): $IDENTITY_MGT_SIM $IDENTITY_MGT_SIM_LEAK $IDENTITY_MGT_SIM_ROGUE
+# wildcard): $IDENTITY_MGT_SIM $IDENTITY_MGT_SIM_LEAK
 
 # Secure client starts with an anonymous outer identity; match it to AKA' so the
 # server then requests the (protected) permanent identity / accepts a pseudonym.

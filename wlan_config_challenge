@@ -480,12 +480,6 @@ SIM_MGT_OPC='171c81b1d2e86fd17173829c2ed7191e'
 SIM_MGT_LEAK_IMSI='214033390218475'
 SIM_MGT_LEAK_KI='f953a22c3ebe2d181a7bb677eee7e0a0'
 SIM_MGT_LEAK_OPC='135eaa72bef65ce3cb3c9f0dd02f0d7f'
-# Rogue-lure subscriber: valid on the real AP (authenticates normally), anonymous
-# outer identity so no passive leak, but its client discloses this IMSI to an active
-# evil-twin/rogue AP (AT_PERMANENT_ID_REQ). Mirrors wlan_config; keep the two in sync.
-SIM_MGT_ROGUE_IMSI='214039313370001'
-SIM_MGT_ROGUE_KI='a1b4c7d0e3f6091c2f5a8d0b3e6114a7'
-SIM_MGT_ROGUE_OPC='b2c5d8e1f4071a3d6092b5e8014b7e0a'
 
 ############ CLIENTS ############
 # Secure EAP-AKA' client: anonymous outer identity, IMSI not sent in the clear.
@@ -497,12 +491,6 @@ IDENTITY_MGT_SIM='6214031547762093@wlan.mnc003.mcc214.wifichallenge.com'
 WLAN_CLIENT_MGT_SIM_LEAK=wlan59
 MAC_CLIENT_MGT_SIM_LEAK='64:32:A8:F2:9C:68'
 IDENTITY_MGT_SIM_LEAK='6214033390218475@wlan.mnc003.mcc214.wifichallenge.com'
-# Rogue-lure EAP-AKA' client: anonymous outer identity (no passive leak, like the
-# secure client) but surrenders its IMSI to an active rogue/evil-twin AP (see the
-# RogueAP-SIM lesson). Reuses ANON_IDENTITY_MGT_SIM as the shared anonymous NAI.
-WLAN_CLIENT_MGT_SIM_ROGUE=wlan61
-MAC_CLIENT_MGT_SIM_ROGUE='64:32:A8:3B:7C:61'
-IDENTITY_MGT_SIM_ROGUE='6214039313370001@wlan.mnc003.mcc214.wifichallenge.com'
 
 
 ############################################################

@@ -176,10 +176,9 @@ CLIENT_ROWS=(
   "58|ESSID_MGT_TLS|wpa_TLS_leak.conf|yes|supplicantTLS_leak.log"
   "59|ESSID_MGT_SIM|wpa_sim_leak.conf|yes|supplicantSIM_leak.log"
   "60|ESSID_MGT_SIM|wpa_sim.conf|yes|supplicantSIM.log"
-  "61|ESSID_MGT_SIM|wpa_sim_rogue.conf|yes|supplicantSIM_rogue.log"
   "62||randmac.conf|no|supplicantRANDMAC.log"
 )
-EXPECTED_CLIENT_PROCS=21
+EXPECTED_CLIENT_PROCS=20
 
 ########################################
 # Attacker toolkit
