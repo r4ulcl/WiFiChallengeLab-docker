@@ -290,6 +290,8 @@ sed -i '/^AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=/c\AIRGEDDON_EVIL_TWIN_ESSID_STRIP
 cd plugins
 [ ! -d airgeddon-plugins ] && git clone --depth 1 https://github.com/OscarAkaElvis/airgeddon-plugins.git
 cp airgeddon-plugins/allchars_captiveportal/allchars_captiveportal.sh . || true
+cp airgeddon-plugins/wpa3_cookie_guzzler/wpa3_cookie_guzzler.sh . || true
+cp airgeddon-plugins/wpa3_cookie_guzzler/wpa3_cookie_guzzler.py . || true
 cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.sh . || true
 cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.py . || true
 mkdir -p wpa_supplicant_binaries
