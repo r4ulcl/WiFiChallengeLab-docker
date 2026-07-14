@@ -60,7 +60,7 @@ apt_noninteractive update -y
 apt_noninteractive install -y \
   -o Dpkg::Options::="--force-confdef" \
   -o Dpkg::Options::="--force-confnew" \
-  xrdp xorgxrdp gnome-session gnome-shell dbus-x11 network-manager
+  xrdp xorgxrdp gnome-session gnome-shell dbus-x11 network-manager dconf-cli
 
 # Groups required for xrdp and Wi-Fi control
 adduser xrdp ssl-cert >/dev/null 2>&1 || true
@@ -139,6 +139,34 @@ polkit.addRule(function(action, subject) {
 });
 EOF
 chmod 0644 "$PK_RULE"
+
+# Never lock the RDP/GNOME session for inactivity. Disable the screensaver lock,
+# idle activation and idle-blank/suspend via a system-wide dconf default, and
+# lock the keys so a session can't turn them back on. Mirrors the exam attacker's
+# "no RDP inactivity lockout" fix (KDE there, GNOME here).
+install -d /etc/dconf/profile /etc/dconf/db/local.d/locks
+printf 'user-db:user\nsystem-db:local\n' > /etc/dconf/profile/user
+cat > /etc/dconf/db/local.d/00-no-idle-lock <<'EOF'
+[org/gnome/desktop/screensaver]
+lock-enabled=false
+idle-activation-enabled=false
+
+[org/gnome/desktop/session]
+idle-delay=uint32 0
+
+[org/gnome/settings-daemon/plugins/power]
+idle-dim=false
+sleep-inactive-ac-type='nothing'
+sleep-inactive-battery-type='nothing'
+EOF
+cat > /etc/dconf/db/local.d/locks/00-no-idle-lock <<'EOF'
+/org/gnome/desktop/screensaver/lock-enabled
+/org/gnome/desktop/screensaver/idle-activation-enabled
+/org/gnome/desktop/session/idle-delay
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type
+EOF
+dconf update
 
 # Restart services
 systemctl enable --now NetworkManager
