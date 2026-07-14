@@ -443,10 +443,37 @@ preseed_desktop_debconf
 apt_update
 apt_install gnome-core gnome-shell gnome-terminal nautilus gnome-control-center gnome-system-monitor \
   gnome-tweaks gnome-shell-extension-dashtodock gnome-shell-extension-prefs gnome-remote-desktop \
-  gdm3 network-manager-gnome gnome-calculator evince eog file-roller gnome-shell-extension-desktop-icons-ng
+  gdm3 network-manager-gnome gnome-calculator evince eog file-roller gnome-shell-extension-desktop-icons-ng dconf-cli
 
 sudo systemctl enable gdm3 || true
 sudo systemctl set-default graphical.target || true
+
+# Never lock the local (non-RDP) GNOME desktop for inactivity either. Same
+# system-wide dconf no-idle-lock that installRDP.sh applies, set here so a build
+# WITHOUT RDP still gets it. Idempotent if installRDP.sh runs afterwards.
+sudo install -d /etc/dconf/profile /etc/dconf/db/local.d/locks
+printf 'user-db:user\nsystem-db:local\n' | sudo tee /etc/dconf/profile/user >/dev/null
+sudo tee /etc/dconf/db/local.d/00-no-idle-lock >/dev/null <<'EOF'
+[org/gnome/desktop/screensaver]
+lock-enabled=false
+idle-activation-enabled=false
+
+[org/gnome/desktop/session]
+idle-delay=uint32 0
+
+[org/gnome/settings-daemon/plugins/power]
+idle-dim=false
+sleep-inactive-ac-type='nothing'
+sleep-inactive-battery-type='nothing'
+EOF
+sudo tee /etc/dconf/db/local.d/locks/00-no-idle-lock >/dev/null <<'EOF'
+/org/gnome/desktop/screensaver/lock-enabled
+/org/gnome/desktop/screensaver/idle-activation-enabled
+/org/gnome/desktop/session/idle-delay
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type
+EOF
+sudo dconf update
 
 apt_install htop xpra tmux
 
