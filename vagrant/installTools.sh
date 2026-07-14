@@ -155,7 +155,7 @@ fi
 # ---------- pcapFilter helper -------------------------------------------------
 cd "${TOOLS}"
 apt-get install -y xxd
-wget -q https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/78e097e1d4a9eb5f43ab0b2763195c04f02c4998/pcapFilter.sh -O pcapFilter.sh
+wget -q https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/14c25daf9e7ef54e54f53d5a72b2bcd627967ad8/pcapFilter.sh -O pcapFilter.sh
 chmod +x pcapFilter.sh
 
 # ---------- UnicastDeauth -----------------------------------------------------
