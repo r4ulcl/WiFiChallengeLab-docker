@@ -4,49 +4,34 @@
 
 ### Added
 
-* Added **host-only networks** for RDP (VirtualBox and VMware)
-* Added **Start/Stop Nzyme** desktop launchers
-* Added an **EAP-TLS identity-leak scenario** (hardened vs. leaking client certificates)
-* Added a **SIM/USIM AP (`wifi-passpoint`, EAP-SIM/AKA/AKA')** with **three EAP-AKA' clients** on the same AP: a **leaking** client (permanent IMSI in the clear, any passive sniffer), a **rogue-lure** client (anonymous identity, so no passive leak, but it surrenders its IMSI to a student-built evil-twin/rogue AP that actively requests the permanent identity), and a **privacy-preserving** client (anonymous identity + pseudonym/fast-reauth), backed by a software HLR/AuC (`hlr_auc_gw` + Milenage, no physical SIM)
-* Added a **client-less PMKID AP (`wifi-campus`)**: one WPA2-PSK BSSID (channel 7, no client on purpose) on AP radio `wlan31`. Capture the PMKID client-lessly straight from the BSSID and crack the PSK offline. See `APs/PMKID_TESTING.md`
-* Added **Vagrant audio support** for QEMU and VirtualBox
+* **Host-only RDP networks** (VirtualBox, VMware) and **Start/Stop Nzyme** desktop launchers
+* **EAP-TLS identity-leak scenario** (hardened vs. leaking client certificates)
+* **SIM/USIM AP** (`wifi-passpoint`, EAP-SIM/AKA/AKA') with **two EAP-AKA' clients** backed by a software HLR/AuC (`hlr_auc_gw` + Milenage, no physical SIM): a **leaking** one (permanent IMSI in the clear, any passive sniffer) and a **privacy-preserving** one (anonymous outer identity + pseudonym/fast-reauth: no passive leak, yet still surrenders its IMSI to a student-built evil-twin/rogue AP that actively requests the permanent identity)
+* **Client-less PMKID AP** (`wifi-campus`): a lone WPA2-PSK BSSID (channel 7, no client on purpose) on radio `wlan31`. Capture the PMKID straight from the BSSID and crack the PSK offline (see `APs/PMKID_TESTING.md`)
+* **WPA3 Cookie Guzzler airgeddon plugin** and **Vagrant audio support** (QEMU, VirtualBox)
 
 ### Modifications
 
-* Consolidated host networking on **NetworkManager + systemd-resolved** across VirtualBox, VMware, QEMU and Hyper-V
-* Made the **Nzyme web UI reachable from other computers** (auto-detects host IP)
-* Grew the **client radio pool from 20 to 30** (`wlan40-69`, `radios=71`) and moved the **nzyme WIDS tap to `wlan70`**, freeing 10 client slots for new scenarios
-* Management EAP-TLS AP now offers **both TLS 1.3 and legacy TLS 1.2**
-* Updated **wifi_db** to v1.6
+* Consolidated **host networking on NetworkManager + systemd-resolved** (VirtualBox, VMware, QEMU, Hyper-V) and made the **Nzyme web UI reachable from other computers** (auto-detects host IP)
+* Grew the **client radio pool 20 → 30** (`wlan40-69`, `radios=71`) and moved the **nzyme WIDS tap to `wlan70`**, freeing 10 slots for new scenarios
+* Management **EAP-TLS AP now offers both TLS 1.3 and legacy TLS 1.2**; updated **wifi_db to v1.6**
 
 ### Bug Fixes
 
-* Fixed **DNS** breaking on networks that block public resolvers
-* Fixed **AP internet sharing** to use name-independent uplink detection
-* Fixed **EAP-TLS client certificates** missing the `clientAuth` EKU
-* Made the **CA certificate RFC 5280-conformant** and corrected the **server certificate** subject/SAN
-* Fixed **PHP errors and session handling** across the AP and client web portals
-* Fixed **`lab.php` not showing the username**
-* Fixed a **regional/locale error** when connecting to MGT (EAP relay) networks
-* Made the **`ath_masker` build best-effort** so image builds no longer abort
-* Removed the **hardcoded gcc/g++ version 12**
-* Fixed a **stale exit** in the deauth-on-drop patch
-* Fixed an **image tag error** in the challenge compose file
-* Fixed the **MGT MSCHAP/GTC simulated logins** using a MAC instead of the gateway IP
-* Removed **`ieee80211w`** from the MSCHAPv2 relay client to match the AP
-* Set **MFP optional** (`ieee80211w=1`) on the **WPA3 downgrade AP** so its `SAE`/`WPA2-PSK` transition mode works — mandatory MFP would block the WPA2-PSK downgrade path
-* **Deduplicated the TLS certificates** into a single generated set and fixed a **stray `wget`** in the AP `Dockerfile`
+* **Networking:** fixed **DNS** on networks that block public resolvers and **AP internet sharing** (name-independent uplink detection)
+* **Certificates:** added the missing `clientAuth` EKU to EAP-TLS client certs, made the CA RFC 5280-conformant, corrected the server cert subject/SAN, deduplicated them into a single generated set, and removed a stray `wget` in the AP `Dockerfile`
+* **Web portals:** fixed PHP errors and session handling across the AP and client portals, plus `lab.php` not showing the username
+* **MGT/EAP:** fixed a regional/locale error connecting to MGT (EAP relay) networks and the MSCHAP/GTC simulated logins using a MAC instead of the gateway IP; removed `ieee80211w` from the MSCHAPv2 relay client to match the AP; set **MFP optional** (`ieee80211w=1`) on the **WPA3 downgrade AP** so its SAE/WPA2-PSK transition mode works (mandatory MFP would block the WPA2-PSK downgrade path)
+* **Build/misc:** made the **`ath_masker` build best-effort** (no more aborted image builds), removed the **hardcoded gcc/g++ 12**, fixed a **stale exit in the deauth-on-drop patch** and an **image-tag error in the challenge compose file**, fixed the **challenge flags** in `wlan_config_challenge`, and updated the **`pcapFilter.sh`** helper to the latest gist revision
 
 ### Miscellaneous Improvements
 
-* Added **network self-heal** service to recover the uplink on boot
-* Disabled **Debian automatic updates**
+* **network self-heal** service to recover the uplink on boot; disabled **Debian automatic updates**
 * Removed **email/PII and legacy Netscape fields** from generated certificates
-* Reworked **healthchecks and compose files** across all variants
-* Made **hostapd per-SSID logs capture stderr** (`2>&1`)
-* Gave **each AP and client a distinct, stable signal level** via per-radio RSSI jitter (~±3 dB) in the `mac80211_hwsim` driver, so scans no longer show every BSSID/station clustered at one identical PWR; done in-kernel (deterministic per radio, no per-beacon flicker) instead of a racy userspace `iw txpower` loop that hostapd overrode
-* Ran **each MGT relay supplicant in its own loop** so a stalled one no longer blocks the others
-* **Backgrounded the client `fping` keepalive**
+* Reworked **healthchecks and compose files** across all variants; **hostapd per-SSID logs now capture stderr** (`2>&1`)
+* Gave **each AP/client a distinct, stable signal** via per-radio **RSSI jitter (~±3 dB)** in the `mac80211_hwsim` driver (in-kernel, deterministic per radio, no per-beacon flicker) instead of a racy userspace `iw txpower` loop that hostapd overrode
+* Ran **each MGT relay supplicant in its own loop** (a stall no longer blocks the others) and **backgrounded the client `fping` keepalive**
+* Stopped the **GNOME session from locking on inactivity** (system-wide dconf no-idle-lock) for both **RDP** and **local desktop** sessions, so long-running attacks aren't interrupted
 * Updated **OPEN_SOURCE_REFERENCES.md**
 
 ## Changelog: WiFiChallengeLab v2.4
