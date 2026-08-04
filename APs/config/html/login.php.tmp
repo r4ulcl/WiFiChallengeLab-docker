@@ -111,7 +111,7 @@ $flag_6ghz                = decode('${FLAG_6GHZ}', $a);
 $flag_roam                = decode('${FLAG_ROAM}', $a);
 
 function loginflag($flag) {
-  echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Signal locked · key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$flag}')\">{$flag}</button></div>";
+  echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Access key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$flag}')\">{$flag}</button></div>";
 }
 
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_MGT_RELAY}.') === 0)
@@ -155,7 +155,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0)
 
       <div class="field">
         <label for="Username">Username</label>
-        <input id="Username" name="Username" type="text" class="Input" autocomplete="username" placeholder="recovered credential">
+        <input id="Username" name="Username" type="text" class="Input" autocomplete="username">
       </div>
 
       <div class="field">

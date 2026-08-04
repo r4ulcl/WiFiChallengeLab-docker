@@ -37,9 +37,49 @@ function matchnet($ip, $list) {
     return false;
 }
 
-function showflag($val, $a) {
-    $decoded = decode($val, $a);
-    echo "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Signal locked · key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button></div>";
+function flagReadout($decoded) {
+    return "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Access key recovered</div><button class=\"flag\" onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button></div>";
+}
+
+function renderStatus($user, $ip, $a, $rules) {
+    if (!isset($rules[$user])) {
+        return "<p class=\"msg\">No access key is assigned to this account.</p>";
+    }
+
+    $r = $rules[$user];
+
+    if (isset($r['multi'])) {
+        foreach ($r['multi'] as $net => $flag) {
+            if (strpos($ip, $net) === 0) {
+                return $flag === null
+                    ? "<p class=\"welcome\">Link established. No access key is exposed on this network.</p>"
+                    : flagReadout(decode($flag, $a));
+            }
+        }
+        return "<p class=\"msg\">No key on this segment. Try another credential ;)</p>";
+    }
+
+    if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
+        return "<p class=\"msg\">Your princess is in another castle. Wrong segment.</p>";
+    }
+
+    $out = flagReadout(decode($r['flag'], $a));
+
+    if (!empty($r['extra'])) {
+        $out .= "<p class=\"eyebrow\">AP config</p>";
+        $out .= "<pre class=\"confdump\">eap_user_file = /root/mgt/hostapd_wpe.eap_user
+ca_cert         = /root/certs/ca.crt
+server_cert     = /root/certs/server.crt
+private_key     = /root/certs/server.key
+private_key_passwd = whatever
+dh_file         = /etc/hostapd-wpe/dh
+
+ssid    = $ESSID_MGT
+channel = $CHANNEL_MGT</pre>";
+        $out .= "<p>Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a></p>";
+    }
+
+    return $out;
 }
 
 $rules = [
@@ -159,58 +199,11 @@ $rules = [
   <div class="dev-body">
 
 <?php
+echo renderStatus($user, $ip, $a, $rules);
 echo "<p class=\"eyebrow\">Session established</p>";
 echo "<p class=\"welcome\">Authenticated as <b>" . htmlspecialchars($user) . "</b></p>";
-
-if (!isset($rules[$user])) {
-    echo "<p class=\"msg\">No key bound to this credential.</p>";
-    echo "<p><a href=\"logout.php\">Sign out</a></p>";
-    exit;
-}
-
-$r = $rules[$user];
-
-if (isset($r['multi'])) {
-    foreach ($r['multi'] as $net => $flag) {
-        if (strpos($ip, $net) === 0) {
-            if ($flag === null) {
-                echo "<p class=\"welcome\">Link up. No key exposed on this segment.</p>";
-            } else {
-                showflag($flag, $a);
-            }
-            echo "<p><a href=\"logout.php\">Sign out</a></p>";
-            exit;
-        }
-    }
-    echo "<p class=\"msg\">No key on this segment. Try another credential ;)</p>";
-    echo "<p><a href=\"logout.php\">Sign out</a></p>";
-    exit;
-}
-
-if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
-    echo "<p class=\"msg\">Your princess is in another castle. Wrong segment.</p>";
-    echo "<p><a href=\"logout.php\">Sign out</a></p>";
-    exit;
-}
-
-showflag($r['flag'], $a);
-
-if (!empty($r['extra'])) {
-    echo "<p class=\"eyebrow\">AP config</p>";
-    echo "<pre class=\"confdump\">eap_user_file = /root/mgt/hostapd_wpe.eap_user
-ca_cert         = /root/certs/ca.crt
-server_cert     = /root/certs/server.crt
-private_key     = /root/certs/server.key
-private_key_passwd = whatever
-dh_file         = /etc/hostapd-wpe/dh
-
-ssid    = $ESSID_MGT
-channel = $CHANNEL_MGT</pre>";
-    echo "<p>Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a></p>";
-}
-
-echo "<p><a href=\"logout.php\">Sign out</a></p>";
 ?>
+    <p><a href="logout.php">Sign out</a></p>
 
   </div>
 
