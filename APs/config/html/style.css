@@ -1,28 +1,27 @@
 /*
    WiFiChallenge by r4ulcl
-   Dracula console theme. v2.4 palette, v2.5 device readout.
+   Dracula console theme, minimal.
 */
 
 :root {
   /* Dracula palette */
-  --bg:        #282a36;   /* background            */
-  --bg-glow:   #343746;   /* soft top glow         */
-  --panel:     #44475a;   /* current line / card   */
-  --panel-2:   #383b4d;   /* header / footer strip */
-  --panel-in:  #21222c;   /* inset (inputs, code)  */
-  --edge:      #6272a4;   /* comment / borders     */
-  --edge-soft: rgba(98, 114, 164, 0.45);
+  --bg:        #282a36;
+  --panel:     #44475a;
+  --panel-2:   #383b4d;
+  --panel-in:  #21222c;
+  --edge:      #6272a4;
+  --edge-soft: rgba(98, 114, 164, 0.35);
+  --edge-line: rgba(98, 114, 164, 0.18);
 
-  --ink:       #f8f8f2;   /* foreground            */
-  --ink-dim:   #c7cbe6;   /* softened foreground   */
-  --ink-faint: #6272a4;   /* comment               */
+  --ink:       #f8f8f2;
+  --ink-dim:   #c7cbe6;
+  --ink-faint: #6272a4;
 
   --pink:      #ff79c6;
   --pink-hi:   #ff92d0;
   --purple:    #bd93f9;
   --cyan:      #8be9fd;
   --green:     #50fa7b;
-  --yellow:    #f1fa8c;
   --orange:    #ffb86c;
   --red:       #ff5555;
 
@@ -45,10 +44,7 @@ body {
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink);
-  background:
-    radial-gradient(120% 90% at 50% -10%, var(--bg-glow) 0%, transparent 55%),
-    var(--bg);
-  background-attachment: fixed;
+  background: var(--bg);
   padding: clamp(1rem, 4vw, 3rem) 1rem;
   display: flex;
   flex-direction: column;
@@ -58,17 +54,13 @@ body {
 /* ------------------------------------------------------------------ shell */
 
 .content {
-  position: relative;
-  z-index: 1;
   width: 100%;
   max-width: var(--shell);
   margin: 2rem auto;
   background: var(--panel);
-  border: 1px solid var(--edge);
-  border-radius: 15px;
-  box-shadow:
-    0 2px 5px rgba(0, 0, 0, 0.2),
-    0 24px 60px -30px rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--edge-soft);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
 
@@ -84,12 +76,7 @@ body {
   border-bottom: 1px solid var(--edge-soft);
 }
 
-.leds {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  flex-wrap: wrap;
-}
+.leds { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
 
 .led {
   display: inline-flex;
@@ -97,28 +84,20 @@ body {
   gap: 0.4rem;
   font-family: var(--mono);
   font-size: 9.5px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: var(--ink-faint);
   text-transform: uppercase;
 }
-
 .led .dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #21222c;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+  background: #3a3d4d;
 }
-.led .dot.g     { background: var(--green);  box-shadow: 0 0 6px 0 rgba(80, 250, 123, 0.7); }
-.led .dot.a     { background: var(--orange); box-shadow: 0 0 6px 0 rgba(255, 184, 108, 0.7); }
-.led .dot.b     { background: var(--cyan);   box-shadow: 0 0 6px 0 rgba(139, 233, 253, 0.7); }
+.led .dot.g { background: var(--green); }
+.led .dot.a { background: var(--orange); }
+.led .dot.b { background: var(--cyan); }
 .led .dot.blink { animation: blink 2.1s steps(1) infinite; }
-
-@keyframes blink {
-  0%, 62% { opacity: 1; }
-  63%, 78% { opacity: 0.22; }
-  79%, 100% { opacity: 1; }
-}
 
 .dev-id {
   display: flex;
@@ -129,47 +108,36 @@ body {
   line-height: 1.25;
   white-space: nowrap;
 }
-.dev-model { font-size: 11px; letter-spacing: 0.16em; color: var(--ink); }
-.dev-fw    { font-size: 9.5px; letter-spacing: 0.1em; color: var(--ink-faint); }
+.dev-model { font-size: 11px; letter-spacing: 0.14em; color: var(--ink); }
+.dev-fw    { font-size: 9.5px; letter-spacing: 0.08em; color: var(--ink-faint); }
 
 /* ----------------------------------------------------------------- body */
 
 .dev-body {
-  padding: clamp(1.4rem, 4vw, 2.1rem) clamp(1.15rem, 4vw, 2.1rem) 1.5rem;
+  padding: clamp(1.4rem, 4vw, 2rem) clamp(1.15rem, 4vw, 2rem) 1.4rem;
 }
 
 .eyebrow {
   font-family: var(--mono);
   font-size: 10.5px;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-dim);
   margin: 0 0 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.eyebrow::before {
-  content: "";
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--pink);
-  box-shadow: 0 0 7px 0 rgba(255, 121, 198, 0.8);
 }
 
 h1, h2, h3 {
   font-family: var(--sans);
   font-weight: 600;
   color: var(--ink);
-  letter-spacing: 0.01em;
   margin: 0 0 0.7rem;
 }
-h1 { font-size: 1.35rem; }
+h1 { font-size: 1.3rem; }
 h3 { font-size: 1.05rem; }
 
 p { margin: 0 0 0.9rem; color: var(--ink); }
 a { color: var(--link); text-decoration: none; }
-a:hover { color: #a9f0ff; text-decoration: underline; text-underline-offset: 3px; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 /* -------------------------------------------------------- device plate */
 
@@ -177,8 +145,7 @@ a:hover { color: #a9f0ff; text-decoration: underline; text-underline-offset: 3px
   border: 1px solid var(--edge-soft);
   border-radius: 8px;
   background: var(--panel-in);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  padding: 0.9rem 1rem;
+  padding: 0.85rem 1rem;
   margin: 0 0 1.5rem;
 }
 .plate-row {
@@ -189,16 +156,16 @@ a:hover { color: #a9f0ff; text-decoration: underline; text-underline-offset: 3px
   font-family: var(--mono);
   font-size: 12px;
   padding: 0.28rem 0;
-  border-bottom: 1px dashed var(--edge-soft);
+  border-bottom: 1px solid var(--edge-line);
 }
 .plate-row:last-child { border-bottom: none; }
 .plate-row .k {
   color: var(--ink-faint);
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 10px;
 }
-.plate-row .v { color: var(--ink); letter-spacing: 0.04em; }
+.plate-row .v { color: var(--ink); }
 .plate-row .v.sig { color: var(--orange); }
 
 /* --------------------------------------------------------------- inputs */
@@ -218,11 +185,10 @@ label,
   display: block;
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-dim);
   margin-bottom: 0.45rem;
-  font-weight: 600;
 }
 
 input[type="text"],
@@ -230,14 +196,14 @@ input[type="password"],
 input[type="file"],
 .Input {
   width: 100%;
-  padding: 0.75rem 0.85rem;
+  padding: 0.7rem 0.85rem;
   font-family: var(--mono);
   font-size: 14px;
   color: var(--ink);
   background: var(--panel-in);
   border: 1px solid var(--edge);
   border-radius: 6px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 input::placeholder { color: var(--ink-faint); }
 input[type="text"]:focus,
@@ -245,7 +211,7 @@ input[type="password"]:focus,
 .Input:focus {
   outline: none;
   border-color: var(--pink);
-  box-shadow: 0 0 0 1px var(--pink), 0 0 14px -4px rgba(255, 121, 198, 0.6);
+  box-shadow: 0 0 0 1px var(--pink);
 }
 
 /* --------------------------------------------------------------- buttons */
@@ -259,20 +225,16 @@ input[type="submit"] {
   font-family: var(--sans);
   font-size: 1.05rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
   color: var(--bg);
   background: var(--pink);
   border: 1px solid var(--pink);
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease, filter 0.15s ease, transform 0.05s ease;
+  transition: background 0.2s ease;
 }
 button:hover,
 .Button3:hover,
 input[type="submit"]:hover { background: var(--pink-hi); border-color: var(--pink-hi); }
-button:active,
-.Button3:active,
-input[type="submit"]:active { transform: translateY(1px); }
 button:focus-visible,
 .Button3:focus-visible,
 input[type="submit"]:focus-visible,
@@ -288,54 +250,35 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* --------------------------------------------------- flag / signal lock */
+/* --------------------------------------------------- flag / recovered key */
 
 .readout {
   margin: 1.2rem 0;
-  border: 1px solid rgba(80, 250, 123, 0.4);
+  border: 1px solid rgba(80, 250, 123, 0.3);
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(80, 250, 123, 0.06), rgba(0, 0, 0, 0.15)),
-    var(--panel-in);
-  box-shadow: inset 0 0 24px -10px rgba(80, 250, 123, 0.4);
-  padding: 0.9rem 1rem 1rem;
+  background: var(--panel-in);
+  padding: 0.85rem 1rem 0.95rem;
   animation: lockin 0.5s ease both;
-}
-@keyframes lockin {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
 }
 
 .readout-top {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--green);
   margin-bottom: 0.7rem;
 }
 
-.bars {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 14px;
-}
-.bars i {
-  width: 3.5px;
-  background: var(--green);
-  box-shadow: 0 0 7px -1px rgba(80, 250, 123, 0.9);
-  transform-origin: bottom;
-  animation: fill 0.5s ease both;
-}
+.bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+.bars i { width: 3px; background: var(--green); transform-origin: bottom; animation: fill 0.5s ease both; }
 .bars i:nth-child(1) { height: 30%;  animation-delay: 0.05s; }
 .bars i:nth-child(2) { height: 55%;  animation-delay: 0.15s; }
 .bars i:nth-child(3) { height: 78%;  animation-delay: 0.25s; }
 .bars i:nth-child(4) { height: 100%; animation-delay: 0.35s; }
-@keyframes fill { from { transform: scaleY(0); opacity: 0.2; } to { transform: scaleY(1); opacity: 1; } }
 
 /* the flag itself is emitted as a <button> by PHP */
 .readout button,
@@ -349,7 +292,7 @@ button.flag {
   text-align: left;
   color: var(--green);
   background: #191a21;
-  border: 1px solid rgba(80, 250, 123, 0.4);
+  border: 1px solid rgba(80, 250, 123, 0.35);
   border-radius: 6px;
   padding: 0.7rem 4rem 0.7rem 0.9rem;
   position: relative;
@@ -362,11 +305,11 @@ button.flag:hover { background: #14251b; border-color: var(--green); }
 button.flag::after {
   content: "COPY";
   position: absolute;
-  top: 0.55rem;
+  top: 0.6rem;
   right: 0.7rem;
   font-family: var(--mono);
   font-size: 9px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   color: var(--ink-faint);
 }
 .readout button.copied::after,
@@ -378,11 +321,11 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
 .message {
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--red);
-  background: rgba(255, 85, 85, 0.09);
-  border: 1px solid rgba(255, 85, 85, 0.35);
+  background: rgba(255, 85, 85, 0.08);
+  border: 1px solid rgba(255, 85, 85, 0.3);
   border-radius: 6px;
   padding: 0.6rem 0.8rem;
   margin-bottom: 1.1rem;
@@ -395,7 +338,7 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
   display: block;
   font-family: var(--mono);
   font-size: 11px !important;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--red) !important;
 }
@@ -407,7 +350,6 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
   color: var(--ink-dim);
   background: var(--panel-in);
   border: 1px solid var(--edge-soft);
-  border-left: 2px solid var(--purple);
   border-radius: 6px;
   padding: 0.85rem 1rem;
   margin: 1rem 0;
@@ -416,26 +358,16 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
 }
 
 /* small helper note (legacy .info) */
-.info {
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  color: var(--cyan);
-  margin-top: 0.5rem;
-}
+.info { font-family: var(--mono); font-size: 0.8rem; color: var(--cyan); margin-top: 0.5rem; }
 
-/* legacy login <table> layout from PHP; make it behave */
+/* legacy login <table> / menu from older PHP */
 .table,
 .Table { width: 100%; border-collapse: collapse; }
 .table td,
 .Table td { padding: 0.5rem 0.4rem; vertical-align: middle; }
 .Table h3 { margin: 0 0 0.4rem; }
-
-/* legacy menu list */
 .menu ul { list-style: none; padding: 0; margin: 0; }
-.menu li {
-  padding: 10px 0;
-  border-bottom: 1px solid var(--edge);
-}
+.menu li { padding: 10px 0; border-bottom: 1px solid var(--edge); }
 .menu li:last-child { border-bottom: none; }
 .menu a { color: var(--ink); font-weight: 500; }
 .menu a:hover { color: var(--pink); }
@@ -443,13 +375,12 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
 /* --------------------------------------------------------------- footer */
 
 .dev-foot {
-  margin-top: 0;
   padding: 0.85rem 1.15rem;
   border-top: 1px solid var(--edge-soft);
   background: var(--panel-2);
   font-family: var(--mono);
   font-size: 10px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-align: center;
   color: var(--ink-faint);
 }
@@ -463,10 +394,25 @@ button.flag.copied::after { content: "COPIED"; color: var(--green); }
   .content { margin: 0.5rem auto; }
   .dev { flex-wrap: wrap; }
   .led { font-size: 0; gap: 0; }           /* dots only, hide micro-labels */
-  .led .dot { margin-right: 0; }
-  .leds { gap: 0.55rem; }
+  .leds { gap: 0.5rem; }
   .plate-row { flex-direction: column; gap: 0.1rem; }
   .plate-row .v { align-self: flex-start; }
+}
+
+/* --------------------------------------------------------------- motion */
+
+@keyframes blink {
+  0%, 62% { opacity: 1; }
+  63%, 78% { opacity: 0.22; }
+  79%, 100% { opacity: 1; }
+}
+@keyframes lockin {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fill {
+  from { transform: scaleY(0); opacity: 0.2; }
+  to   { transform: scaleY(1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

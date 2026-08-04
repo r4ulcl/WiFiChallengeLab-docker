@@ -155,7 +155,7 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0)
 
       <div class="field">
         <label for="Username">Username</label>
-        <input id="Username" name="Username" type="text" class="Input" autocomplete="username">
+        <input id="Username" name="Username" type="text" class="Input" autocomplete="username" placeholder="username">
       </div>
 
       <div class="field">
