@@ -101,9 +101,12 @@ subjectAltName   = @alt_names
 DNS.1 = $SERVER_NAME
 EOF
 
-# Add IPs from 192.168.1.1 to 192.168.20.1 to SAN
+# Add gateway IPs 192.168.1.1 .. 192.168.40.1 to the SAN. The lab uses subnets
+# up to 192.168.30 (IP_OTHER0) plus 192.168.21 (IP_ROAM1 / PSK campus); the extra
+# headroom means new networks won't trip a Firefox name-mismatch warning
+# (SSL_ERROR_BAD_CERT_DOMAIN) on their captive/config portal.
 COUNTER=1
-for i in $(seq 1 20); do
+for i in $(seq 1 40); do
     echo "IP.$COUNTER = 192.168.$i.1" >> server.ext
     ((COUNTER++))
 done
