@@ -344,16 +344,17 @@ button.flag {
   margin: 0;
   letter-spacing: 0.02em;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-align: left;
   color: var(--green);
   background: #191a21;
   border: 1px solid rgba(80, 250, 123, 0.4);
   border-radius: 6px;
-  padding: 0.7rem 5.2rem 0.7rem 0.9rem;
+  padding: 0.7rem 4rem 0.7rem 0.9rem;
   position: relative;
-  word-break: break-all;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 .readout button:hover,
 button.flag:hover { background: #14251b; border-color: var(--green); }
