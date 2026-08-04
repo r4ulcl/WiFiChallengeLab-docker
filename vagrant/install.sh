@@ -968,10 +968,27 @@ for pkg in "${packages[@]}"; do
 done
 
 echo 'Install WiFi tools'
+TOOLS_DONE_MARKER='/root/tools/.installTools.done'
+sudo rm -f "$TOOLS_DONE_MARKER"
 sudo bash vagrant/installTools.sh || {
-  echo "installTools.sh failed"
+  echo ''
+  echo '############################################################'
+  echo '# CRITICAL: installTools.sh failed - provisioning aborted.'
+  echo '# The lab image is INCOMPLETE. See the error above.'
+  echo '############################################################'
   exit 1
 }
+# Guard against a silent early exit (e.g. a stray `|| true` swallowing a fatal
+# error): if the completion marker is missing, the script did not finish.
+if ! sudo test -f "$TOOLS_DONE_MARKER"; then
+  echo ''
+  echo '############################################################'
+  echo '# CRITICAL: installTools.sh did not run to completion'
+  echo "# (marker $TOOLS_DONE_MARKER missing) - image INCOMPLETE."
+  echo '# Provisioning aborted.'
+  echo '############################################################'
+  exit 1
+fi
 
 sudo apt-get -o Dpkg::Use-Pty=0 -y autoremove </dev/null || true
 sudo apt-get -o Dpkg::Use-Pty=0 clean </dev/null || true

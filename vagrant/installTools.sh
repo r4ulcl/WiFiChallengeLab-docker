@@ -45,6 +45,24 @@ __restore_resolv_conf() {
 }
 trap __restore_resolv_conf EXIT
 
+# Fail loudly and stop if a tool build aborts the script. Historically one build
+# error (e.g. hostapd-mana missing its .config) tripped `set -e` and every tool
+# after it - including hcxdumptool 7.1.2 - was silently skipped. Report it as
+# CRITICAL so the provisioner aborts instead of shipping a half-built image.
+# Only fatal inside `set -e` regions; the `set +e` best-effort blocks are exempt.
+__installtools_failed() {
+    local code=$?
+    case $- in *e*) ;; *) return 0 ;; esac
+    echo ""                                                            >&2
+    echo "############################################################" >&2
+    echo "# CRITICAL: installTools.sh aborted (exit ${code})"          >&2
+    echo "#   at line ${1}: ${2}"                                      >&2
+    echo "#   Wireless toolkit is INCOMPLETE - provisioning stopped."  >&2
+    echo "############################################################" >&2
+    exit "${code}"
+}
+trap '__installtools_failed "${LINENO}" "${BASH_COMMAND}"' ERR
+
 # quick sanity check
 getent hosts deb.debian.org >/dev/null || echo "Warning: DNS check failed"
 set -e
@@ -334,7 +352,11 @@ set -e
 apt-get install -y libnl-genl-3-dev libssl-dev
 cd "${TOOLS}"
 [ ! -d hostapd-mana ] && git clone https://github.com/sensepost/hostapd-mana
-cd hostapd-mana && make -C hostapd -j"$(nproc)"
+# hostapd's build needs a .config first (verify_config fails without it, same as
+# wacker above). Tolerate a build failure so one tool can't abort the whole
+# script and skip everything after it (hcxdumptool 7.1.2, wifiphisher, wifite2...).
+cd hostapd-mana/hostapd && cp -n defconfig .config && make -j"$(nproc)" || true
+cd "${TOOLS}"
 ln -sf /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
 
 # eapeak with python2 if present
@@ -502,3 +524,8 @@ sudo ln -sf "${TOOLS}"/dragondrain-and-time/src/dragondrain /usr/local/bin/drago
 
 
 echo -e "\n[+] Wireless assessment toolkit installed under ${TOOLS}"
+
+# Completion marker: install.sh checks for this, so a run that aborts before
+# reaching this line is treated as a hard failure rather than a success.
+: > "${TOOLS}/.installTools.done"
+echo "[+] installTools.sh completed successfully"
