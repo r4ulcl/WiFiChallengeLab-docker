@@ -799,10 +799,13 @@ fi
 
 sudo systemctl enable NetworkManager 2>/dev/null || true
 
-# 6) Disable dnsmasq on the host if present (the lab runs its own inside the AP
-#    container network namespace, not on the host).
+# 6) Disable host-side DHCP/DNS daemons if present. The lab runs its own
+#    dnsmasq inside the AP container network namespace, not on the host.
 if service_exists dnsmasq.service; then
-  sudo systemctl disable dnsmasq || true
+  sudo systemctl disable --now dnsmasq.service 2>/dev/null || true
+fi
+if service_exists isc-dhcp-server.service; then
+  sudo systemctl disable --now isc-dhcp-server.service 2>/dev/null || true
 fi
 
 # 7) Boot-time self-heal: if NetworkManager ever fails to bring up a default
@@ -908,23 +911,6 @@ END {
 
 sudo systemctl enable gdm3 || true
 sudo sed -i -E 's/^#?\s*WaylandEnable\s*=.*/WaylandEnable=false/' "$GDM_CONF"
-
-# ---------- isc-dhcp-server common failure fix -------------------------------
-# Fixes "isc-dhcp-server.service failed" when INTERFACESv4 is empty or wrong.
-if [ -f /etc/default/isc-dhcp-server ]; then
-  IFACE=""
-  for candidate in wlan70 wlan0 eth0 ens33 enp0s3; do
-    if ip link show "$candidate" >/dev/null 2>&1; then
-      IFACE="$candidate"
-      break
-    fi
-  done
-  if [ -n "$IFACE" ]; then
-    sudo sed -i -E "s/^INTERFACESv4=.*/INTERFACESv4=\"$IFACE\"/" /etc/default/isc-dhcp-server || true
-    sudo sed -i -E 's/^INTERFACESv6=.*/INTERFACESv6=""/' /etc/default/isc-dhcp-server || true
-    sudo systemctl restart isc-dhcp-server 2>/dev/null || true
-  fi
-fi
 
 # ---------- debloat -----------------------------------------------------------
 sudo apt-mark manual wireshark firefox-esr || true
