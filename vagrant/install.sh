@@ -294,6 +294,22 @@ else
   sudo docker compose -f docker-compose.yml up -d
 fi
 
+# Install hostapd's HLR/AuC gateway on the attacker machine for EAP-SIM/AKA labs.
+sudo docker cp WiFiChallengeLab-APs:/usr/sbin/hlr_auc_gw /usr/local/sbin/hlr_auc_gw
+sudo chmod 0755 /usr/local/sbin/hlr_auc_gw
+if ldd /usr/local/sbin/hlr_auc_gw | grep -q 'not found'; then
+  echo 'hlr_auc_gw has unresolved shared-library dependencies' >&2
+  ldd /usr/local/sbin/hlr_auc_gw >&2
+  exit 1
+fi
+sudo tee /etc/profile.d/wifichallengelab-path.sh >/dev/null <<'EOF'
+case ":${PATH}:" in
+  *:/usr/local/sbin:*) ;;
+  *) export PATH="/usr/local/sbin:${PATH}" ;;
+esac
+EOF
+sudo chmod 0644 /etc/profile.d/wifichallengelab-path.sh
+
 # ---------- flags and helper scripts -----------------------------------------
 echo 'flag{2162ae75cdefc5f731dfed4efa8b92743d1fb556}' | sudo tee /root/flag.txt
 
