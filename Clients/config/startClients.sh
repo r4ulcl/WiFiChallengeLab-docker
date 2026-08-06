@@ -89,7 +89,7 @@ macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.lo
 macchanger -m $MAC_MGT_GTC $WLAN_CLIENT_MGT_GTC >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS $WLAN_CLIENT_MGT_TLS >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS_PHISHING $WLAN_CLIENT_MGT_TLS_PHISHING >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY $WLAN_CLIENT_MGT_RELAY >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_RELAY $WLAN_CLIENT_MGT_RELAY >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS_W $WLAN_CLIENT_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS $WLAN_CLIENT_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
 
