@@ -15,14 +15,15 @@
 * Consolidated **host networking on NetworkManager + systemd-resolved** (VirtualBox, VMware, QEMU, Hyper-V) and made the **Nzyme web UI reachable from other computers** (auto-detects host IP)
 * Grew the **client radio pool 20 → 30** (`wlan40-69`, `radios=71`) and moved the **nzyme WIDS tap to `wlan70`**, freeing 10 slots for new scenarios
 * Management **EAP-TLS AP now offers both TLS 1.3 and legacy TLS 1.2**; updated **wifi_db to v1.6**
+* Clients now carry a **realm in the EAP anonymous outer identity** (e.g. `anonymous@CONTOSOREG`) on the TLS and MSCHAPv2-relay networks, matching real supplicant behaviour
 
 ### Bug Fixes
 
-* **Networking:** fixed **DNS** on networks that block public resolvers and **AP internet sharing** (name-independent uplink detection)
-* **Certificates:** added the missing `clientAuth` EKU to EAP-TLS client certs, made the CA RFC 5280-conformant, corrected the server cert subject/SAN, deduplicated them into a single generated set, and removed a stray `wget` in the AP `Dockerfile`
+* **Networking:** fixed **DNS** on networks that block public resolvers and **AP internet sharing** (name-independent uplink detection); fixed **host DHCP service startup failures**
+* **Certificates:** added the missing `clientAuth` EKU to EAP-TLS client certs, made the CA RFC 5280-conformant, corrected the server cert subject/SAN, deduplicated them into a single generated set, and removed a stray `wget` in the AP `Dockerfile`; extended the **server cert SAN through `192.168.40.1`** so every lab portal (including `192.168.21.1`) validates in Firefox
 * **Web portals:** fixed PHP errors and session handling across the AP and client portals, plus `lab.php` not showing the username
-* **MGT/EAP:** fixed a regional/locale error connecting to MGT (EAP relay) networks and the MSCHAP/GTC simulated logins using a MAC instead of the gateway IP; removed `ieee80211w` from the MSCHAPv2 relay client to match the AP; set **MFP optional** (`ieee80211w=1`) on the **WPA3 downgrade AP** so its SAE/WPA2-PSK transition mode works (mandatory MFP would block the WPA2-PSK downgrade path)
-* **Build/misc:** made the **`ath_masker` build best-effort** (no more aborted image builds), removed the **hardcoded gcc/g++ 12**, fixed a **stale exit in the deauth-on-drop patch** and an **image-tag error in the challenge compose file**, fixed the **challenge flags** in `wlan_config_challenge`, and updated the **`pcapFilter.sh`** helper to the latest gist revision
+* **MGT/EAP:** fixed a regional/locale error connecting to MGT (EAP relay) networks and the MSCHAP/GTC simulated logins using a MAC instead of the gateway IP; removed `ieee80211w` from the MSCHAPv2 relay client to match the AP; set **MFP optional** (`ieee80211w=1`) on the **WPA3 downgrade AP** so its SAE/WPA2-PSK transition mode works (mandatory MFP would block the WPA2-PSK downgrade path); fixed the **`wifi-regional` relay client** (`wlan50`) being `macchanger`'d to the **AP's own BSSID** (`MAC_MGT_RELAY` instead of `MAC_CLIENT_MGT_RELAY`): a station whose MAC equals its target BSSID has every authentication rejected by mac80211 (*SME: Authentication request to the driver failed*)
+* **Build/misc:** made the **`ath_masker` build best-effort** (no more aborted image builds), removed the **hardcoded gcc/g++ 12**, fixed a **stale exit in the deauth-on-drop patch** and an **image-tag error in the challenge compose file**, fixed the **challenge flags** in `wlan_config_challenge`, updated the **`pcapFilter.sh`** helper to the latest gist revision, and fixed the **`hostapd-mana` build** under Vagrant while making provisioning **abort if `installTools.sh` doesn't finish**
 
 ### Miscellaneous Improvements
 
@@ -32,6 +33,8 @@
 * Gave **each AP/client a distinct, stable signal** via per-radio **RSSI jitter (~±3 dB)** in the `mac80211_hwsim` driver (in-kernel, deterministic per radio, no per-beacon flicker) instead of a racy userspace `iw txpower` loop that hostapd overrode
 * Ran **each MGT relay supplicant in its own loop** (a stall no longer blocks the others) and **backgrounded the client `fping` keepalive**
 * Stopped the **GNOME session from locking on inactivity** (system-wide dconf no-idle-lock) for both **RDP** and **local desktop** sessions, so long-running attacks aren't interrupted
+* New **AP web console** (login and recovered-flag pages): Dracula theme, animations, single sign-out, flag on top and pink username with placeholder
+* Gave the **lab user access to the compiled tool tree** so the tools run without extra permissions
 * Updated **OPEN_SOURCE_REFERENCES.md**
 
 ## Changelog: WiFiChallengeLab v2.4
