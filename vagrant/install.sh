@@ -194,6 +194,38 @@ sudo usermod -aG sudo user
 echo "user ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/zzz-user >/dev/null
 sudo chmod 0440 /etc/sudoers.d/zzz-user
 
+# Make commands installed in /usr/sbin, including iw, available to users.
+sudo tee /etc/profile.d/wifichallenge-path.sh >/dev/null <<'EOF'
+_wcl_old_ifs=$IFS
+IFS=:
+_wcl_path=
+for _wcl_entry in $PATH; do
+  [ "$_wcl_entry" = /usr/sbin ] && continue
+  case ":${_wcl_path}:" in
+    *:"${_wcl_entry}":*) ;;
+    *) _wcl_path="${_wcl_path:+${_wcl_path}:}${_wcl_entry}" ;;
+  esac
+done
+IFS=$_wcl_old_ifs
+PATH="/usr/sbin${_wcl_path:+:${_wcl_path}}"
+export PATH
+unset _wcl_old_ifs _wcl_path _wcl_entry
+EOF
+sudo chmod 0644 /etc/profile.d/wifichallenge-path.sh
+
+# Also cover interactive non-login shells, which do not source /etc/profile.
+for u in user vagrant; do
+  if id -u "$u" >/dev/null 2>&1; then
+    sudo sed -i '/^# WiFiChallengeLab: include \/usr\/sbin in PATH$/,+4d' "/home/$u/.bashrc" 2>/dev/null || true
+    if ! sudo grep -qF '# WiFiChallengeLab: source normalized PATH' "/home/$u/.bashrc" 2>/dev/null; then
+      sudo tee -a "/home/$u/.bashrc" >/dev/null <<'EOF'
+# WiFiChallengeLab: source normalized PATH
+. /etc/profile.d/wifichallenge-path.sh
+EOF
+    fi
+  fi
+done
+
 sudo touch /home/user/.Xauthority
 sudo chmod 600 /home/user/.Xauthority
 sudo chown user:user /home/user/.Xauthority
