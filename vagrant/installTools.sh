@@ -74,7 +74,7 @@ TOOLS="${FOLDER}/tools"
 mkdir -p "${TOOLS}"
 
 apt-get update
-apt-get install -y wget curl git ca-certificates build-essential
+apt-get install -y wget curl git ca-certificates build-essential acl
 
 # ---------- basic utilities ---------------------------------------------------
 apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full iptables dnsmasq-base
@@ -448,6 +448,12 @@ cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && PIP_IGNORE_INSTALL
 # convenience
 chown -R user:user "${TOOLS}"
 ln -sf "${TOOLS}" /home/user/tools || true
+
+# /usr/bin/hostapd-mana points into /root/tools. Allow the lab user to traverse
+# the path and all tool subdirectories so the shell can find commands without
+# exposing /root itself for directory listing.
+setfacl -m u:user:--x /root
+setfacl -R -m u:user:--x "${TOOLS}"
 
 # Wireshark GUI for the GNOME desktop. Preseed the setuid-dumpcap prompt to "yes"
 # (noninteractive install would otherwise default to no) and add the lab user to

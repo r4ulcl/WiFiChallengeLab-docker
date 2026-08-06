@@ -223,7 +223,7 @@ EOF
 # - update-alternatives for python2 failing
 # - pipenv "Python 2" flags failing
 # Prefer Python 3 everywhere and provide "python" alias.
-apt_install python3 python3-dev python3-venv python3-pip python-is-python3 pipx
+apt_install python3 python3-dev python3-venv python3-pip python-is-python3 pipx acl
 sudo -u user pipx ensurepath 2>/dev/null || true
 
 # ---------- Docker for Debian 12 ---------------------------------------------
@@ -974,6 +974,14 @@ if ! sudo test -f "$TOOLS_DONE_MARKER"; then
   echo '# Provisioning aborted.'
   echo '############################################################'
   exit 1
+fi
+
+# Tools are installed below /root. Let the lab user traverse the entire tools
+# tree so commands and files below it are resolvable instead of appearing as
+# "command not found".
+if sudo test -d /root/tools; then
+  sudo setfacl -m u:user:--x /root
+  sudo setfacl -R -m u:user:--x /root/tools
 fi
 
 sudo apt-get -o Dpkg::Use-Pty=0 -y autoremove </dev/null || true
