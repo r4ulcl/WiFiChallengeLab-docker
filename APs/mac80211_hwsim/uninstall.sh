@@ -3,7 +3,7 @@ set -euo pipefail
 
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
-TARGET_VERSION="2.5-WiFiChallengeLab-version"
+TARGET_VERSION="2.5.1-WiFiChallengeLab-version"
 
 REMOVE_ANY_VERSION=0
 

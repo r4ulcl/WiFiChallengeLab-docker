@@ -19,7 +19,7 @@ STOCK_MODNAME="mac80211_hwsim"
 AUTO_INSTALL_DEPS="${AUTO_INSTALL_DEPS:-0}"
 HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
 # Version stamped into the patched module by patch80211.sh (single source of truth).
-TARGET_VERSION="2.5-WiFiChallengeLab-version"
+TARGET_VERSION="2.5.1-WiFiChallengeLab-version"
 # ----------------------------------------------------------------------
 
 ### ---- Fast path: already installed? -------------------------------
@@ -183,9 +183,29 @@ if ! bash patch80211.sh; then
     exit 1
 fi
 
+# Scope the flood/DoS detector to ONLY the DoS-challenge APs (SAE downgrade,
+# 6 GHz, OWE). Without an allowlist the in-kernel detector kicks EVERY flooded
+# AP, which self-DoSes the WPA3-SAE online-bruteforce target (wifi-management)
+# and the WPA2 PMKID target (wifi-campus). The BSSIDs come from wlan_config so
+# they stay in sync. Keep the set aligned with the interface list in
+# APs/config/patch_deauth_on_drop_dmesg.sh.
+PATCH_ALLOW_BSSIDS=""
+for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
+    if [[ -r "$_wlan_cfg" ]]; then
+        # shellcheck disable=SC1090
+        source "$_wlan_cfg"
+        break
+    fi
+done
+PATCH_ALLOW_BSSIDS="$(printf '%s,%s,%s' "${MAC_DOWNGRADE:-}" "${MAC_6GHZ:-}" "${MAC_OWE:-}")"
+if [[ "$PATCH_ALLOW_BSSIDS" == ",," ]]; then
+    echo "WARNING: no challenge BSSIDs found in wlan_config; flood/DoS detector will apply to ALL APs" >&2
+fi
+
+PATCH_ALLOW_BSSIDS="$PATCH_ALLOW_BSSIDS" \
 PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 
-TARGET_VERSION_ERROR="2.5-WiFiChallengeLab-version"
+TARGET_VERSION_ERROR="2.5.1-WiFiChallengeLab-version"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install
