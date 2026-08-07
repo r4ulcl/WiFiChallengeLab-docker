@@ -3,23 +3,28 @@ set -euo pipefail
 
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
-TARGET_VERSION="2.5-WiFiChallengeLab-version"
+TARGET_VERSION="2.4.1-WiFiChallengeLab-version"
 
+RELOAD_STOCK=1
 REMOVE_ANY_VERSION=0
 
 usage() {
   cat <<'EOF'
 Usage:
-  sudo bash uninstall.sh [--remove-any-version]
+  sudo bash uninstall.sh [--no-reload-stock] [--remove-any-version]
 
 Options:
-  --remove-any-version  Remove the custom module file even if version != 2.5
+  --no-reload-stock     Do not load stock mac80211_hwsim after removal
+  --remove-any-version  Remove the custom module file even if version != 2.4.1
   -h, --help            Show this help
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --no-reload-stock)
+      RELOAD_STOCK=0
+      ;;
     --remove-any-version)
       REMOVE_ANY_VERSION=1
       ;;
@@ -92,4 +97,14 @@ else
   echo "[=] No module files removed."
 fi
 
+if [[ "${RELOAD_STOCK}" -eq 1 ]]; then
+  echo "[*] Loading stock ${STOCK_MODNAME}..."
+  if modprobe "${STOCK_MODNAME}" 2>/dev/null; then
+    echo "[+] Loaded ${STOCK_MODNAME}"
+  else
+    echo "[!] Could not load ${STOCK_MODNAME}. You can load it manually later."
+  fi
+fi
+
 echo "[+] Done. removed=${REMOVED} skipped=${SKIPPED}"
+

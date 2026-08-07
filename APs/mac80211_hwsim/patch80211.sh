@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#set -euo pipefail
+set -euo pipefail
 
 DEST="./"
 mkdir -p "$DEST"
@@ -17,34 +17,17 @@ fi
 base_url="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/plain/${subdir}"
 files=(mac80211_hwsim.c mac80211_hwsim.h)
 
-# Per-branch cache so an offline rebuild can reuse previously fetched sources
-# (raw, pre-patch) for the matching kernel branch.
-CACHE_DIR="${DEST}/cache/${branch}"
-mkdir -p "$CACHE_DIR"
-
 printf "→ Kernel branch:  %s\n→ Source path:    %s\n" "$branch" "$subdir"
 
 for f in "${files[@]}"; do
   url="${base_url}/${f}?h=${branch}"
   dst="${DEST}/${f}"
-  cache="${CACHE_DIR}/${f}"
   if [[ -f "$dst" ]]; then
     echo "  • $f already exists – skipping download"
     continue
   fi
   printf '  • Downloading %s …\n' "$f"
-  # Bounded timeouts so no network fails fast instead of hanging the container.
-  if curl -fsSL --connect-timeout 5 --max-time 30 "$url" -o "$dst"; then
-    cp -f "$dst" "$cache"        # refresh cache for offline reuse
-  else
-    rm -f "$dst"                 # drop any truncated/empty output
-    if [[ -f "$cache" ]]; then
-      echo "  • download failed – using cached $f for branch $branch"
-      cp -f "$cache" "$dst"
-    else
-      echo "  ✖ download failed and no cached $f for branch $branch (offline?)" >&2
-    fi
-  fi
+  curl -fsSL "$url" -o "$dst"
 done
 echo "✔ Sources are in ${DEST}"
 
@@ -53,7 +36,7 @@ CFILE="${DEST}/mac80211_hwsim.c"
 
 # MODULE_VERSION
 if ! grep -q 'WiFiChallengeLab-version' "$CFILE"; then
-  perl -0777 -i -pe 's/MODULE_LICENSE\("GPL"\);\n/MODULE_LICENSE("GPL");\nMODULE_VERSION("2.5-WiFiChallengeLab-version");\n/s' "$CFILE"
+  perl -0777 -i -pe 's/MODULE_LICENSE\("GPL"\);\n/MODULE_LICENSE("GPL");\nMODULE_VERSION("2.4.1-WiFiChallengeLab-version");\n/s' "$CFILE"
   echo "  • MODULE_VERSION added"
 else
   echo "  • MODULE_VERSION already present"
@@ -98,86 +81,5 @@ else
   echo "  • Extra monitor-ACK block already present"
 fi
 
-# Client-less PMKID for the wifi-campus AP.
-# The campus BSSID runs WPA2-PSK with NO real client on purpose. hcxdumptool
-# associates from its own random client MAC, so the Assoc Resp + EAPOL msg 1
-# (carrying the PMKID) that hostapd sends are addressed to a MAC no hwsim radio
-# owns; mac80211_hwsim_tx_frame_no_nl() then reports the frame as un-ACKed and
-# hostapd drops the STA before the PMKID goes out. Force ack=true for frames
-# *sourced* from the campus BSSID so the association completes and the PMKID is
-# captured client-lessly. Scoped to that BSSID only (keep in sync with
-# MAC_ROAM1 in wlan_config) so every other AP keeps real ACK semantics.
-if ! grep -q 'WiFiChallenge] Client-less PMKID campus ACK' "$CFILE"; then
-  IFS= read -r -d '' PMKID_CAMPUS_ACK_BLOCK <<'EOF' || true
-	/* [WiFiChallenge] Client-less PMKID campus ACK.
-	 * The wifi-campus BSSID has no real client, so hostapd's Assoc Resp and
-	 * EAPOL msg 1 (with the PMKID) are addressed to hcxdumptool's random client
-	 * MAC that no hwsim radio owns and would never be ACKed. Force-ACK frames
-	 * sourced from this BSSID so the association completes and the PMKID is
-	 * captured client-lessly. One shared .ko serves both deploys, so BOTH BSSIDs
-	 * are listed. Keep in sync with MAC_ROAM1 in wlan_config (dev) AND
-	 * wlan_config_challenge (CTF). */
-	if (!ack) {
-		static const u8 wifichallenge_pmkid_bssids[][ETH_ALEN] = {
-			/* wlan_config (dev/local) */
-			{ 0xf0, 0x9f, 0xc2, 0x71, 0x22, 0x31 },
-			/* wlan_config_challenge (CTF deploy) */
-			{ 0xf0, 0x9f, 0xc2, 0x3c, 0xb1, 0x31 },
-		};
-		int wc_i;
-
-		for (wc_i = 0; wc_i < ARRAY_SIZE(wifichallenge_pmkid_bssids); wc_i++) {
-			if (ether_addr_equal(hdr->addr2,
-					     wifichallenge_pmkid_bssids[wc_i])) {
-				ack = true;
-				break;
-			}
-		}
-	}
-EOF
-  export PMKID_CAMPUS_ACK_BLOCK
-  perl -0777 -i -pe '
-    my $blk = $ENV{PMKID_CAMPUS_ACK_BLOCK};
-    s/\n\treturn ack;\n\}/\n$blk\n\treturn ack;\n}/;
-  ' "$CFILE"
-  unset PMKID_CAMPUS_ACK_BLOCK
-  echo "  • Client-less PMKID campus ACK block inserted"
-else
-  echo "  • Client-less PMKID campus ACK block already present"
-fi
-
-# Per-radio RSSI jitter so every AP/client shows a distinct signal.
-# Stock mac80211_hwsim reports the SAME signal for every radio on a channel
-# (rx_status.signal = data->rx_rssi + vif txpower), so a scan shows all BSSIDs
-# clustered at one or two identical PWR values. Add a small, STABLE per-radio
-# offset (~±10% => ±3 dB) hashed from the radio's own hw MAC, right where the
-# base signal is set. Being in the driver, this is immune to the hostapd/iw
-# txpower race a userspace `iw set txpower` loop suffered, and deterministic per
-# radio so a given BSSID's PWR stays constant across beacons (no flicker).
-if ! grep -q 'WiFiChallenge] Per-radio RSSI jitter' "$CFILE"; then
-  IFS= read -r -d '' WC_JITTER_BLOCK <<'EOF' || true
-	/* [WiFiChallenge] Per-radio RSSI jitter: give each radio a small, STABLE
-	 * signal offset (~+/-10%, i.e. +/-3 dB) hashed from its own hw MAC, so every
-	 * AP/client shows a distinct PWR in a scan instead of all radios reporting
-	 * an identical level. Deterministic per radio (no per-frame flicker). */
-	{
-		u32 wc_h = 0;
-		int wc_i;
-
-		for (wc_i = 0; wc_i < ETH_ALEN; wc_i++)
-			wc_h = wc_h * 131u + data->addresses[0].addr[wc_i];
-		rx_status.signal += (int)(wc_h % 7) - 3;
-	}
-EOF
-  export WC_JITTER_BLOCK
-  perl -0777 -i -pe '
-    my $blk = $ENV{WC_JITTER_BLOCK};
-    s/(rx_status\.signal \+= info->control\.vif->bss_conf\.txpower;\n)/$1$blk/;
-  ' "$CFILE"
-  unset WC_JITTER_BLOCK
-  echo "  • Per-radio RSSI jitter block inserted"
-else
-  echo "  • Per-radio RSSI jitter block already present"
-fi
-
 echo "✔ mac80211_hwsim.c patched successfully"
+
