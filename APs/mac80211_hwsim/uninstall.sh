@@ -13,7 +13,8 @@ Usage:
   sudo bash uninstall.sh [--remove-any-version]
 
 Options:
-  --remove-any-version  Remove the custom module file even if version != 2.5
+  --remove-any-version  Remove the custom module file even if its version
+                        differs from the current target
   -h, --help            Show this help
 EOF
 }
