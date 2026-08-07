@@ -231,6 +231,11 @@ sudo chmod 600 /home/user/.Xauthority
 sudo chown user:user /home/user/.Xauthority
 
 # ---------- polkit tweaks -----------------------------------------------------
+# The pklocalauthority path does not exist on a fresh Debian 12 (polkit dropped
+# the .pkla backend by default), so the `tee` calls below failed with
+# "No such file or directory" and the Wi-Fi-scan / colord rules were never
+# written. Create the directory first so the rules are actually installed.
+sudo mkdir -p /etc/polkit-1/localauthority/50-local.d
 sudo tee /etc/polkit-1/localauthority/50-local.d/47-allow-wifi-scan.pkla >/dev/null <<'EOF'
 [Allow Wifi Scan]
 Identity=unix-user:*
@@ -897,6 +902,21 @@ if command -v dmidecode >/dev/null 2>&1; then
   if dmidecode | grep -iq vmware; then
     apt_install open-vm-tools-desktop
   elif dmidecode | grep -iq virtualbox; then
+    # virtualbox-guest-utils / virtualbox-guest-x11 live in Debian's "contrib"
+    # component, which the generic/debian12 box does not enable by default. Without
+    # it apt failed with "Unable to locate package virtualbox-guest-utils" and the
+    # guest additions (resize, clipboard, seamless) were never installed. Enable
+    # contrib on the bookworm lines, refresh, then install.
+    if ! grep -rqE '^\s*(deb .*|Components:.*)\bcontrib\b' /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null; then
+      # Classic one-line format (/etc/apt/sources.list on the generic/debian12 box)
+      sudo sed -i -E '/^deb .*debian .*bookworm/ s/\bmain\b/main contrib/' /etc/apt/sources.list 2>/dev/null || true
+      # deb822 format (/etc/apt/sources.list.d/*.sources), if present
+      for s in /etc/apt/sources.list.d/*.sources; do
+        [ -f "$s" ] || continue
+        sudo sed -i -E '/^Components:/ {/\bcontrib\b/!s/^Components:(.*)$/Components:\1 contrib/}' "$s" 2>/dev/null || true
+      done
+    fi
+    apt_update
     apt_install virtualbox-guest-utils virtualbox-guest-x11
   fi
 fi

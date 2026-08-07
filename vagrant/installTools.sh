@@ -7,6 +7,16 @@ if [ "${EUID}" -ne 0 ]; then
 fi
 
 export DEBIAN_FRONTEND="noninteractive"
+
+# Debian 12+ PEP-668 guardrail: `pip install` into the system interpreter aborts
+# with "externally-managed-environment" unless --break-system-packages is passed.
+# This script is invoked as `sudo bash installTools.sh`, and sudo strips the
+# PIP_BREAK_SYSTEM_PACKAGES that install.sh exported, so pip calls made *inside*
+# makefiles / setup.py (wifipumpkin3, assless-chaps, wifi_db, ...) that we cannot
+# add a flag to were failing. Export it here so every pip invocation is covered.
+export PIP_BREAK_SYSTEM_PACKAGES=1
+export PIP_DISABLE_PIP_VERSION_CHECK=1
+
 . /etc/os-release
 DEB_CODENAME="${VERSION_CODENAME:-bookworm}"
 
@@ -245,8 +255,14 @@ if [ ! -d hashcat-6.0.0 ]; then
   wget -q https://hashcat.net/files/hashcat-6.0.0.7z
   7zr x hashcat-6.0.0.7z && rm hashcat-6.0.0.7z
   wget -q https://http.kali.org/kali/pool/main/h/hashcat-utils/hashcat-utils_1.9-0kali2_amd64.deb || true
-  dpkg -i hashcat-utils_*.deb || apt-get -y --fix-broken install || true
-  rm -f hashcat-utils_*.deb
+  # Guard the dpkg: if the download failed the glob does not expand and dpkg would
+  # error on the literal "hashcat-utils_*.deb". hashcat-utils is non-critical.
+  if ls hashcat-utils_*.deb >/dev/null 2>&1; then
+    dpkg -i hashcat-utils_*.deb || apt-get -y --fix-broken install || true
+    rm -f hashcat-utils_*.deb
+  else
+    echo "Warning: hashcat-utils deb download failed; skipping (non-critical)"
+  fi
   ln -sf /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat || true
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
@@ -281,18 +297,31 @@ rm -f bettercap_*.deb
 
 # BeEF
 apt-get install -y autoconf bison libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev  libgdbm-dev libdb-dev ruby-bundler nodejs
+# BeEF's Gemfile now pulls selenium-webdriver ~>4.46, which requires Ruby >= 3.3,
+# so the old 3.1.4 target made `bundle install` fail with "version solving has
+# failed". Build a current Ruby instead.
+BEEF_RUBY_VER="3.3.5"
 if [ ! -d /usr/local/rbenv ]; then
   git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv
 fi
+# rbenv has NO `install` subcommand without the ruby-build plugin. Without it the
+# clone above left `rbenv install` failing with "no such command `install'", so
+# no managed Ruby was ever built and bundle ran against system Ruby 3.1. Install
+# (or refresh) the plugin so `rbenv install` works.
+if [ ! -d /usr/local/rbenv/plugins/ruby-build ]; then
+  git clone https://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build
+else
+  git -C /usr/local/rbenv/plugins/ruby-build pull --ff-only || true
+fi
 export PATH="/usr/local/rbenv/bin:$PATH"
 eval "$(/usr/local/rbenv/bin/rbenv init - bash)" || true
-/usr/local/rbenv/bin/rbenv install -s 3.1.4 || true
-/usr/local/rbenv/bin/rbenv global 3.1.4 || true
+/usr/local/rbenv/bin/rbenv install -s "${BEEF_RUBY_VER}" || true
+/usr/local/rbenv/bin/rbenv global "${BEEF_RUBY_VER}" || true
 if [ ! -d /usr/share/beef ]; then
   git clone https://github.com/beefproject/beef.git /usr/share/beef
 fi
 cd /usr/share/beef
-/usr/local/rbenv/bin/rbenv local 3.1.4 || true
+/usr/local/rbenv/bin/rbenv local "${BEEF_RUBY_VER}" || true
 gem install bundler || true
 bundle install || true
 install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
@@ -367,9 +396,11 @@ if [ ! -d eapeak ]; then
   git clone https://github.com/securestate/eapeak
   cd eapeak
   if command -v python2 >/dev/null 2>&1; then
-    pipenv --two install || echo "pipenv on Python 2 failed, continuing"
+    # Modern pipenv (2020.x+) removed the `--two` flag; select the interpreter
+    # explicitly by path instead so eapeak's Python 2 virtualenv is still created.
+    pipenv --python "$(command -v python2)" install || echo "pipenv on Python 2 failed, continuing"
   else
-    echo "python2 not available, skipping pipenv --two for eapeak"
+    echo "python2 not available, skipping Python 2 pipenv for eapeak"
   fi
 fi
 
@@ -419,9 +450,15 @@ cd "${TOOLS}"
 [ ! -d mdk4 ] && git clone https://github.com/aircrack-ng/mdk4
 # -Wno-unterminated-string-initialization silences ~500 harmless warnings GCC 15
 # emits on mdk4's manufactor.h OUI table (no -Werror upstream, so cosmetic only).
-# Pass mdk4's own default CFLAGS + the suppression (src/Makefile uses ?=, so a
-# command-line CFLAGS overrides it and propagates to the sub-make).
-cd mdk4 && make -j"$(nproc)" CFLAGS="-g -O3 -Wall -Wextra -fcommon -Wno-unterminated-string-initialization" && make install
+# IMPORTANT: pass the suppression as an ENVIRONMENT assignment (before `make`),
+# NOT as a `make CFLAGS=...` command-line override. A command-line CFLAGS wins
+# over the Makefile's `CFLAGS += $(pkg-config --cflags libnl-3.0 libnl-genl-3.0)`
+# and `-Iosdep`, stripping the netlink/pcap include paths -- which made
+# channelhopper.c (netlink/genl/genl.h) and file.c (LINKTYPE_*/TCPDUMP_MAGIC)
+# fail to compile and silently skipped `make install`. As an env var it seeds the
+# `?=` default and the Makefile's `+=` still appends the includes, so the build
+# both suppresses the noise and keeps its include paths.
+cd mdk4 && CFLAGS="-g -O3 -Wall -Wextra -fcommon -Wno-unterminated-string-initialization" make -j"$(nproc)" && make install
 
 # air-hammer with python2 if available
 cd "${TOOLS}"
@@ -481,7 +518,15 @@ cd "${TOOLS}"
 apt-get install -y libpcap-dev pkg-config gcc make
 [ ! -d hcxdumptool-src ] && git clone https://github.com/ZerBea/hcxdumptool.git hcxdumptool-src
 cd hcxdumptool-src && git fetch --tags || true
-git checkout "$(git describe --tags "$(git rev-list --tags --max-count=1)")" || true
+# Check out the newest *version* tag. `git rev-list --tags --max-count=1` +
+# `git describe` walked the commit graph and landed on an OLD tag (e.g. a 6.0.x
+# backport), which still uses SIOCGSTAMP directly and fails to build on modern
+# glibc ("SIOCGSTAMP undeclared"). Sorting tags by version and taking the top
+# one gives the actual latest release (7.x), which compiles cleanly.
+LATEST_HCXDUMPTOOL_TAG="$(git tag --sort=-v:refname | head -n1)"
+if [ -n "${LATEST_HCXDUMPTOOL_TAG}" ]; then
+  git checkout "${LATEST_HCXDUMPTOOL_TAG}" || true
+fi
 make -j"$(nproc)" && make install || true
 hash -r || true
 
