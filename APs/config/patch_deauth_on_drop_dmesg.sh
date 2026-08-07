@@ -10,8 +10,9 @@ if [[ -r "$WLAN_CONFIG_FILE" ]]; then
 fi
 
 # Validate required variables
+# NOTE: WLAN_BRUTEFORCE (wifi-management) is deliberately NOT a target here:
+# it is the online-bruteforce challenge and must stay crackable with wacker.
 : "${WLAN_DOWNGRADE:?WLAN_DOWNGRADE not set in /root/wlan_config}"
-: "${WLAN_BRUTEFORCE:?WLAN_BRUTEFORCE not set in /root/wlan_config}"
 : "${WLAN_6GHZ:?WLAN_6GHZ not set in /root/wlan_config}"
 : "${WLAN_OWE:?WLAN_OWE not set in /root/wlan_config}"
 
@@ -95,7 +96,7 @@ patch_phy_is_target() {
   local patch_if
   while IFS= read -r patch_if; do
     [[ -z "$patch_if" ]] && continue
-    if [[ "$patch_if" == "$WLAN_DOWNGRADE" || "$patch_if" == "$WLAN_BRUTEFORCE" || "$patch_if" == "$WLAN_6GHZ"|| "$patch_if" == "$WLAN_OWE" ]]; then
+    if [[ "$patch_if" == "$WLAN_DOWNGRADE" || "$patch_if" == "$WLAN_6GHZ"|| "$patch_if" == "$WLAN_OWE" ]]; then
       return 0
     fi
   done < <(patch_ifaces_for_phy "$patch_phy")
@@ -136,7 +137,7 @@ sudo dmesg -wH | while IFS= read -r patch_line; do
 
     # Only deauth on the interfaces you explicitly allow
     for patch_if in "${patch_ifaces[@]}"; do
-      if [[ "$patch_if" != "$WLAN_DOWNGRADE" && "$patch_if" != "$WLAN_BRUTEFORCE" && "$patch_if" != "$WLAN_6GHZ" && "$patch_if" != "$WLAN_OWE" ]]; then
+      if [[ "$patch_if" != "$WLAN_DOWNGRADE" && "$patch_if" != "$WLAN_6GHZ" && "$patch_if" != "$WLAN_OWE" ]]; then
         continue
       fi
 
