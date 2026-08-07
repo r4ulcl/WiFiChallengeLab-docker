@@ -280,40 +280,52 @@ button:disabled {
 .bars i:nth-child(3) { height: 78%;  animation-delay: 0.25s; }
 .bars i:nth-child(4) { height: 100%; animation-delay: 0.35s; }
 
-/* the flag itself is emitted as a <button> by PHP */
-.readout button,
-button.flag {
-  width: 100%;
-  margin: 0;
+/* the key text is selectable; the COPY button sits next to it */
+.flag {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  background: #191a21;
+  border: 1px solid rgba(80, 250, 123, 0.35);
+  border-radius: 6px;
+  padding: 0.7rem 0.7rem 0.7rem 0.9rem;
+}
+.flag:hover { border-color: var(--green); }
+
+.flag-text {
+  flex: 1 1 auto;
+  min-width: 0;
   letter-spacing: 0.02em;
   font-family: var(--mono);
   font-size: 13px;
   font-weight: 600;
-  text-align: left;
   color: var(--green);
-  background: #191a21;
-  border: 1px solid rgba(80, 250, 123, 0.35);
-  border-radius: 6px;
-  padding: 0.7rem 4rem 0.7rem 0.9rem;
-  position: relative;
   white-space: nowrap;
   overflow-x: auto;
+  /* let the user drag-select the key by hand */
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
 }
-.readout button:hover,
-button.flag:hover { background: #14251b; border-color: var(--green); }
-.readout button::after,
-button.flag::after {
-  content: "COPY";
-  position: absolute;
-  top: 0.6rem;
-  right: 0.7rem;
+
+.flag-copy {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  align-self: center;
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.14em;
   color: var(--ink-faint);
+  background: transparent;
+  border: 1px solid rgba(80, 250, 123, 0.25);
+  border-radius: 4px;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
 }
-.readout button.copied::after,
-button.flag.copied::after { content: "COPIED"; color: var(--green); }
+.flag-copy:hover { color: var(--green); border-color: var(--green); background: #14251b; }
+.flag-copy.copied { color: var(--green); border-color: var(--green); }
+.flag-copy.failed { color: #ff5555; border-color: #ff5555; }
 
 /* --------------------------------------------------------------- states */
 
