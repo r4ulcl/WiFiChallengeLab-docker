@@ -906,18 +906,24 @@ if command -v dmidecode >/dev/null 2>&1; then
     # component, which the generic/debian12 box does not enable by default. Without
     # it apt failed with "Unable to locate package virtualbox-guest-utils" and the
     # guest additions (resize, clipboard, seamless) were never installed. Enable
-    # contrib on the bookworm lines, refresh, then install.
-    if ! grep -rqE '^\s*(deb .*|Components:.*)\bcontrib\b' /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null; then
-      # Classic one-line format (/etc/apt/sources.list on the generic/debian12 box)
-      sudo sed -i -E '/^deb .*debian .*bookworm/ s/\bmain\b/main contrib/' /etc/apt/sources.list 2>/dev/null || true
-      # deb822 format (/etc/apt/sources.list.d/*.sources), if present
-      for s in /etc/apt/sources.list.d/*.sources; do
-        [ -f "$s" ] || continue
-        sudo sed -i -E '/^Components:/ {/\bcontrib\b/!s/^Components:(.*)$/Components:\1 contrib/}' "$s" 2>/dev/null || true
-      done
-    fi
+    # contrib on the bookworm main line(s), refresh, then install.
+    #
+    # Both seds are per-line idempotent (they skip a line that already lists
+    # contrib), so enable unconditionally instead of guarding on a repo-wide
+    # `grep contrib`: that grep matched contrib on ANY suite (e.g. security/updates)
+    # and could skip enabling it on the main line that actually carries the packages.
+    # Classic one-line format (/etc/apt/sources.list on the generic/debian12 box)
+    sudo sed -i -E '/^deb .*bookworm.*\bmain\b/ { /\bcontrib\b/b; s/\bmain\b/main contrib/ }' /etc/apt/sources.list 2>/dev/null || true
+    # deb822 format (/etc/apt/sources.list.d/*.sources), if present
+    for s in /etc/apt/sources.list.d/*.sources; do
+      [ -f "$s" ] || continue
+      sudo sed -i -E '/^Components:/ {/\bcontrib\b/!s/^Components:(.*)$/Components:\1 contrib/}' "$s" 2>/dev/null || true
+    done
     apt_update
-    apt_install virtualbox-guest-utils virtualbox-guest-x11
+    # Guest additions are a convenience (resize/clipboard/seamless); never let a
+    # failure here abort the whole provision under `set -e`.
+    apt_install virtualbox-guest-utils virtualbox-guest-x11 \
+      || echo "Warning: VirtualBox guest additions not installed (non-critical)"
   fi
 fi
 # ---------- sound  ---------------------------------------------------
