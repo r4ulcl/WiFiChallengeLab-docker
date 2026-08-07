@@ -7,9 +7,13 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Install mac80211_hwsim_WiFiChallenge if missing
+# Install mac80211_hwsim_WiFiChallenge if missing.
+# Run WITHOUT sudo: this script already requires root (EUID check above), and
+# sudo's default env_reset would strip the MAC_*/WLAN_* vars that docker-compose
+# injects via env_file (there is no /root/wlan_config file). install.sh needs
+# MAC_DOWNGRADE/MAC_6GHZ/MAC_OWE to scope the hwsim flood/DoS BSSID allowlist.
 cd /root/mac80211_hwsim_WiFiChallenge
-sudo bash install.sh  || true
+bash install.sh  || true
 
 # Returns all available interfaces, except "lo" and "veth*".
 available_interfaces()

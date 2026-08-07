@@ -198,8 +198,12 @@ for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
     fi
 done
 PATCH_ALLOW_BSSIDS="$(printf '%s,%s,%s' "${MAC_DOWNGRADE:-}" "${MAC_6GHZ:-}" "${MAC_OWE:-}")"
+# Defensive: strip any stray quotes/whitespace an env_file quirk might leave, so a
+# malformed token can't trip dragondrain.sh's strict MAC regex and abort the build.
+PATCH_ALLOW_BSSIDS="${PATCH_ALLOW_BSSIDS//[\'\" ]/}"
 if [[ "$PATCH_ALLOW_BSSIDS" == ",," ]]; then
-    echo "WARNING: no challenge BSSIDs found in wlan_config; flood/DoS detector will apply to ALL APs" >&2
+    echo "WARNING: no challenge BSSIDs (MAC_DOWNGRADE/MAC_6GHZ/MAC_OWE) in environment;" >&2
+    echo "         hwsim flood/DoS detector will apply to ALL APs (self-DoSes wacker/PMKID)." >&2
 fi
 
 PATCH_ALLOW_BSSIDS="$PATCH_ALLOW_BSSIDS" \
