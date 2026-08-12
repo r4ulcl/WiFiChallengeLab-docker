@@ -65,7 +65,33 @@ date
 
 echo 'nameserver 8.8.8.8' > /etc/resolv.conf
 
-service apache2 start > /root/logs/apache2.log 2>&1 &
+# Self-healing apache2 supervisor.
+# `service apache2 start` trusts /var/run/apache2/apache2.pid blindly: if apache2
+# ever dies and that PID gets reused by an unrelated process, the init script
+# thinks apache is "already running" and refuses to restart it, permanently
+# wedging the login.php portal (and the container healthcheck) even though the
+# container itself stays "Up". Instead of a one-shot start, run a small loop
+# that health-checks the real HTTP endpoint and force-restarts apache2 whenever
+# it stops answering, clearing any stale pidfile first.
+supervise_apache () {
+    while true; do
+        if ! curl -f -s -o /dev/null --max-time 3 http://localhost/login.php; then
+            echo "$(date) apache2 not responding, restarting" >> /root/logs/apache2.log
+            service apache2 stop >> /root/logs/apache2.log 2>&1
+            # -x (exact process-name match, no -f) so this doesn't match its own
+            # argv when invoked as `bash -c "<this source>"`, which would
+            # otherwise self-match and kill the watchdog loop.
+            pkill -9 -x apache2 2>/dev/null
+            rm -f /var/run/apache2/apache2.pid
+            service apache2 start >> /root/logs/apache2.log 2>&1
+        fi
+        sleep 15
+    done
+}
+
+rm -f /var/run/apache2/apache2.pid
+service apache2 start > /root/logs/apache2.log 2>&1
+supervise_apache > /root/logs/apache2_supervisor.log 2>&1 &
 
 freeradius -f -l /var/log/freeradius/radius.log &
 

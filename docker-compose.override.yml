@@ -1,0 +1,4 @@
+services:
+  aps:
+    volumes:
+      - ./APs/config/startAPs.sh:/root/startAPs.sh:ro
