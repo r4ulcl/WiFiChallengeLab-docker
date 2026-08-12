@@ -22,8 +22,8 @@ services:
           curl -s -o /dev/null http://localhost:8080 || exit 2;
           pgrep -x freeradius >/dev/null || exit 3;
           [ "$(pgrep -xc host_aps_apd)" -ge 18 ] || exit 4;
-          phy_count="$$(iw dev | grep -c '^phy#')";
-          wlan_count="$$(iw dev | grep -c '^[[:space:]]*Interface wlan[0-9][0-9]*$')";
+          phy_count="$$(iw dev | grep -c "^phy#")";
+          wlan_count="$$(iw dev | grep -c "^[[:space:]]*Interface wlan[0-9][0-9]*$")";
           echo "AP radio assignment: $${phy_count}/34 PHY devices, $${wlan_count}/34 WLAN interfaces (wlan6-wlan39)";
           [ "$${phy_count}" -eq 34 ] || exit 5;
           [ "$${wlan_count}" -eq 34 ] || exit 6'
@@ -56,8 +56,8 @@ services:
           ip netns exec ns-client /bin/bash -c '
           curl -s -o /dev/null http://localhost || exit 1;
           [ "$(pgrep -c wpa_wifichallen)" -ge 17 ]  || exit 2;
-          phy_count="$$(iw dev | grep -c '^phy#')";
-          wlan_count="$$(iw dev | grep -c '^[[:space:]]*Interface wlan[0-9][0-9]*$')";
+          phy_count="$$(iw dev | grep -c "^phy#")";
+          wlan_count="$$(iw dev | grep -c "^[[:space:]]*Interface wlan[0-9][0-9]*$")";
           echo "Clients radio assignment: $${phy_count}/30 PHY devices, $${wlan_count}/30 WLAN interfaces (wlan40-wlan69)";
           [ "$${phy_count}" -eq 30 ] || exit 3;
           [ "$${wlan_count}" -eq 30 ] || exit 4'
