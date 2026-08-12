@@ -18,45 +18,51 @@ ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
 AUTO_INSTALL_DEPS="${AUTO_INSTALL_DEPS:-0}"
 HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
-# Version stamped into the patched module by patch80211.sh (single source of truth).
+# Base version stamped into the patched module by patch80211.sh (single source of
+# truth). The BSSID-allowlist tag ("+scope-<hash>"/"+noscope") is appended below so
+# the module's identity tracks the active flood/DoS scope.
 TARGET_VERSION="2.5-WiFiChallengeLab-version"
 # ----------------------------------------------------------------------
 
-### ---- BSSID scope ----------------------------------------------------
-# Docker Compose supplies these values through env_file; the image does not
-# contain /root/wlan_config. Build the scope before the fast path so an already
-# installed module is reused only when it was built for this exact scope.
-PATCH_ALLOW_BSSIDS=""
-PATCH_SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PATCH_CONFIG_CANDIDATES=()
-if [[ -n "${WLAN_CONFIG_FILE:-}" ]]; then
-    PATCH_CONFIG_CANDIDATES+=("${WLAN_CONFIG_FILE}")
-fi
-PATCH_CONFIG_CANDIDATES+=(
-    "/root/wlan_config"
-    "/root/wlan_config.clear"
-    "${PATCH_SCRIPT_DIR}/../../wlan_config"
-)
-for _wlan_cfg in "${PATCH_CONFIG_CANDIDATES[@]}"; do
+### ---- BSSID-allowlist tag (MUST be computed BEFORE the fast-path) ---
+# The flood/DoS scope (challenge BSSIDs) is folded into MODULE_VERSION further down,
+# so a scoped module is stamped "…-version+scope-<hash>" and an unscoped one
+# "…-version+noscope". The fast-path below MUST therefore compare against the *tagged*
+# version, never the bare base -- otherwise a stale detect-all module built before
+# scoping (bare "…-version") matches the base string, the fast-path early-exits, and
+# the tagging/rebuild logic never runs. That stale module keeps kicking (via
+# ieee80211_restart_hw) EVERY flooded radio, self-DoSing the WPA3-SAE online-bruteforce
+# target (wifi-management / wacker) and the WPA2 PMKID target (wifi-campus).
+# This computation is env-only (no network) and is the single source of truth for
+# the scope: the "Scope the flood/DoS detector" block below only consumes
+# $PATCH_ALLOW_BSSIDS / $PATCH_ALLOW_TAG (it does not recompute them).
+for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
     if [[ -r "$_wlan_cfg" ]]; then
         # shellcheck disable=SC1090
         source "$_wlan_cfg"
-        echo "[i] Loaded WLAN scope from ${_wlan_cfg}"
         break
     fi
 done
 PATCH_ALLOW_BSSIDS="$(printf '%s,%s,%s' "${MAC_DOWNGRADE:-}" "${MAC_6GHZ:-}" "${MAC_OWE:-}")"
 PATCH_ALLOW_BSSIDS="${PATCH_ALLOW_BSSIDS//[\'\" ]/}"
-if [[ "$PATCH_ALLOW_BSSIDS" == ",," || "$PATCH_ALLOW_BSSIDS" == ,* || "$PATCH_ALLOW_BSSIDS" == *, || "$PATCH_ALLOW_BSSIDS" == *,,* ]]; then
-    echo "ERROR: MAC_DOWNGRADE, MAC_6GHZ, and MAC_OWE are required to scope the hwsim DoS detector." >&2
-    exit 1
+if [[ -n "$PATCH_ALLOW_BSSIDS" && "$PATCH_ALLOW_BSSIDS" != ",," ]]; then
+    PATCH_ALLOW_TAG="scope-$(printf '%s' "$PATCH_ALLOW_BSSIDS" | tr 'A-F' 'a-f' | sha1sum | cut -c1-8)"
+else
+    PATCH_ALLOW_TAG="noscope"
 fi
-
-# Include the normalized scope in the expected module version before the fast
-# path. A host-mounted module with a different scope must be rebuilt; a module
-# with the same scope can remain offline-safe.
-PATCH_ALLOW_TAG="scope-$(printf '%s' "$PATCH_ALLOW_BSSIDS" | tr 'A-F' 'a-f' | sha1sum | cut -c1-8)"
+# Surface a non-scoped or partial allowlist. noscope = detect ALL APs, which
+# self-DoSes wifi-management (wacker) and wifi-campus (PMKID). A partial set (an
+# empty field, e.g. MAC_OWE missing at build time) silently drops that DoS
+# challenge AP from detection, so its attack never triggers a response.
+if [[ "$PATCH_ALLOW_TAG" == "noscope" ]]; then
+    echo "WARNING: no challenge BSSIDs (MAC_DOWNGRADE/MAC_6GHZ/MAC_OWE) in environment;" >&2
+    echo "         hwsim flood/DoS detector will apply to ALL APs (self-DoSes wacker/PMKID)." >&2
+elif [[ "$PATCH_ALLOW_BSSIDS" == ,* || "$PATCH_ALLOW_BSSIDS" == *, || "$PATCH_ALLOW_BSSIDS" == *,,* ]]; then
+    echo "WARNING: partial challenge BSSID set ('${PATCH_ALLOW_BSSIDS}'); a DoS challenge AP" >&2
+    echo "         (SAE downgrade / 6 GHz / OWE) is missing and will NOT be detected." >&2
+fi
 TARGET_VERSION="${TARGET_VERSION}+${PATCH_ALLOW_TAG}"
+# ----------------------------------------------------------------------
 
 ### ---- Fast path: already installed? -------------------------------
 # Run this BEFORE any apt/curl/build step so an already-built module starts
@@ -280,7 +286,8 @@ fi
 
 echo "==> Installing to ${DEST_DIR} …"
 sudo cp -f "./${ALT_MODNAME}.ko" "${DEST_DIR}/"
-printf '%s\n' "${PATCH_ALLOW_BSSIDS}" | sudo tee "${ALT_MOD_PATH}.allowlist" >/dev/null
+printf '%s\n' "${PATCH_ALLOW_BSSIDS}" | sudo tee "${ALT_MOD_PATH}.allowlist" >/dev/null \
+    || echo "WARNING: could not write ${ALT_MOD_PATH}.allowlist; fast-path will rebuild on every start." >&2
 
 echo "==> Updating depmod …"
 sudo depmod -a
