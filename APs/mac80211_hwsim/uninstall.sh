@@ -3,7 +3,9 @@ set -euo pipefail
 
 ALT_MODNAME="mac80211_hwsim_WiFiChallenge"
 STOCK_MODNAME="mac80211_hwsim"
-TARGET_VERSION="2.5-WiFiChallengeLab-version"
+# Match any build of our module regardless of the numeric version or the
+# "+scope-*/+noscope" allowlist tag install.sh appends to MODULE_VERSION.
+VERSION_MARKER="WiFiChallengeLab-version"
 
 REMOVE_ANY_VERSION=0
 
@@ -76,7 +78,7 @@ for MOD_PATH in "${CANDIDATE_PATHS[@]}"; do
 
   MOD_VER="$(modinfo -F version "${MOD_PATH}" 2>/dev/null || true)"
 
-  if [[ "${REMOVE_ANY_VERSION}" -eq 1 || "${MOD_VER}" == "${TARGET_VERSION}" ]]; then
+  if [[ "${REMOVE_ANY_VERSION}" -eq 1 || "${MOD_VER}" == *"${VERSION_MARKER}"* ]]; then
     rm -f "${MOD_PATH}"
     echo "[+] Removed ${MOD_PATH} (version: ${MOD_VER:-unknown})"
     ((REMOVED+=1))

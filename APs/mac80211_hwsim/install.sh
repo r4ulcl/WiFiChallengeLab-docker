@@ -209,7 +209,22 @@ fi
 PATCH_ALLOW_BSSIDS="$PATCH_ALLOW_BSSIDS" \
 PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 
-TARGET_VERSION_ERROR="2.5-WiFiChallengeLab-version"
+# Fold the BSSID allowlist into MODULE_VERSION so the module's identity changes
+# whenever the scoped set changes. MODULE_VERSION is otherwise a fixed constant
+# (patch80211.sh), so once ANY build is installed on the host-bind-mounted
+# /lib/modules, the version-match early-exit below refuses to recompile -- a stale
+# detect-all module then keeps self-DoSing wifi-management (wacker) and wifi-campus
+# (PMKID) even after the allowlist is corrected. Tagging forces a rebuild on change
+# and makes the active scope visible in `modinfo -F version` / /sys/module/*/version.
+if [[ -n "$PATCH_ALLOW_BSSIDS" && "$PATCH_ALLOW_BSSIDS" != ",," ]]; then
+    PATCH_ALLOW_TAG="scope-$(printf '%s' "$PATCH_ALLOW_BSSIDS" | tr 'A-F' 'a-f' | sha1sum | cut -c1-8)"
+else
+    PATCH_ALLOW_TAG="noscope"
+fi
+perl -0777 -i -pe 's{MODULE_VERSION\("([^"]*?WiFiChallengeLab-version)(?:\+[0-9a-z-]+)?"\)}{MODULE_VERSION("$1+'"$PATCH_ALLOW_TAG"'")}g' mac80211_hwsim.c
+echo "[i] MODULE_VERSION allowlist tag: +${PATCH_ALLOW_TAG}"
+
+TARGET_VERSION_ERROR="2.5.1-WiFiChallengeLab-version"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install
