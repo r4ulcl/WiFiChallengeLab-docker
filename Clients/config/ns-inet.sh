@@ -66,11 +66,27 @@ ip netns add $NS
 echo "Waiting for APs (10 secs)"
 sleep 10 # wait for AP docker
 
-# Add WiFi interfaces wlan 40-69
+# Add WiFi interfaces wlan 40-69. Resolve the PHY from the exact interface
+# name; a broad grep can select the wrong radio (for example wlan4 also
+# matches wlan40). Fail immediately when a client radio is not available so
+# the container healthcheck does not report a misleading "healthy" state.
+CLIENT_RADIOS=0
 for I in `seq 40 69` ; do
-	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
-	iw phy $PHY set netns name /run/netns/$NS
+    WLAN="wlan${I}"
+    PHY="$(cat "/sys/class/net/${WLAN}/phy80211/name" 2>/dev/null)"
+    if [[ -z "$PHY" ]]; then
+        echo "ERROR: no PHY found for Clients interface ${WLAN}" >&2
+        exit 1
+    fi
+
+    echo "Assigning ${PHY} (${WLAN}) to ${NS}"
+    if ! iw phy "$PHY" set netns name "/run/netns/${NS}"; then
+        echo "ERROR: could not assign ${PHY} (${WLAN}) to ${NS}" >&2
+        exit 1
+    fi
+    CLIENT_RADIOS=$((CLIENT_RADIOS + 1))
 done
+echo "Clients radio assignment: ${CLIENT_RADIOS}/30 PHY devices (wlan40-wlan69)"
 
 #--------------------------------------------------------------------------------------------------
 
