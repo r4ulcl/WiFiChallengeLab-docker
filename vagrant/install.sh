@@ -933,12 +933,35 @@ apt_install alsa-utils
 apt_install sox libsox-fmt-all pipewire-audio-client-libraries
 
 
-# ---------- allow root X11 ----------------------------------------------------
+# ---------- allow root X11 + self-heal /dev/null -----------------------------
+# On this privileged/host-netns box a stray root-owned regular file sometimes
+# shadows the /dev/null device (it stays that way until the next reboot). Once
+# that happens, every ">/dev/null" redirect in an interactive shell prints
+# "bash: /dev/null: Permission denied" -- two per new GUI terminal, from the
+# xhost line this used to append. Repair the node *before* any such redirect
+# runs (the [ -c ] test and the mknod use no redirection), then re-assert root
+# X11 access quietly. The block is marker-guarded so re-running install.sh does
+# not duplicate it.
 for u in vagrant user; do
   if id -u "$u" >/dev/null 2>&1; then
     if command -v xhost >/dev/null 2>&1; then
       su - "$u" -c 'if [ -n "$DISPLAY" ]; then xhost si:localuser:root; fi' || true
-      echo 'if [ -n "$DISPLAY" ] && command -v xhost >/dev/null 2>&1; then xhost si:localuser:root >/dev/null 2>&1; fi' >> "/home/$u/.bashrc"
+    fi
+    # Drop the older single-line snippet so it is not duplicated / noisy.
+    sudo sed -i '/xhost si:localuser:root >\/dev\/null 2>&1/d' "/home/$u/.bashrc" 2>/dev/null || true
+    if ! sudo grep -qF '# WiFiChallengeLab: root X11 + /dev/null guard' "/home/$u/.bashrc" 2>/dev/null; then
+      sudo tee -a "/home/$u/.bashrc" >/dev/null <<'EOF'
+# WiFiChallengeLab: root X11 + /dev/null guard
+# Repair /dev/null first -- no redirection in this branch, since a broken
+# /dev/null is exactly what a ">/dev/null" would choke on -- then allow root to
+# use the X display. Both are best-effort and stay silent.
+if [ ! -c /dev/null ]; then
+  sudo sh -c 'rm -f /dev/null && mknod -m 666 /dev/null c 1 3' || true
+fi
+if [ -n "$DISPLAY" ] && command -v xhost >/dev/null 2>&1; then
+  xhost si:localuser:root >/dev/null 2>&1 || true
+fi
+EOF
     fi
   fi
 done
