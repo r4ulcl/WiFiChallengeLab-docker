@@ -53,7 +53,7 @@ CFILE="${DEST}/mac80211_hwsim.c"
 
 # MODULE_VERSION
 if ! grep -q 'WiFiChallengeLab-version' "$CFILE"; then
-  perl -0777 -i -pe 's/MODULE_LICENSE\("GPL"\);\n/MODULE_LICENSE("GPL");\nMODULE_VERSION("2.5.1-WiFiChallengeLab-version");\n/s' "$CFILE"
+  perl -0777 -i -pe 's/MODULE_LICENSE\("GPL"\);\n/MODULE_LICENSE("GPL");\nMODULE_VERSION("2.5-WiFiChallengeLab-version");\n/s' "$CFILE"
   echo "  • MODULE_VERSION added"
 else
   echo "  • MODULE_VERSION already present"

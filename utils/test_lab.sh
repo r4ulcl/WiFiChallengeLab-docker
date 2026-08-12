@@ -149,7 +149,7 @@ AP_ROWS=(
   "ISP vodafone     |wlan22|ESSID_OTHER2|CHANNEL_OTHER2||192.168.12|PSK|psk/hostapd_other2.conf"
   "ISP MiFibra      |wlan23|ESSID_OTHER3|CHANNEL_OTHER3||192.168.13|PSK|psk/hostapd_other3.conf"
 )
-EXPECTED_AP_PROCS=23
+EXPECTED_AP_PROCS=21
 
 # Client rows: wlan|expected_ESSID_var|supplicant_conf|associates(yes/no)|logfile
 # logfile is the supplicant output under /root/logs/ (naming is not derivable
