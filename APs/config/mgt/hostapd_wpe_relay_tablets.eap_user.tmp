@@ -103,6 +103,9 @@
 #"8"*		AKA'	[2]
 
 # WPE - DO NOT REMOVE - These entries are specifically in here 
+# Password-backed identities use every password-capable phase-2 method that
+# this AP advertises. The tablet supplicant may still pin MSCHAPv2 for its
+# intended relay scenario.
 *		PEAP,TTLS,TLS,FAST
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
@@ -115,4 +118,4 @@
 "CONTOSOREG\anonymous"		MSCHAPV2
 "anonymous@CONTOSOREG"  MSCHAPV2
 
-"${IDENTITY_MGT_RELAY}"        MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"    [2]
+"${IDENTITY_MGT_RELAY}"        TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"    [2]
