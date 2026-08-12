@@ -132,19 +132,18 @@ ip netns exec $NS ip route add default via ${VETH_ADDR}
 # Enable IP-forwarding.
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-# Flush forward rules.
-iptables -P FORWARD DROP
-iptables -F FORWARD
- 
-# Flush nat rules.
-iptables -t nat -F
-
-# Enable masquerading of 10.200.1.0/24 out the uplink (only if we have one,
-# so an offline lab still starts its APs without a bogus MASQUERADE rule).
+# Do not flush the shared FORWARD or NAT tables here.  The client namespace is
+# configured by a second script in the same host network namespace; flushing
+# either table would remove the other namespace's internet-sharing rules.
+# Keep the lab rules idempotent so restarting this container does not create
+# duplicate entries.
 if [[ -n "$IFACE" ]]; then
-   iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
-   iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
-   iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
+   iptables -t nat -C POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE 2>/dev/null || \
+      iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
+   iptables -C FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT 2>/dev/null || \
+      iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
+   iptables -C FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT 2>/dev/null || \
+      iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
 fi
 
 # Get into namespace and exec startAP
