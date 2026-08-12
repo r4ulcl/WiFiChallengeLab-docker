@@ -27,10 +27,21 @@ TARGET_VERSION="2.5-WiFiChallengeLab-version"
 # contain /root/wlan_config. Build the scope before the fast path so an already
 # installed module is reused only when it was built for this exact scope.
 PATCH_ALLOW_BSSIDS=""
-for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
+PATCH_SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PATCH_CONFIG_CANDIDATES=()
+if [[ -n "${WLAN_CONFIG_FILE:-}" ]]; then
+    PATCH_CONFIG_CANDIDATES+=("${WLAN_CONFIG_FILE}")
+fi
+PATCH_CONFIG_CANDIDATES+=(
+    "/root/wlan_config"
+    "/root/wlan_config.clear"
+    "${PATCH_SCRIPT_DIR}/../../wlan_config"
+)
+for _wlan_cfg in "${PATCH_CONFIG_CANDIDATES[@]}"; do
     if [[ -r "$_wlan_cfg" ]]; then
         # shellcheck disable=SC1090
         source "$_wlan_cfg"
+        echo "[i] Loaded WLAN scope from ${_wlan_cfg}"
         break
     fi
 done
