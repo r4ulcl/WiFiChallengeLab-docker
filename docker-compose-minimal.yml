@@ -16,7 +16,8 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - ip netns exec ns-ap /bin/bash -c '
+        - |
+          ip netns exec ns-ap /bin/bash -c '
           curl -f -s -o /dev/null http://localhost/login.php || exit 1;
           curl -s -o /dev/null http://localhost:8080 || exit 2;
           pgrep -x freeradius >/dev/null || exit 3;
