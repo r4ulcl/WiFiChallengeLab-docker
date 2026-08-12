@@ -271,10 +271,9 @@ else
   echo "[=] patch_ AP destination filter helpers already present"
 fi
 
-# 4b) Insert BSSID allowlist helper (scopes detection/DoS to challenge APs)
-if ! grep -qF "$patch_ALLOWLIST_MARK" "$patch_FILE"; then
-  if (( patch_ALLOW_COUNT > 0 )); then
-    patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
+# 4b) Insert/refresh BSSID allowlist helper (scopes detection/DoS to challenge APs)
+if (( patch_ALLOW_COUNT > 0 )); then
+  patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
 static const u8 patch_allow_bssids[][ETH_ALEN] = {
 ${patch_ALLOW_ROWS}};
 static bool patch_bssid_allowed(const u8 *patch_bssid)
@@ -287,15 +286,28 @@ static bool patch_bssid_allowed(const u8 *patch_bssid)
 		if (memcmp(patch_bssid, patch_allow_bssids[patch_i], ETH_ALEN) == 0)
 			return true;
 	return false;
-}"
-  else
-    patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
+}
+/* [HWSIM-PATCH] bssid allowlist end */"
+else
+  patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
 static bool patch_bssid_allowed(const u8 *patch_bssid)
 {
 	(void)patch_bssid;
-	return true; /* no allowlist configured -> detect on all APs */
-}"
-  fi
+	return false; /* no allowlist configured -> detect no APs */
+}
+/* [HWSIM-PATCH] bssid allowlist end */"
+fi
+
+if grep -qF "$patch_ALLOWLIST_MARK" "$patch_FILE"; then
+  # Replace a previously generated block. This matters when the module source
+  # is reused: an old empty/all-AP allowlist must not survive a configuration
+  # change that excludes wifi-management.
+  patch_INS="$patch_ALLOWLIST_CONTENT" perl -0777 -i -pe '
+    my $ins = $ENV{patch_INS};
+    s{/\* \[HWSIM-PATCH\] bssid allowlist \*/.*?(?=\n?do \{\n\t/\* \[HWSIM-PATCH-RX\] begin \*/)}{$ins\n}s;
+  ' "$patch_FILE"
+  echo "[+] Refreshed patch_ BSSID allowlist (${patch_ALLOW_COUNT} entries)"
+else
   patch_INS="$patch_ALLOWLIST_CONTENT" perl -0777 -i -pe '
     my $ins = $ENV{patch_INS};
     if (index($_, "/* [HWSIM-PATCH] bssid allowlist */") < 0) {
@@ -303,8 +315,6 @@ static bool patch_bssid_allowed(const u8 *patch_bssid)
     }
   ' "$patch_FILE"
   echo "[+] Inserted patch_ BSSID allowlist (${patch_ALLOW_COUNT} entries)"
-else
-  echo "[=] patch_ BSSID allowlist already present"
 fi
 
 # 5) RX wrapper (receiver-only flood detection + optional DoS simulation)

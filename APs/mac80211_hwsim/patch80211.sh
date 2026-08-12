@@ -51,12 +51,15 @@ echo "✔ Sources are in ${DEST}"
 CFILE="${DEST}/mac80211_hwsim.c"
 [[ -f "$CFILE" ]] || { echo "✖ ${CFILE} not found – aborting" >&2; exit 1; }
 
-# MODULE_VERSION
-if ! grep -q 'WiFiChallengeLab-version' "$CFILE"; then
+# MODULE_VERSION. Rewrite an older WiFiChallengeLab version as well: the source
+# file can survive across container restarts and must not retain a stale module
+# version after the patch scripts change.
+if grep -q 'MODULE_VERSION("[^"]*WiFiChallengeLab-version")' "$CFILE"; then
+  perl -0777 -i -pe 's/MODULE_VERSION\("[^"]*WiFiChallengeLab-version"\);/MODULE_VERSION("2.5-WiFiChallengeLab-version");/s' "$CFILE"
+  echo "  • MODULE_VERSION normalized"
+else
   perl -0777 -i -pe 's/MODULE_LICENSE\("GPL"\);\n/MODULE_LICENSE("GPL");\nMODULE_VERSION("2.5-WiFiChallengeLab-version");\n/s' "$CFILE"
   echo "  • MODULE_VERSION added"
-else
-  echo "  • MODULE_VERSION already present"
 fi
 
 # Rewrite hwsim_mon_xmit()

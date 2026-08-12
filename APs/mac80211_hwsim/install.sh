@@ -22,12 +22,40 @@ HOST_USR_LIB_MOUNT="${HOST_USR_LIB_MOUNT:-/host_usr_lib}"
 TARGET_VERSION="2.5-WiFiChallengeLab-version"
 # ----------------------------------------------------------------------
 
+### ---- BSSID scope ----------------------------------------------------
+# Docker Compose supplies these values through env_file; the image does not
+# contain /root/wlan_config. Build the scope before the fast path so an already
+# installed module is reused only when it was built for this exact scope.
+PATCH_ALLOW_BSSIDS=""
+for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
+    if [[ -r "$_wlan_cfg" ]]; then
+        # shellcheck disable=SC1090
+        source "$_wlan_cfg"
+        break
+    fi
+done
+PATCH_ALLOW_BSSIDS="$(printf '%s,%s,%s' "${MAC_DOWNGRADE:-}" "${MAC_6GHZ:-}" "${MAC_OWE:-}")"
+PATCH_ALLOW_BSSIDS="${PATCH_ALLOW_BSSIDS//[\'\" ]/}"
+if [[ "$PATCH_ALLOW_BSSIDS" == ",," || "$PATCH_ALLOW_BSSIDS" == ,* || "$PATCH_ALLOW_BSSIDS" == *, || "$PATCH_ALLOW_BSSIDS" == *,,* ]]; then
+    echo "ERROR: MAC_DOWNGRADE, MAC_6GHZ, and MAC_OWE are required to scope the hwsim DoS detector." >&2
+    exit 1
+fi
+
+# Include the normalized scope in the expected module version before the fast
+# path. A host-mounted module with a different scope must be rebuilt; a module
+# with the same scope can remain offline-safe.
+PATCH_ALLOW_TAG="scope-$(printf '%s' "$PATCH_ALLOW_BSSIDS" | tr 'A-F' 'a-f' | sha1sum | cut -c1-8)"
+TARGET_VERSION="${TARGET_VERSION}+${PATCH_ALLOW_TAG}"
+
 ### ---- Fast path: already installed? -------------------------------
 # Run this BEFORE any apt/curl/build step so an already-built module starts
 # the lab fully offline (no internet required at AP container start).
 KVER="$(uname -r)"
 ALT_MOD_PATH_EARLY="/lib/modules/${KVER}/kernel/drivers/net/wireless/${ALT_MODNAME}.ko"
-if [[ "$(modinfo -F version "${ALT_MOD_PATH_EARLY}" 2>/dev/null || echo none)" == "${TARGET_VERSION}" ]]; then
+PATCH_ALLOWLIST_STATE_EARLY="${ALT_MOD_PATH_EARLY}.allowlist"
+if [[ "$(modinfo -F version "${ALT_MOD_PATH_EARLY}" 2>/dev/null || echo none)" == "${TARGET_VERSION}" &&
+      -r "${PATCH_ALLOWLIST_STATE_EARLY}" &&
+      "$(<"${PATCH_ALLOWLIST_STATE_EARLY}")" == "${PATCH_ALLOW_BSSIDS}" ]]; then
     echo "==> ${ALT_MODNAME} ${TARGET_VERSION} already installed for ${KVER}; nothing to do (offline-safe)."
     exit 0
 fi
@@ -189,48 +217,22 @@ fi
 # and the WPA2 PMKID target (wifi-campus). The BSSIDs come from wlan_config so
 # they stay in sync. Keep the set aligned with the interface list in
 # APs/config/patch_deauth_on_drop_dmesg.sh.
-PATCH_ALLOW_BSSIDS=""
-for _wlan_cfg in /root/wlan_config /root/wlan_config.clear; do
-    if [[ -r "$_wlan_cfg" ]]; then
-        # shellcheck disable=SC1090
-        source "$_wlan_cfg"
-        break
-    fi
-done
-PATCH_ALLOW_BSSIDS="$(printf '%s,%s,%s' "${MAC_DOWNGRADE:-}" "${MAC_6GHZ:-}" "${MAC_OWE:-}")"
-# Defensive: strip any stray quotes/whitespace an env_file quirk might leave, so a
-# malformed token can't trip dragondrain.sh's strict MAC regex and abort the build.
-PATCH_ALLOW_BSSIDS="${PATCH_ALLOW_BSSIDS//[\'\" ]/}"
-if [[ "$PATCH_ALLOW_BSSIDS" == ",," ]]; then
-    echo "WARNING: no challenge BSSIDs (MAC_DOWNGRADE/MAC_6GHZ/MAC_OWE) in environment;" >&2
-    echo "         hwsim flood/DoS detector will apply to ALL APs (self-DoSes wacker/PMKID)." >&2
-fi
-
 PATCH_ALLOW_BSSIDS="$PATCH_ALLOW_BSSIDS" \
 PATCH_SAE_AUTH_THRESHOLD=4 PATCH_DETECT_WINDOWS=2 bash dragondrain.sh --simulate-dos
 
-# Fold the BSSID allowlist into MODULE_VERSION so the module's identity changes
-# whenever the scoped set changes. MODULE_VERSION is otherwise a fixed constant
-# (patch80211.sh), so once ANY build is installed on the host-bind-mounted
-# /lib/modules, the version-match early-exit below refuses to recompile -- a stale
-# detect-all module then keeps self-DoSing wifi-management (wacker) and wifi-campus
-# (PMKID) even after the allowlist is corrected. Tagging forces a rebuild on change
-# and makes the active scope visible in `modinfo -F version` / /sys/module/*/version.
-if [[ -n "$PATCH_ALLOW_BSSIDS" && "$PATCH_ALLOW_BSSIDS" != ",," ]]; then
-    PATCH_ALLOW_TAG="scope-$(printf '%s' "$PATCH_ALLOW_BSSIDS" | tr 'A-F' 'a-f' | sha1sum | cut -c1-8)"
-else
-    PATCH_ALLOW_TAG="noscope"
-fi
+# Stamp the source with the same scope tag used by the fast path. The BSSID
+# allowlist is compile-time data, so the scope must be visible in MODULE_VERSION.
 perl -0777 -i -pe 's{MODULE_VERSION\("([^"]*?WiFiChallengeLab-version)(?:\+[0-9a-z-]+)?"\)}{MODULE_VERSION("$1+'"$PATCH_ALLOW_TAG"'")}g' mac80211_hwsim.c
 echo "[i] MODULE_VERSION allowlist tag: +${PATCH_ALLOW_TAG}"
 
-TARGET_VERSION_ERROR="2.5.1-WiFiChallengeLab-version"
+TARGET_VERSION_ERROR="${TARGET_VERSION}"
 TARGET_VERSION=$(grep -oP 'MODULE_VERSION\("([^"]+)"\)' mac80211_hwsim.c | grep -oP '(?<=")[^"]+(?=")' || echo $TARGET_VERSION_ERROR)
 
 ### ---- Compile and install
 BUILD_DIR="$PWD"
 DEST_DIR="/lib/modules/${KVER}/kernel/drivers/net/wireless"
 ALT_MOD_PATH="${DEST_DIR}/${ALT_MODNAME}.ko"
+PATCH_ALLOWLIST_STATE="${ALT_MOD_PATH}.allowlist"
 
 # helper – return MODULE_VERSION string or "none"
 modver() { modinfo -F version "$1" 2>/dev/null || echo "none"; }
@@ -239,7 +241,9 @@ echo "==> Checking existing installation …"
 ALT_VER_INSTALLED="$(modver "${ALT_MOD_PATH}")"
 echo "Installed WiFiChallenge version : ${ALT_VER_INSTALLED}"
 
-if [[ "${ALT_VER_INSTALLED}" == "${TARGET_VERSION}" ]]; then
+if [[ "${ALT_VER_INSTALLED}" == "${TARGET_VERSION}" &&
+      -r "${PATCH_ALLOWLIST_STATE}" &&
+      "$(<"${PATCH_ALLOWLIST_STATE}")" == "${PATCH_ALLOW_BSSIDS}" ]]; then
     echo "Desired version already present; nothing to do."
     exit 0
 fi
@@ -265,6 +269,7 @@ fi
 
 echo "==> Installing to ${DEST_DIR} …"
 sudo cp -f "./${ALT_MODNAME}.ko" "${DEST_DIR}/"
+printf '%s\n' "${PATCH_ALLOW_BSSIDS}" | sudo tee "${ALT_MOD_PATH}.allowlist" >/dev/null
 
 echo "==> Updating depmod …"
 sudo depmod -a
