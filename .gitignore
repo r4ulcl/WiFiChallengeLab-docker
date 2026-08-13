@@ -16,3 +16,5 @@ APs/mac80211_hwsim/.*.cmd
 APs/mac80211_hwsim/Module.symvers
 APs/mac80211_hwsim/modules.order
 REPORT.md
+/virtualbox.log
+/vmware.log

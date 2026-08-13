@@ -42,7 +42,7 @@ def cleanup_script
     apt-get clean
     rm -rf /var/lib/apt/lists/*
     fstrim -av || true
-    dd if=/dev/zero of=/var/tmp/zerofile bs=1M || true
+    dd if=/dev/zero of=/var/tmp/zerofile bs=1M status=none 2>/dev/null || true
     # sync BEFORE rm: dirty pages of an unlinked file can be dropped without
     # ever hitting the disk, which would leave free space un-zeroed.
     sync

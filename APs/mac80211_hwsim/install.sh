@@ -227,6 +227,10 @@ if ! bash patch80211.sh; then
     echo "       Build once while online, then offline starts will reuse the installed module."
     exit 1
 fi
+if [[ ! -s mac80211_hwsim.c || ! -s mac80211_hwsim.h ]]; then
+    echo "ERROR: mac80211_hwsim source files are missing or empty after download." >&2
+    exit 1
+fi
 
 # Scope the flood/DoS detector to ONLY the DoS-challenge APs (SAE downgrade,
 # 6 GHz, OWE). Without an allowlist the in-kernel detector kicks EVERY flooded

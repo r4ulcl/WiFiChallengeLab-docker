@@ -33,8 +33,9 @@ for f in "${files[@]}"; do
     continue
   fi
   printf '  • Downloading %s …\n' "$f"
-  # Bounded timeouts so no network fails fast instead of hanging the container.
-  if curl -fsSL --connect-timeout 5 --max-time 30 "$url" -o "$dst"; then
+  # Retry transient DNS/network failures while retaining bounded timeouts.
+  if curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 \
+      --connect-timeout 15 --max-time 60 "$url" -o "$dst"; then
     cp -f "$dst" "$cache"        # refresh cache for offline reuse
   else
     rm -f "$dst"                 # drop any truncated/empty output
@@ -44,6 +45,12 @@ for f in "${files[@]}"; do
     else
       echo "  ✖ download failed and no cached $f for branch $branch (offline?)" >&2
     fi
+  fi
+done
+for f in "${files[@]}"; do
+  if [[ ! -s "${DEST}/${f}" ]]; then
+    echo "${DEST}/${f} is missing or empty; aborting before the build." >&2
+    exit 1
   fi
 done
 echo "✔ Sources are in ${DEST}"

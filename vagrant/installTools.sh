@@ -48,12 +48,37 @@ chattr +i /etc/resolv.conf 2>/dev/null || true
 # QEMU and Hyper-V (any network blocking those resolvers had no working DNS, and
 # the user could not fix it because the file was immutable).
 __restore_resolv_conf() {
+  set +e
   chattr -i /etc/resolv.conf 2>/dev/null || true
-  if [ -e /run/systemd/resolve/stub-resolv.conf ]; then
+  rm -f /etc/resolv.conf
+  if [ -e "$RESOLV_BAK" ] || [ -L "$RESOLV_BAK" ]; then
+    mv -f "$RESOLV_BAK" /etc/resolv.conf
+  elif [ -e /run/systemd/resolve/stub-resolv.conf ]; then
     ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
   fi
 }
 trap __restore_resolv_conf EXIT
+
+# Prevent package post-install scripts from starting daemons in the middle of
+# provisioning. In particular, isc-dhcp-server starts before install.sh can
+# disable it. Restore any pre-existing policy when this script exits.
+POLICY_RC_BAK="/root/policy-rc.d.pre-install.$(date +%s)"
+if [ -e /usr/sbin/policy-rc.d ]; then
+  cp -a /usr/sbin/policy-rc.d "$POLICY_RC_BAK"
+fi
+cat >/usr/sbin/policy-rc.d <<'EOF'
+#!/bin/sh
+exit 101
+EOF
+chmod 0755 /usr/sbin/policy-rc.d
+__restore_policy_rc() {
+  set +e
+  rm -f /usr/sbin/policy-rc.d
+  if [ -e "$POLICY_RC_BAK" ]; then
+    mv -f "$POLICY_RC_BAK" /usr/sbin/policy-rc.d
+  fi
+}
+trap '__restore_resolv_conf; __restore_policy_rc' EXIT
 
 # Fail loudly and stop if a tool build aborts the script. Historically one build
 # error (e.g. hostapd-mana missing its .config) tripped `set -e` and every tool
@@ -92,7 +117,10 @@ apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full 
 # ---------- Python 2 availability check --------------------------------------
 have_py2_pkg=false
 if apt-cache show python2 >/dev/null 2>&1; then
-  apt-get install -y python2 python2-dev || true
+  apt-get install -y python2 || true
+  if apt-cache show python2-dev >/dev/null 2>&1; then
+    apt-get install -y python2-dev || true
+  fi
   if command -v python2 >/dev/null 2>&1; then have_py2_pkg=true; fi
 fi
 
@@ -109,20 +137,22 @@ if ! $have_py2_pkg; then
     apt-get install -y libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev
     CFLAGS="-O2" pyenv install 2.7.18 || true
   fi
-  pyenv global 2.7.18 || true
-  ln -sf "$(pyenv root)/versions/2.7.18/bin/python" /usr/local/bin/python2 || true
-  ln -sf "$(pyenv root)/versions/2.7.18/bin/pip" /usr/local/bin/pip2 || true
+  PY2_PREFIX="$(pyenv root)/versions/2.7.18"
+  if [ -x "${PY2_PREFIX}/bin/python" ]; then
+    ln -sf "${PY2_PREFIX}/bin/python" /usr/local/bin/python2
+    [ ! -x "${PY2_PREFIX}/bin/pip" ] || ln -sf "${PY2_PREFIX}/bin/pip" /usr/local/bin/pip2
+  else
+    echo "Warning: Python 2.7.18 could not be built; legacy Python 2 tools will be unavailable"
+    rm -f /usr/local/bin/python2 /usr/local/bin/pip2
+  fi
+  # Keep pyenv's generic `python` shim on the system interpreter. Only the
+  # explicit python2/pip2 shims above should select the legacy runtime.
+  pyenv global system || true
+  hash -r || true
 fi
 
-# Default python alternative for legacy tools that expect python -> python2.
-# Use the RESOLVED path: on Debian 12/13 python2 comes from pyenv at
-# /usr/local/bin/python2, not /usr/bin/python2, so hardcoding /usr/bin/python2
-# made update-alternatives fail with "alternative path ... doesn't exist".
-if command -v python2 >/dev/null 2>&1; then
-  PY2_BIN="$(command -v python2)"
-  update-alternatives --install /usr/bin/python python "$PY2_BIN" 1 || true
-  update-alternatives --set python "$PY2_BIN" || true
-fi
+# Keep the system `python` command on Python 3 (python-is-python3 is installed by
+# install.sh). Legacy tools invoke python2 explicitly through the shim above.
 
 # ---------- wordlists ---------------------------------------------------------
 # These downloads are non-critical and use flaky public endpoints (GitHub release
@@ -160,14 +190,11 @@ if ! openssl version | grep -qE 'OpenSSL 3\.'; then
   fi
 fi
 
-# ---------- hcxtools via deb, then source refresh ----------------------------
+# ---------- hcxtools ---------------------------------------------------------
+# The old airgeddon .deb downgrades hcxtools and pulls libssl1.1, which is not
+# available on Debian 12 and leaves dpkg broken. Use the distro package.
 cd "${TOOLS}"
-apt-get install -y pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc
-if [ ! -f hcxtools_6.0.2-1+b1_amd64.deb ]; then
-  wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/hcxtools_6.0.2-1+b1_amd64.deb || true
-  dpkg -i hcxtools_6.0.2-1+b1_amd64.deb || apt-get -y --fix-broken install || true
-  rm -f hcxtools_6.0.2-1+b1_amd64.deb
-fi
+apt-get install -y hcxtools pkg-config libcurl4-openssl-dev libssl-dev zlib1g-dev make gcc
 
 # ---------- wifi_db -----------------------------------------------------------
 # DB Browser for SQLite (Qt GUI) to inspect wifi_db's database on the GNOME
@@ -221,16 +248,28 @@ fi
 cd "${TOOLS}"
 apt-get install -y libsqlite3-dev
 if [ ! -d hostapd-2.11 ]; then
-  wget -q https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/52925bbd/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch
-  wget -q https://w1.fi/releases/hostapd-2.11.tar.gz
-  tar zxf hostapd-2.11.tar.gz && rm hostapd-2.11.tar.gz
-  cd hostapd-2.11
-  patch -p1 < ../hostapd-2.11-wpe.patch && rm ../hostapd-2.11-wpe.patch
-  cd hostapd
-  make -j"$(nproc)"
-  make install
-  make wpe || true
-  cd /etc/hostapd-wpe/certs && ./bootstrap && make install || true
+  if wget -q https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch \
+      && wget -q https://w1.fi/releases/hostapd-2.11.tar.gz \
+      && tar zxf hostapd-2.11.tar.gz; then
+    rm -f hostapd-2.11.tar.gz
+    cd hostapd-2.11
+    if patch --dry-run -p1 < ../hostapd-2.11-wpe.patch >/dev/null 2>&1; then
+      patch -p1 < ../hostapd-2.11-wpe.patch
+      rm -f ../hostapd-2.11-wpe.patch
+      cd hostapd
+      make -j"$(nproc)"
+      make install
+      make wpe || true
+      cd /etc/hostapd-wpe/certs && ./bootstrap && make install || true
+    else
+      echo "Warning: hostapd-WPE patch does not match hostapd 2.11; skipping WPE build"
+      cd "${TOOLS}"
+      rm -rf hostapd-2.11 hostapd-2.11-wpe.patch
+    fi
+  else
+    echo "Warning: could not download hostapd-WPE sources; skipping WPE build"
+    rm -rf hostapd-2.11 hostapd-2.11.tar.gz hostapd-2.11-wpe.patch
+  fi
 fi
 
 # ---------- Aircrack-ng from source ------------------------------------------
@@ -297,10 +336,17 @@ rm -f bettercap_*.deb
 
 # BeEF
 apt-get install -y autoconf bison libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev  libgdbm-dev libdb-dev ruby-bundler nodejs
-# BeEF's Gemfile now pulls selenium-webdriver ~>4.46, which requires Ruby >= 3.3,
-# so the old 3.1.4 target made `bundle install` fail with "version solving has
-# failed". Build a current Ruby instead.
-BEEF_RUBY_VER="3.3.5"
+# Follow BeEF's declared Ruby version instead of pinning an older runtime that
+# eventually becomes incompatible with its rolling Gemfile.
+if [ ! -d /usr/share/beef ]; then
+  git clone https://github.com/beefproject/beef.git /usr/share/beef
+else
+  git -C /usr/share/beef pull --ff-only || echo "Warning: could not refresh the existing BeEF checkout"
+fi
+BEEF_RUBY_VER="$(tr -d '[:space:]' </usr/share/beef/.ruby-version 2>/dev/null || true)"
+if ! [[ "$BEEF_RUBY_VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  BEEF_RUBY_VER="3.4.7"
+fi
 if [ ! -d /usr/local/rbenv ]; then
   git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv
 fi
@@ -317,14 +363,21 @@ export PATH="/usr/local/rbenv/bin:$PATH"
 eval "$(/usr/local/rbenv/bin/rbenv init - bash)" || true
 /usr/local/rbenv/bin/rbenv install -s "${BEEF_RUBY_VER}" || true
 /usr/local/rbenv/bin/rbenv global "${BEEF_RUBY_VER}" || true
-if [ ! -d /usr/share/beef ]; then
-  git clone https://github.com/beefproject/beef.git /usr/share/beef
-fi
 cd /usr/share/beef
-/usr/local/rbenv/bin/rbenv local "${BEEF_RUBY_VER}" || true
-gem install bundler || true
-bundle install || true
-install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
+if /usr/local/rbenv/bin/rbenv prefix "${BEEF_RUBY_VER}" >/dev/null 2>&1; then
+  /usr/local/rbenv/bin/rbenv local "${BEEF_RUBY_VER}"
+  if gem install bundler \
+      && bundle config set --local without 'test' \
+      && bundle install; then
+    install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef
+  else
+    echo "Warning: BeEF dependencies could not be installed; disabling the BeEF launcher"
+    rm -f /usr/local/bin/beef
+  fi
+else
+  echo "Warning: Ruby ${BEEF_RUBY_VER} is unavailable; skipping BeEF bundle install"
+  rm -f /usr/local/bin/beef
+fi
 
 # airgeddon
 apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only mdk3 mdk4 arping ccze
@@ -396,9 +449,9 @@ if [ ! -d eapeak ]; then
   git clone https://github.com/securestate/eapeak
   cd eapeak
   if command -v python2 >/dev/null 2>&1; then
-    # Modern pipenv (2020.x+) removed the `--two` flag; select the interpreter
-    # explicitly by path instead so eapeak's Python 2 virtualenv is still created.
-    pipenv --python "$(command -v python2)" install || echo "pipenv on Python 2 failed, continuing"
+    # Modern virtualenv no longer supports Python 2. Do not invoke it; eapeak
+    # remains available as source for legacy use.
+    echo "Warning: Python 2 is present but modern pipenv cannot create a Python 2 environment; skipping eapeak virtualenv"
   else
     echo "python2 not available, skipping Python 2 pipenv for eapeak"
   fi
@@ -508,26 +561,39 @@ cp defconfig wpa_supplicant-2.10/wpa_supplicant/.config
 git apply wpa_supplicant.patch || true
 cd wpa_supplicant-2.10/wpa_supplicant && make -j"$(nproc)" || true
 
-# hcxtools from source refresh
+# Build hcxtools and hcxdumptool from their upstream default branches as a
+# matched pair. The distro hcxtools is older, while the old hcxdumptool snapshot
+# uses SIOCGSTAMP and fails on modern glibc.
 cd "${TOOLS}"
-[ ! -d hcxtools-src ] && git clone https://salsa.debian.org/pkg-security-team/hcxtools hcxtools-src
-cd hcxtools-src && make -j"$(nproc)" && make install || true
-
-# hcxdumptool from upstream source (latest). The distro package is 6.2.6 (2022)
-cd "${TOOLS}"
-apt-get install -y libpcap-dev pkg-config gcc make
-[ ! -d hcxdumptool-src ] && git clone https://github.com/ZerBea/hcxdumptool.git hcxdumptool-src
-cd hcxdumptool-src && git fetch --tags || true
-# Check out the newest *version* tag. `git rev-list --tags --max-count=1` +
-# `git describe` walked the commit graph and landed on an OLD tag (e.g. a 6.0.x
-# backport), which still uses SIOCGSTAMP directly and fails to build on modern
-# glibc ("SIOCGSTAMP undeclared"). Sorting tags by version and taking the top
-# one gives the actual latest release (7.x), which compiles cleanly.
-LATEST_HCXDUMPTOOL_TAG="$(git tag --sort=-v:refname | head -n1)"
-if [ -n "${LATEST_HCXDUMPTOOL_TAG}" ]; then
-  git checkout "${LATEST_HCXDUMPTOOL_TAG}" || true
+apt-get install -y libpcap-dev pkg-config gcc make libcurl4-openssl-dev libssl-dev zlib1g-dev
+if [ ! -d hcxtools-src/.git ]; then
+  rm -rf hcxtools-src
+  git clone https://github.com/ZerBea/hcxtools.git hcxtools-src
+else
+  git -C hcxtools-src remote set-url origin https://github.com/ZerBea/hcxtools.git
+  if [ -f hcxtools-src/.git/shallow ]; then
+    git -C hcxtools-src fetch --unshallow --tags origin
+  fi
+  git -C hcxtools-src fetch --tags origin master
+  git -C hcxtools-src checkout -B wcl-current FETCH_HEAD
 fi
-make -j"$(nproc)" && make install || true
+cd hcxtools-src
+make -j"$(nproc)" && make install
+
+cd "${TOOLS}"
+if [ ! -d hcxdumptool-src/.git ]; then
+  rm -rf hcxdumptool-src
+  git clone https://github.com/ZerBea/hcxdumptool.git hcxdumptool-src
+else
+  git -C hcxdumptool-src remote set-url origin https://github.com/ZerBea/hcxdumptool.git
+  if [ -f hcxdumptool-src/.git/shallow ]; then
+    git -C hcxdumptool-src fetch --unshallow --tags origin
+  fi
+  git -C hcxdumptool-src fetch --tags origin master
+  git -C hcxdumptool-src checkout -B wcl-current FETCH_HEAD
+fi
+cd hcxdumptool-src
+make -j"$(nproc)" && make install
 hash -r || true
 
 # Wifiphisher

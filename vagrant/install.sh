@@ -314,25 +314,70 @@ require_pkg p7zip-full
 7z x nzyme-logs.7z
 
 cd /var/WiFiChallengeLab-docker/APs/mac80211_hwsim/
-sudo bash install.sh
-
-cd /var/WiFiChallengeLab-docker
-if [ "$LOCATION" = "local" ]; then
-  sudo docker compose -f docker-compose-local.yml build
-  docker tag wifichallengelab-docker-clients r4ulcl/wifichallengelab-clients || true
-  docker tag wifichallengelab-docker-aps r4ulcl/wifichallengelab-aps || true
-  docker tag wifichallengelab-docker-nzyme r4ulcl/wifichallengelab-nzyme || true
-  docker image rm wifichallengelab-docker-nzyme wifichallengelab-docker-aps wifichallengelab-docker-clients || true
+if ! sudo bash install.sh; then
+  echo "ERROR: mac80211_hwsim installation failed; stopping before Docker startup." >&2
+  exit 1
 fi
 
+cd /var/WiFiChallengeLab-docker
+COMPOSE_FILE="docker-compose.yml"
 if [ "$DEV" = "true" ]; then
-  sudo docker compose -f docker-compose-dev.yml up -d
+  COMPOSE_FILE="docker-compose-dev.yml"
+fi
+
+# Authenticate when credentials were supplied, then pull the requested images.
+# If Docker Hub rate-limits an unauthenticated pull, build from the checked-out
+# sources instead of starting a partial stack and cascading into docker cp errors.
+if [ -n "${DOCKERHUB_USERNAME:-}" ] && [ -n "${DOCKERHUB_TOKEN:-}" ]; then
+  if ! printf '%s' "$DOCKERHUB_TOKEN" | sudo docker login --username "$DOCKERHUB_USERNAME" --password-stdin; then
+    echo "ERROR: Docker Hub authentication failed." >&2
+    exit 1
+  fi
+fi
+if [ "$LOCATION" = "local" ]; then
+  COMPOSE_FILE="docker-compose-local.yml"
+  if ! sudo docker compose -f "$COMPOSE_FILE" build; then
+    echo "ERROR: local Docker image build failed." >&2
+    exit 1
+  fi
 else
-  sudo docker compose -f docker-compose.yml up -d
+  if ! sudo docker compose -f "$COMPOSE_FILE" pull; then
+    echo "Warning: Docker image pull failed (often Docker Hub rate limiting); using local image builds." >&2
+    COMPOSE_FILE="docker-compose-local.yml"
+    if ! sudo docker compose -f "$COMPOSE_FILE" build; then
+      echo "ERROR: Docker pull and local fallback build both failed." >&2
+      echo "       Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN if the registry is rate limiting pulls." >&2
+      exit 1
+    fi
+  fi
+fi
+if ! sudo docker compose -f "$COMPOSE_FILE" up -d; then
+  echo "ERROR: Docker Compose could not start the lab stack." >&2
+  sudo docker compose -f "$COMPOSE_FILE" ps >&2 || true
+  exit 1
+fi
+
+# compose up is asynchronous; wait for the AP container before copying the
+# gateway binary. This makes the first real failure visible and avoids the old
+# 'No such container' cascade after a failed image pull.
+AP_STATE=""
+for _ in $(seq 1 60); do
+  AP_STATE="$(sudo docker inspect -f '{{.State.Running}}' WiFiChallengeLab-APs 2>/dev/null || true)"
+  [ "$AP_STATE" = "true" ] && break
+  sleep 2
+done
+if [ "$AP_STATE" != "true" ]; then
+  echo "ERROR: WiFiChallengeLab-APs did not start; recent container output:" >&2
+  sudo docker logs --tail 80 WiFiChallengeLab-APs >&2 || true
+  exit 1
 fi
 
 # Install hostapd's HLR/AuC gateway on the attacker machine for EAP-SIM/AKA labs.
-sudo docker cp WiFiChallengeLab-APs:/usr/sbin/hlr_auc_gw /usr/local/sbin/hlr_auc_gw
+if ! sudo docker cp WiFiChallengeLab-APs:/usr/sbin/hlr_auc_gw /usr/local/sbin/hlr_auc_gw; then
+  echo "ERROR: AP container is running but /usr/sbin/hlr_auc_gw is missing." >&2
+  sudo docker logs --tail 80 WiFiChallengeLab-APs >&2 || true
+  exit 1
+fi
 sudo chmod 0755 /usr/local/sbin/hlr_auc_gw
 if ldd /usr/local/sbin/hlr_auc_gw | grep -q 'not found'; then
   echo 'hlr_auc_gw has unresolved shared-library dependencies' >&2
@@ -902,28 +947,17 @@ if command -v dmidecode >/dev/null 2>&1; then
   if dmidecode | grep -iq vmware; then
     apt_install open-vm-tools-desktop
   elif dmidecode | grep -iq virtualbox; then
-    # virtualbox-guest-utils / virtualbox-guest-x11 live in Debian's "contrib"
-    # component, which the generic/debian12 box does not enable by default. Without
-    # it apt failed with "Unable to locate package virtualbox-guest-utils" and the
-    # guest additions (resize, clipboard, seamless) were never installed. Enable
-    # contrib on the bookworm main line(s), refresh, then install.
-    #
-    # Both seds are per-line idempotent (they skip a line that already lists
-    # contrib), so enable unconditionally instead of guarding on a repo-wide
-    # `grep contrib`: that grep matched contrib on ANY suite (e.g. security/updates)
-    # and could skip enabling it on the main line that actually carries the packages.
-    # Classic one-line format (/etc/apt/sources.list on the generic/debian12 box)
-    sudo sed -i -E '/^deb .*bookworm.*\bmain\b/ { /\bcontrib\b/b; s/\bmain\b/main contrib/ }' /etc/apt/sources.list 2>/dev/null || true
-    # deb822 format (/etc/apt/sources.list.d/*.sources), if present
-    for s in /etc/apt/sources.list.d/*.sources; do
-      [ -f "$s" ] || continue
-      sudo sed -i -E '/^Components:/ {/\bcontrib\b/!s/^Components:(.*)$/Components:\1 contrib/}' "$s" 2>/dev/null || true
-    done
-    apt_update
-    # Guest additions are a convenience (resize/clipboard/seamless); never let a
-    # failure here abort the whole provision under `set -e`.
-    apt_install virtualbox-guest-utils virtualbox-guest-x11 \
-      || echo "Warning: VirtualBox guest additions not installed (non-critical)"
+    # The Vagrantfile installs the matching ISO Guest Additions. Debian's
+    # virtualbox-guest-* packages are not present in the generic bookworm box,
+    # so do not make provisioning fail while looking for unavailable packages.
+    if command -v VBoxService >/dev/null 2>&1 || [ -x /usr/sbin/VBoxService ]; then
+      echo "VirtualBox Guest Additions already installed"
+    elif apt-cache show virtualbox-guest-utils >/dev/null 2>&1; then
+      apt_install virtualbox-guest-utils virtualbox-guest-x11 || \
+        echo "Warning: optional VirtualBox guest packages could not be installed"
+    else
+      echo "VirtualBox Guest Additions package unavailable; using the Vagrant ISO"
+    fi
   fi
 fi
 # ---------- sound  ---------------------------------------------------
