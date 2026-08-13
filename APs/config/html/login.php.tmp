@@ -141,12 +141,38 @@ if (strpos($_SERVER['REMOTE_ADDR'], '${IP_6GHZ}.') === 0)
 if (strpos($_SERVER['REMOTE_ADDR'], '${IP_ROAM1}.') === 0)
   loginflag($flag_roam);
 
+$essidByManagementIp = [
+  '${IP_OPN}.1'                  => '${ESSID_OPN}',
+  '${IP_WEP}.1'                  => '${ESSID_WEP}',
+  '${IP_PSK}.1'                  => '${ESSID_PSK}',
+  '${IP_WPS}.1'                  => '${ESSID_WPS}',
+  '${IP_OPN_HIDDEN}.1'           => '${ESSID_OPN_HIDDEN}',
+  '${IP_MGT}.1'                  => '${ESSID_MGT}',
+  '${IP_MGT2}.1'                 => '${ESSID_MGT2}',
+  '${IP_MGT_RELAY}.1'            => '${ESSID_MGT_RELAY}',
+  '${IP_MGT_RELAY_TABLETS}.1'    => '${ESSID_MGT_RELAY_TABLETS}',
+  '${IP_MGT_TLS}.1'              => '${ESSID_MGT_TLS}',
+  '${IP_MGT_MD5}.1'              => '${ESSID_MGT_MD5}',
+  '${IP_MGT_SIM}.1'              => '${ESSID_MGT_SIM}',
+  '${IP_DOWNGRADE}.1'            => '${ESSID_DOWNGRADE}',
+  '${IP_BRUTEFORCE}.1'           => '${ESSID_BRUTEFORCE}',
+  '${IP_6GHZ}.1'                 => '${ESSID_6GHZ}',
+  '${IP_OWE}.1'                  => '${ESSID_OWE}',
+  '${IP_ROAM1}.1'                => '${ESSID_ROAM}',
+  '${IP_OTHER0}.1'               => '${ESSID_OTHER0}',
+  '${IP_OTHER1}.1'               => '${ESSID_OTHER1}',
+  '${IP_OTHER2}.1'               => '${ESSID_OTHER2}',
+  '${IP_OTHER3}.1'               => '${ESSID_OTHER3}',
+];
+$essid = $essidByManagementIp[$_SERVER['SERVER_ADDR'] ?? ''] ?? 'unknown';
+
 ?>
 
     <p class="eyebrow">Authentication required</p>
 
     <div class="plate">
       <div class="plate-row"><span class="k">Model</span><span class="v">WCX-1900 · dual-band AP</span></div>
+      <div class="plate-row"><span class="k">ESSID</span><span class="v"><?php echo htmlspecialchars($essid, ENT_QUOTES, 'UTF-8'); ?></span></div>
       <div class="plate-row"><span class="k">Mgmt IP</span><span class="v"><?php echo htmlspecialchars($_SERVER['SERVER_ADDR'] ?? 'router.local'); ?></span></div>
       <div class="plate-row"><span class="k">Session</span><span class="v sig">● unauthenticated</span></div>
     </div>
