@@ -1,12 +1,13 @@
 extensions = x509v3
 
 [ x509v3 ]
-nsCertType       = server
-keyUsage         = digitalSignature,nonRepudiation,keyEncipherment
-extendedKeyUsage = msSGC,nsSGC,serverAuth
+basicConstraints = critical,CA:FALSE
+keyUsage         = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
 subjectAltName   = @alt_names
 
 [ alt_names ]
+DNS.1 = radius.wifichallenge.com
 IP.1 = 192.168.1.1
 IP.2 = 192.168.2.1
 IP.3 = 192.168.3.1
@@ -27,3 +28,23 @@ IP.17 = 192.168.17.1
 IP.18 = 192.168.18.1
 IP.19 = 192.168.19.1
 IP.20 = 192.168.20.1
+IP.21 = 192.168.21.1
+IP.22 = 192.168.22.1
+IP.23 = 192.168.23.1
+IP.24 = 192.168.24.1
+IP.25 = 192.168.25.1
+IP.26 = 192.168.26.1
+IP.27 = 192.168.27.1
+IP.28 = 192.168.28.1
+IP.29 = 192.168.29.1
+IP.30 = 192.168.30.1
+IP.31 = 192.168.31.1
+IP.32 = 192.168.32.1
+IP.33 = 192.168.33.1
+IP.34 = 192.168.34.1
+IP.35 = 192.168.35.1
+IP.36 = 192.168.36.1
+IP.37 = 192.168.37.1
+IP.38 = 192.168.38.1
+IP.39 = 192.168.39.1
+IP.40 = 192.168.40.1

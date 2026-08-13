@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 libpcap
 
 # Entrypoint: Replace variables in config 
 COPY docker-entrypoint.sh /bin/
-RUN chmod +x /usr/bin/docker-entrypoint.sh
+RUN chmod +x /bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

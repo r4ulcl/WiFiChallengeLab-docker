@@ -10,19 +10,28 @@ services:
       - ./certs:/root/mgt/certs/:ro
       - ./certs:/var/www/html/.internalCA/
       - /lib/modules:/lib/modules
-      - /usr/src:/usr/src:ro
+      - /usr/src:/usr/src
+      - /usr/lib:/host_usr_lib:ro
       - ./logsAP:/root/logs/
     healthcheck:
       test:
         - CMD-SHELL
-        - ip netns exec ns-ap /bin/bash -c '
-          curl -f -s http://localhost/login.php >/dev/null || exit 1;
-          curl -s http://localhost:8080 >/dev/null || exit 2;
-          if [ $(ps aux | grep host_aps_apd | grep -v grep | grep -c host_aps_apd) -lt 16 ]; then exit 3; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+        - |
+          ip netns exec ns-ap /bin/bash -c '
+          curl -f -s -o /dev/null http://localhost/login.php || exit 1;
+          curl -s -o /dev/null http://localhost:8080 || exit 2;
+          pgrep -x freeradius >/dev/null || exit 3;
+          [ "$(pgrep -xc host_aps_apd)" -ge 18 ] || exit 4;
+          phy_count="$$(iw dev | grep -c "^phy#")";
+          wlan_count="$$(iw dev | grep -c "^[[:space:]]*Interface wlan[0-9][0-9]*$")";
+          echo "AP radio assignment: $${phy_count}/34 PHY devices, $${wlan_count}/34 WLAN interfaces (wlan6-wlan39)";
+          [ "$${phy_count}" -eq 34 ] || exit 5;
+          [ "$${wlan_count}" -eq 34 ] || exit 6'
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+      start_interval: 3s
     network_mode: host #NETNS
     privileged: true #NETNS
 
@@ -43,10 +52,17 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - ip netns exec ns-client /bin/bash -c '
-          curl -s http://localhost >/dev/null || exit 1;
-          if [ $(ps aux | grep wpa_wifichallenge_supplicant | grep -vE "grep|sudo|timeout" | grep -c wpa_wifichallenge_supplicant) -lt 17 ]; then exit 2; fi'
-      interval: 5s
-      timeout: 5s
-      retries: 3
+        - |
+          ip netns exec ns-client /bin/bash -c '
+          curl -s -o /dev/null http://localhost || exit 1;
+          [ "$(pgrep -c wpa_wifichallen)" -ge 17 ]  || exit 2;
+          phy_count="$$(iw dev | grep -c "^phy#")";
+          wlan_count="$$(iw dev | grep -c "^[[:space:]]*Interface wlan[0-9][0-9]*$")";
+          echo "Clients radio assignment: $${phy_count}/30 PHY devices, $${wlan_count}/30 WLAN interfaces (wlan40-wlan69)";
+          [ "$${phy_count}" -eq 30 ] || exit 3;
+          [ "$${wlan_count}" -eq 30 ] || exit 4'
+      interval: 15s
+      timeout: 10s
+      retries: 5
       start_period: 45s
+      start_interval: 3s

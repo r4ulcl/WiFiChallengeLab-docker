@@ -1,0 +1,35 @@
+# --- Probe-request fingerprint persona: modern smartphone (Passpoint / Hotspot 2.0) ---
+# wpa_supplicant appends these to probe requests (wpa_supplicant_extra_ies):
+#   interworking=1 -> Interworking element (IE 107)
+#   hs20=1         -> Hotspot 2.0 Indication (vendor IE 221, WFA OUI)
+# This shifts the IE tag-number list that wifi_db hashes, giving this device a
+# distinct fingerprint. Probe-only: auto_interworking stays off and there are no
+# cred{} blocks, so association to the lab's non-Passpoint APs is unaffected.
+# (Note: disable_ht/vht/he would NOT help here - those only affect the assoc
+# request, not the probe request the fingerprint is built from.)
+interworking=1
+hs20=1
+access_network_type=2
+
+# Preferred-network list: each network is a directed probe (scan_ssid=1). None of
+# these SSIDs exist in the lab, so the station keeps probing without associating.
+network={
+    ssid="Andres-iPhone"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=3
+}
+
+network={
+    ssid="MOVISTAR_A31F"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=2
+}
+
+network={
+    ssid="AeropuertoT4-WiFi"
+    key_mgmt=NONE
+    scan_ssid=1
+    priority=1
+}

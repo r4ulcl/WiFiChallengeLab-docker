@@ -46,5 +46,7 @@ own_ip_addr=127.0.0.1
 wpa=2
 wpa_passphrase=$PASS_DOWNGRADE_CLEAR
 wpa_key_mgmt=SAE WPA-PSK
+# MFP optional (1) 
+ieee80211w=1
 
 rsn_pairwise=CCMP

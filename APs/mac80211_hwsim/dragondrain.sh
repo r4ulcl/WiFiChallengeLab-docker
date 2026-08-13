@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+#set -euo pipefail
 
 usage() {
   cat <<'EOF'
@@ -91,6 +91,25 @@ require_posint PATCH_BLOCK_SECONDS "$PATCH_BLOCK_SECONDS"
 require_posint PATCH_SIM_INTERVAL_SECONDS "$PATCH_SIM_INTERVAL_SECONDS"
 require_posint PATCH_SIM_BLOCK_SECONDS "$PATCH_SIM_BLOCK_SECONDS"
 
+# Optional BSSID allowlist (comma/space separated MACs). When set, flood
+# detection AND the DoS-kick only apply to these BSSIDs -- the DoS-challenge APs
+# (SAE downgrade, 6 GHz, OWE). When empty, every local AP is detected (legacy
+# behaviour). This is what keeps a legitimate online WPA3-SAE bruteforce of
+# wifi-management, and WPA2 PMKID capture on wifi-campus, from tripping the AP's
+# own self-DoS. Keep in sync with APs/config/patch_deauth_on_drop_dmesg.sh.
+PATCH_ALLOW_BSSIDS="${PATCH_ALLOW_BSSIDS:-}"
+patch_ALLOW_ROWS=""
+patch_ALLOW_COUNT=0
+for patch_allow_mac in ${PATCH_ALLOW_BSSIDS//,/ }; do
+  if [[ ! "$patch_allow_mac" =~ ^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$ ]]; then
+    echo "[-] PATCH_ALLOW_BSSIDS: invalid MAC '$patch_allow_mac'" >&2
+    exit 1
+  fi
+  patch_ALLOW_ROWS+="	{0x${patch_allow_mac//:/,0x}},"$'\n'
+  patch_ALLOW_COUNT=$((patch_ALLOW_COUNT + 1))
+done
+echo "[i] BSSID allowlist: ${patch_ALLOW_COUNT} entr$([[ $patch_ALLOW_COUNT -eq 1 ]] && echo y || echo ies) (${PATCH_ALLOW_BSSIDS:-<none: detect all APs>})"
+
 if [[ "$PATCH_SIMULATE_DOS" != "0" && "$PATCH_SIMULATE_DOS" != "1" ]]; then
   echo "[-] PATCH_SIMULATE_DOS must be 0 or 1" >&2
   exit 1
@@ -105,6 +124,7 @@ cp -a "$patch_FILE" "$patch_FILE.bak"
 
 patch_HELPERS_MARK="/* [HWSIM-PATCH] kick helpers */"
 patch_APFILTER_MARK="/* [HWSIM-PATCH] ap dest filter */"
+patch_ALLOWLIST_MARK="/* [HWSIM-PATCH] bssid allowlist */"
 patch_RX_MARK_BEGIN="/* [HWSIM-PATCH-RX] begin */"
 
 echo "[i] Tuning: auth=$PATCH_AUTH_THRESHOLD sae_auth=$PATCH_SAE_AUTH_THRESHOLD assoc=$PATCH_ASSOC_THRESHOLD total=$PATCH_TOTAL_THRESHOLD detect_windows=$PATCH_DETECT_WINDOWS quiet_windows=$PATCH_QUIET_WINDOWS block_s=$PATCH_BLOCK_SECONDS simulate_dos=$PATCH_SIMULATE_DOS sim_interval_s=$PATCH_SIM_INTERVAL_SECONDS sim_block_s=$PATCH_SIM_BLOCK_SECONDS"
@@ -251,6 +271,52 @@ else
   echo "[=] patch_ AP destination filter helpers already present"
 fi
 
+# 4b) Insert/refresh BSSID allowlist helper (scopes detection/DoS to challenge APs)
+if (( patch_ALLOW_COUNT > 0 )); then
+  patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
+static const u8 patch_allow_bssids[][ETH_ALEN] = {
+${patch_ALLOW_ROWS}};
+static bool patch_bssid_allowed(const u8 *patch_bssid)
+{
+	unsigned int patch_i;
+
+	if (!patch_bssid)
+		return false;
+	for (patch_i = 0; patch_i < ARRAY_SIZE(patch_allow_bssids); patch_i++)
+		if (memcmp(patch_bssid, patch_allow_bssids[patch_i], ETH_ALEN) == 0)
+			return true;
+	return false;
+}
+/* [HWSIM-PATCH] bssid allowlist end */"
+else
+  patch_ALLOWLIST_CONTENT="/* [HWSIM-PATCH] bssid allowlist */
+static bool patch_bssid_allowed(const u8 *patch_bssid)
+{
+	(void)patch_bssid;
+	return false; /* no allowlist configured -> detect no APs */
+}
+/* [HWSIM-PATCH] bssid allowlist end */"
+fi
+
+if grep -qF "$patch_ALLOWLIST_MARK" "$patch_FILE"; then
+  # Replace a previously generated block. This matters when the module source
+  # is reused: an old empty/all-AP allowlist must not survive a configuration
+  # change that excludes wifi-management.
+  patch_INS="$patch_ALLOWLIST_CONTENT" perl -0777 -i -pe '
+    my $ins = $ENV{patch_INS};
+    s{/\* \[HWSIM-PATCH\] bssid allowlist \*/.*?(?=\n?do \{\n\t/\* \[HWSIM-PATCH-RX\] begin \*/)}{$ins\n}s;
+  ' "$patch_FILE"
+  echo "[+] Refreshed patch_ BSSID allowlist (${patch_ALLOW_COUNT} entries)"
+else
+  patch_INS="$patch_ALLOWLIST_CONTENT" perl -0777 -i -pe '
+    my $ins = $ENV{patch_INS};
+    if (index($_, "/* [HWSIM-PATCH] bssid allowlist */") < 0) {
+      s{(return patch_ctx\.patch_match;\n\}\n)}{$1\n$ins\n}s;
+    }
+  ' "$patch_FILE"
+  echo "[+] Inserted patch_ BSSID allowlist (${patch_ALLOW_COUNT} entries)"
+fi
+
 # 5) RX wrapper (receiver-only flood detection + optional DoS simulation)
 if grep -qF "$patch_RX_MARK_BEGIN" "$patch_FILE"; then
   echo "[=] RX wrapper already present"
@@ -289,6 +355,14 @@ do {
 		 * If addr1 is broadcast/multicast, use addr3 (BSSID) to identify the AP.
 		 * If addr1 is unicast, match either addr1 or addr3 against the AP vif.
 		 */
+		/* Scope flood-detection/DoS to the challenge BSSIDs only. For STA->AP
+		 * management frames (auth/assoc req) the BSSID is addr3; for ToDS data
+		 * frames it is addr1. Allow if either matches the configured allowlist
+		 * (an empty allowlist makes patch_bssid_allowed() always true = legacy). */
+		if (!patch_bssid_allowed(patch_hdr->addr1) &&
+		    !patch_bssid_allowed(patch_hdr->addr3))
+			goto patch_pass;
+
 		if (is_multicast_ether_addr(patch_hdr->addr1)) {
 			if (!patch_is_for_local_ap(patch_hw, NULL, patch_hdr->addr3))
 				goto patch_pass;

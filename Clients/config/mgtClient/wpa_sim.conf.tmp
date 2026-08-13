@@ -1,0 +1,39 @@
+# --- Probe-request fingerprint persona: modern smartphone (Passpoint / Hotspot 2.0) ---
+# wpa_supplicant appends these to probe requests (wpa_supplicant_extra_ies):
+#   interworking=1 -> Interworking element (IE 107)
+#   hs20=1         -> Hotspot 2.0 Indication (vendor IE 221, WFA OUI)
+# This shifts the IE tag-number list that wifi_db hashes, giving this device a
+# distinct fingerprint. Probe-only: auto_interworking stays off and there are no
+# cred{} blocks, so association to the lab's non-Passpoint APs is unaffected.
+# (Note: disable_ht/vht/he would NOT help here - those only affect the assoc
+# request, not the probe request the fingerprint is built from.)
+interworking=1
+hs20=1
+access_network_type=2
+
+# Secure EAP-AKA' client - privacy-preserving counterpart of
+# wpa_sim_leak.conf. Same operator, a different (U)SIM.
+#   * anonymous_identity keeps the permanent IMSI OUT of the cleartext
+#     EAP-Response/Identity - a passive sniffer only sees "anonymous@realm".
+#   * fast_reauth=1 reuses the server-issued pseudonym / fast re-authentication, so
+#     the permanent identity is not re-sent on later authentications.
+# Launched once (persistent), like a real handset that attaches and stays: the IMSI
+# is only ever exchanged - protected inside the AKA' identity request - at the
+# initial attach, never on the routine identity frames the leaking client
+# broadcasts every time. Full first-contact IMSI hiding needs pseudonyms / 5G SUCI.
+# Software (U)SIM, no PC/SC: password = Ki:OPc:SQN, matched in the AP milenage_db.
+
+ap_scan=1
+fast_reauth=1
+
+network={
+	ssid="$ESSID_MGT_SIM"
+	scan_ssid=1
+	key_mgmt=WPA-EAP
+	proto=RSN
+	pairwise=CCMP
+	eap=AKA'
+	anonymous_identity="$ANON_IDENTITY_MGT_SIM"
+	identity="$IDENTITY_MGT_SIM"
+	password="$SIM_MGT_KI:$SIM_MGT_OPC:$SIM_MGT_SQN"
+}

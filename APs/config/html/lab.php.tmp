@@ -3,6 +3,7 @@
    WiFiChallenge by r4ulcl 
 */
 
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 if (!isset($_SESSION['UserData']['Username'])) {
@@ -10,11 +11,13 @@ if (!isset($_SESSION['UserData']['Username'])) {
     exit;
 }
 
-$user = $_SESSION['UserData']['Username'];
+$user = $_SESSION["Username"];
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WiFi Router Configuration</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,22 +25,36 @@ $user = $_SESSION['UserData']['Username'];
 
 <div class="content">
 
+  <header class="dev">
+    <div class="leds">
+      <span class="led"><i class="dot g"></i>PWR</span>
+      <span class="led"><i class="dot a blink"></i>LINK</span>
+      <span class="led"><i class="dot g"></i>2.4G</span>
+      <span class="led"><i class="dot g"></i>5G</span>
+      <span class="led"><i class="dot b"></i>WAN</span>
+    </div>
+    <div class="dev-id">
+      <span class="dev-model">WCX-1900</span>
+      <span class="dev-fw">fw ${WIFICHALLENGE_VERSION}</span>
+    </div>
+  </header>
+
+  <div class="dev-body">
+
+    <p class="eyebrow">Session established</p>
 <?php
-echo "Welcome {$user}<br><br>";
+echo "<p class=\"welcome\">Authenticated as <b>" . htmlspecialchars($user) . "</b></p>";
 ?>
+    <p>You have reached a protected area of the device console.</p>
+    <p><a href="index.php">Continue to the status page to recover the key &rarr;</a></p>
 
-<p>Congratulations! You have logged into a protected area.</p>
-<p><a href="index.php">Go to index.php to obtain the flag</a></p>
+  </div>
 
-<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
-  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
-    WiFiChallenge <?php echo "${WIFICHALLENGE_VERSION}"; ?>
-  </a>
-  © 
-  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
-    <?php echo date('Y'); ?> r4ulcl
-  </a>
-</div>
+  <footer class="dev-foot">
+    <a href="https://wifichallenge.com" target="_blank" rel="noopener">WiFiChallenge <?php echo "${WIFICHALLENGE_VERSION}"; ?></a>
+    &nbsp;©&nbsp;
+    <a href="https://r4ulcl.com" target="_blank" rel="noopener"><?php echo date('Y'); ?> r4ulcl</a>
+  </footer>
 
 </div>
 </body>

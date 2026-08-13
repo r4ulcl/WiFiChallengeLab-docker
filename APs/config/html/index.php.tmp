@@ -3,6 +3,7 @@
    WiFiChallenge by r4ulcl 
 */
 
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
 session_start();
 
 if (!isset($_SESSION['UserData']['Username'])) {
@@ -36,9 +37,51 @@ function matchnet($ip, $list) {
     return false;
 }
 
-function showflag($val, $a) {
-    $decoded = decode($val, $a);
-    echo "Flag: <button onclick=\"copyFlagToClipboard('{$decoded}')\">{$decoded}</button><br><br>";
+function flagReadout($decoded) {
+    $f = htmlspecialchars(trim($decoded), ENT_QUOTES, 'UTF-8');
+    return "<div class=\"readout\"><div class=\"readout-top\"><span class=\"bars\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i></span>Access key recovered</div>"
+         . "<div class=\"flag\"><code class=\"flag-text\">{$f}</code><button type=\"button\" class=\"flag-copy\" aria-label=\"Copy access key\">COPY</button></div></div>";
+}
+
+function renderStatus($user, $ip, $a, $rules) {
+    if (!isset($rules[$user])) {
+        return "<p class=\"msg\">No access key is assigned to this account.</p>";
+    }
+
+    $r = $rules[$user];
+
+    if (isset($r['multi'])) {
+        foreach ($r['multi'] as $net => $flag) {
+            if (strpos($ip, $net) === 0) {
+                return $flag === null
+                    ? "<p class=\"welcome\">Link established. No access key is exposed on this network.</p>"
+                    : flagReadout(decode($flag, $a));
+            }
+        }
+        return "<p class=\"msg\">No key on this segment. Try another credential ;)</p>";
+    }
+
+    if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
+        return "<p class=\"msg\">Your princess is in another castle. Wrong segment.</p>";
+    }
+
+    $out = flagReadout(decode($r['flag'], $a));
+
+    if (!empty($r['extra'])) {
+        $out .= "<p class=\"eyebrow\">AP config</p>";
+        $out .= "<pre class=\"confdump\">eap_user_file = /root/mgt/hostapd_wpe.eap_user
+ca_cert         = /root/certs/ca.crt
+server_cert     = /root/certs/server.crt
+private_key     = /root/certs/server.key
+private_key_passwd = whatever
+dh_file         = /etc/hostapd-wpe/dh
+
+ssid    = $ESSID_MGT
+channel = $CHANNEL_MGT</pre>";
+        $out .= "<p>Certificate Authority: <a href=\"/.internalCA/ca.crt\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/ca.crt</a></p>";
+    }
+
+    return $out;
 }
 
 $rules = [
@@ -128,83 +171,49 @@ $rules = [
 
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WiFi Router Configuration</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<script>
-function copyFlagToClipboard(flag) {
-    navigator.clipboard.writeText(flag).then(() => {
-        alert("Flag copied to clipboard!");
-    });
-}
-</script>
+<script src="script.js"></script>
 
 <div class="content">
 
+  <header class="dev">
+    <div class="leds">
+      <span class="led"><i class="dot g"></i>PWR</span>
+      <span class="led"><i class="dot a blink"></i>LINK</span>
+      <span class="led"><i class="dot g"></i>2.4G</span>
+      <span class="led"><i class="dot g"></i>5G</span>
+      <span class="led"><i class="dot b"></i>WAN</span>
+    </div>
+    <div class="dev-id">
+      <span class="dev-model">WCX-1900</span>
+      <span class="dev-fw">fw ${WIFICHALLENGE_VERSION}</span>
+    </div>
+  </header>
+
+  <div class="dev-body">
+
 <?php
-echo "Welcome {$user}<br><br>";
-
-if (!isset($rules[$user])) {
-    echo "No FLAG for this user";
-    echo "<a href=\"logout.php\">Click here</a> to Logout.";
-    exit;
-}
-
-$r = $rules[$user];
-
-if (isset($r['multi'])) {
-    foreach ($r['multi'] as $net => $flag) {
-        if (strpos($ip, $net) === 0) {
-            if ($flag === null) {
-                echo "Hello<br><br>";
-            } else {
-                showflag($flag, $a);
-            }
-            exit;
-        }
-    }
-    echo "No FLAG, try logging in with another user ;)  ";
-    echo "<a href=\"logout.php\">Click here</a> to Logout.";
-    exit;
-}
-
-if (isset($r['nets']) && !matchnet($ip, $r['nets'])) {
-    echo "Your Princess Is in Another Castle!";
-    exit;
-}
-
-showflag($r['flag'], $a);
-
-if (!empty($r['extra'])) {
-    echo "<br>AP CONFIG:<br><br>
-    eap_user_file=/root/mgt/hostapd_wpe.eap_user<br>
-    ca_cert=/root/certs/ca.crt<br>
-    server_cert=/root/certs/server.crt<br>
-    private_key=/root/certs/server.key<br>
-    private_key_passwd=whatever<br>
-    dh_file=/etc/hostapd-wpe/dh<br><br>
-    ssid=wifi-corp<br>
-    channel=44<br><br>
-    Certificate Authority: <a href=\"/.internalCA/\">http://{$_SERVER['SERVER_ADDR']}/.internalCA/</a>";
-}
-
-echo "<br><br>Congratulation! You have logged into password protected page. 
-<a href=\"logout.php\">Click here</a> to Logout.";
+echo renderStatus($user, $ip, $a, $rules);
+echo "<p class=\"eyebrow\">Session established</p>";
+echo "<p class=\"welcome\">Authenticated as <b>" . htmlspecialchars($user) . "</b></p>";
 ?>
+    <p><a href="logout.php">Sign out</a></p>
 
-<div style="text-align:center; margin-top:40px; font-size:12px; color:#888;">
-  <a href="https://wifichallenge.com" target="_blank" style="color:#888; text-decoration:none;">
-    WiFiChallenge ${WIFICHALLENGE_VERSION} 
-  </a>
-  © 
-  <a href="https://r4ulcl.com" target="_blank" style="color:#888; text-decoration:none;">
-    <?php echo date('Y'); ?> r4ulcl
-  </a>
-</div>
+  </div>
+
+  <footer class="dev-foot">
+    <a href="https://wifichallenge.com" target="_blank" rel="noopener">WiFiChallenge ${WIFICHALLENGE_VERSION}</a>
+    &nbsp;©&nbsp;
+    <a href="https://r4ulcl.com" target="_blank" rel="noopener"><?php echo date('Y'); ?> r4ulcl</a>
+  </footer>
 
 </div>
 </body>

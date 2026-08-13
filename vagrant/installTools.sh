@@ -7,6 +7,16 @@ if [ "${EUID}" -ne 0 ]; then
 fi
 
 export DEBIAN_FRONTEND="noninteractive"
+
+# Debian 12+ PEP-668 guardrail: `pip install` into the system interpreter aborts
+# with "externally-managed-environment" unless --break-system-packages is passed.
+# This script is invoked as `sudo bash installTools.sh`, and sudo strips the
+# PIP_BREAK_SYSTEM_PACKAGES that install.sh exported, so pip calls made *inside*
+# makefiles / setup.py (wifipumpkin3, assless-chaps, wifi_db, ...) that we cannot
+# add a flag to were failing. Export it here so every pip invocation is covered.
+export PIP_BREAK_SYSTEM_PACKAGES=1
+export PIP_DISABLE_PIP_VERSION_CHECK=1
+
 . /etc/os-release
 DEB_CODENAME="${VERSION_CODENAME:-bookworm}"
 
@@ -28,8 +38,40 @@ nameserver 8.8.8.8
 options timeout:2 attempts:2
 EOF
 
-# Make it immutable so nothing flips it to 127.0.0.1 mid-install
+# Make it immutable so nothing flips it to 127.0.0.1 mid-install.
 chattr +i /etc/resolv.conf 2>/dev/null || true
+
+# IMPORTANT: this lock is TEMPORARY. Always release it (and hand DNS back to
+# systemd-resolved / NetworkManager) when this script exits, however it exits.
+# Leaving /etc/resolv.conf immutable and pinned to 1.1.1.1/8.8.8.8 was the root
+# cause of "DNS works on my network but not on theirs" across VirtualBox, VMware,
+# QEMU and Hyper-V (any network blocking those resolvers had no working DNS, and
+# the user could not fix it because the file was immutable).
+__restore_resolv_conf() {
+  chattr -i /etc/resolv.conf 2>/dev/null || true
+  if [ -e /run/systemd/resolve/stub-resolv.conf ]; then
+    ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+  fi
+}
+trap __restore_resolv_conf EXIT
+
+# Fail loudly and stop if a tool build aborts the script. Historically one build
+# error (e.g. hostapd-mana missing its .config) tripped `set -e` and every tool
+# after it - including hcxdumptool 7.1.2 - was silently skipped. Report it as
+# CRITICAL so the provisioner aborts instead of shipping a half-built image.
+# Only fatal inside `set -e` regions; the `set +e` best-effort blocks are exempt.
+__installtools_failed() {
+    local code=$?
+    case $- in *e*) ;; *) return 0 ;; esac
+    echo ""                                                            >&2
+    echo "############################################################" >&2
+    echo "# CRITICAL: installTools.sh aborted (exit ${code})"          >&2
+    echo "#   at line ${1}: ${2}"                                      >&2
+    echo "#   Wireless toolkit is INCOMPLETE - provisioning stopped."  >&2
+    echo "############################################################" >&2
+    exit "${code}"
+}
+trap '__installtools_failed "${LINENO}" "${BASH_COMMAND}"' ERR
 
 # quick sanity check
 getent hosts deb.debian.org >/dev/null || echo "Warning: DNS check failed"
@@ -42,10 +84,10 @@ TOOLS="${FOLDER}/tools"
 mkdir -p "${TOOLS}"
 
 apt-get update
-apt-get install -y wget curl git ca-certificates build-essential
+apt-get install -y wget curl git ca-certificates build-essential acl
 
 # ---------- basic utilities ---------------------------------------------------
-apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full
+apt-get install -y nmap python3 python3-pip wpagui sqlite3 tshark jq p7zip-full iptables dnsmasq-base
 
 # ---------- Python 2 availability check --------------------------------------
 have_py2_pkg=false
@@ -72,16 +114,32 @@ if ! $have_py2_pkg; then
   ln -sf "$(pyenv root)/versions/2.7.18/bin/pip" /usr/local/bin/pip2 || true
 fi
 
-# Default python alternative for legacy tools that expect python -> python2
+# Default python alternative for legacy tools that expect python -> python2.
+# Use the RESOLVED path: on Debian 12/13 python2 comes from pyenv at
+# /usr/local/bin/python2, not /usr/bin/python2, so hardcoding /usr/bin/python2
+# made update-alternatives fail with "alternative path ... doesn't exist".
 if command -v python2 >/dev/null 2>&1; then
-  update-alternatives --install /usr/bin/python python /usr/bin/python2 1 || true
-  update-alternatives --set python /usr/bin/python2 || true
+  PY2_BIN="$(command -v python2)"
+  update-alternatives --install /usr/bin/python python "$PY2_BIN" 1 || true
+  update-alternatives --set python "$PY2_BIN" || true
 fi
 
 # ---------- wordlists ---------------------------------------------------------
+# These downloads are non-critical and use flaky public endpoints (GitHub release
+# CDN + raw.githubusercontent). Under `set -e` an unguarded transient failure here
+# silently aborts the whole toolkit build, so each download is guarded.
+# NOTE: `curl | head` makes curl exit 23 ("Failure writing output to destination")
+# by design once head closes the pipe after 1,000,000 lines -- that is expected and
+# harmless; -sL keeps curl quiet so it is not mistaken for the real error.
 cd "${FOLDER}"
-curl -sSL https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt | head -n 1000000 > rockyou-top100000.txt
-wget -q https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt
+curl -sL --retry 3 --retry-delay 2 \
+  https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt \
+  | head -n 1000000 > rockyou-top100000.txt || true
+[ -s rockyou-top100000.txt ] || echo "Warning: rockyou-top100000.txt is empty; check network/disk"
+
+wget -q --tries=3 --timeout=30 \
+  https://raw.githubusercontent.com/danielmiessler/SecLists/master/Usernames/top-usernames-shortlist.txt \
+  || echo "Warning: top-usernames-shortlist.txt download failed, continuing"
 
 # ---------- EAP_buster --------------------------------------------------------
 cd "${TOOLS}"
@@ -112,6 +170,8 @@ if [ ! -f hcxtools_6.0.2-1+b1_amd64.deb ]; then
 fi
 
 # ---------- wifi_db -----------------------------------------------------------
+# DB Browser for SQLite (Qt GUI) to inspect wifi_db's database on the GNOME
+# desktop; the sqlite3 CLI installed earlier stays as the headless fallback.
 apt-get install -y sqlitebrowser
 cd "${TOOLS}"
 if [ ! -d wifi_db ]; then
@@ -123,7 +183,7 @@ fi
 # ---------- pcapFilter helper -------------------------------------------------
 cd "${TOOLS}"
 apt-get install -y xxd
-wget -q https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/78e097e1d4a9eb5f43ab0b2763195c04f02c4998/pcapFilter.sh -O pcapFilter.sh
+wget -q https://gist.githubusercontent.com/r4ulcl/f3470f097d1cd21dbc5a238883e79fb2/raw/14c25daf9e7ef54e54f53d5a72b2bcd627967ad8/pcapFilter.sh -O pcapFilter.sh
 chmod +x pcapFilter.sh
 
 # ---------- UnicastDeauth -----------------------------------------------------
@@ -142,13 +202,20 @@ if [ ! -d eaphammer ]; then
   apt-get install -y dsniff apache2 libffi-dev python3-openssl
   systemctl disable --now apache2 || true
   ./ubuntu-unattended-setup || echo "eaphammer unattended setup failed, continuing"
-  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy pyopenssl gevent netifaces || true
+  # Pin pyopenssl<25: eaphammer's cert_wizard uses crypto.X509Req(), which was
+  # deprecated in pyOpenSSL 24.x and REMOVED in 25.0.0 (AttributeError: module
+  # 'OpenSSL.crypto' has no attribute 'X509Req'). 24.x still ships it.
+  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy 'pyopenssl<25' gevent netifaces || true
   wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini || true
 fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
 #python3 -m pip install aioquic || true
 pip3 install tqdm pem aioquic --break-system-packages || true
-python3 -m pip install --break-system-packages -r pip.req
+if [ -f "${TOOLS}/eaphammer/pip.req" ]; then
+  python3 -m pip install --break-system-packages -r "${TOOLS}/eaphammer/pip.req" || python3 -m pip install -r "${TOOLS}/eaphammer/pip.req"
+else
+  echo "Warning: ${TOOLS}/eaphammer/pip.req not found; skipping eaphammer pip.req install"
+fi
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
@@ -188,8 +255,14 @@ if [ ! -d hashcat-6.0.0 ]; then
   wget -q https://hashcat.net/files/hashcat-6.0.0.7z
   7zr x hashcat-6.0.0.7z && rm hashcat-6.0.0.7z
   wget -q https://http.kali.org/kali/pool/main/h/hashcat-utils/hashcat-utils_1.9-0kali2_amd64.deb || true
-  dpkg -i hashcat-utils_*.deb || apt-get -y --fix-broken install || true
-  rm -f hashcat-utils_*.deb
+  # Guard the dpkg: if the download failed the glob does not expand and dpkg would
+  # error on the literal "hashcat-utils_*.deb". hashcat-utils is non-critical.
+  if ls hashcat-utils_*.deb >/dev/null 2>&1; then
+    dpkg -i hashcat-utils_*.deb || apt-get -y --fix-broken install || true
+    rm -f hashcat-utils_*.deb
+  else
+    echo "Warning: hashcat-utils deb download failed; skipping (non-critical)"
+  fi
   ln -sf /root/tools/hashcat-6.0.0/hashcat.bin /usr/local/bin/hashcat || true
   echo "alias hashcat='sudo hashcat'" >> /home/user/.bashrc
 fi
@@ -224,24 +297,37 @@ rm -f bettercap_*.deb
 
 # BeEF
 apt-get install -y autoconf bison libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev  libgdbm-dev libdb-dev ruby-bundler nodejs
+# BeEF's Gemfile now pulls selenium-webdriver ~>4.46, which requires Ruby >= 3.3,
+# so the old 3.1.4 target made `bundle install` fail with "version solving has
+# failed". Build a current Ruby instead.
+BEEF_RUBY_VER="3.3.5"
 if [ ! -d /usr/local/rbenv ]; then
   git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv
 fi
+# rbenv has NO `install` subcommand without the ruby-build plugin. Without it the
+# clone above left `rbenv install` failing with "no such command `install'", so
+# no managed Ruby was ever built and bundle ran against system Ruby 3.1. Install
+# (or refresh) the plugin so `rbenv install` works.
+if [ ! -d /usr/local/rbenv/plugins/ruby-build ]; then
+  git clone https://github.com/rbenv/ruby-build.git /usr/local/rbenv/plugins/ruby-build
+else
+  git -C /usr/local/rbenv/plugins/ruby-build pull --ff-only || true
+fi
 export PATH="/usr/local/rbenv/bin:$PATH"
 eval "$(/usr/local/rbenv/bin/rbenv init - bash)" || true
-/usr/local/rbenv/bin/rbenv install -s 3.1.4 || true
-/usr/local/rbenv/bin/rbenv global 3.1.4 || true
+/usr/local/rbenv/bin/rbenv install -s "${BEEF_RUBY_VER}" || true
+/usr/local/rbenv/bin/rbenv global "${BEEF_RUBY_VER}" || true
 if [ ! -d /usr/share/beef ]; then
   git clone https://github.com/beefproject/beef.git /usr/share/beef
 fi
 cd /usr/share/beef
-/usr/local/rbenv/bin/rbenv local 3.1.4 || true
+/usr/local/rbenv/bin/rbenv local "${BEEF_RUBY_VER}" || true
 gem install bundler || true
 bundle install || true
 install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef || true
 
 # airgeddon
-apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only hcxdumptool mdk3 mdk4 arping ccze
+apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only mdk3 mdk4 arping ccze
 systemctl disable --now lighttpd || true
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
@@ -251,6 +337,8 @@ sed -i '/^AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=/c\AIRGEDDON_EVIL_TWIN_ESSID_STRIP
 cd plugins
 [ ! -d airgeddon-plugins ] && git clone --depth 1 https://github.com/OscarAkaElvis/airgeddon-plugins.git
 cp airgeddon-plugins/allchars_captiveportal/allchars_captiveportal.sh . || true
+cp airgeddon-plugins/wpa3_cookie_guzzler/wpa3_cookie_guzzler.sh . || true
+cp airgeddon-plugins/wpa3_cookie_guzzler/wpa3_cookie_guzzler.py . || true
 cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.sh . || true
 cp airgeddon-plugins/wpa3_online_attack/wpa3_online_attack.py . || true
 mkdir -p wpa_supplicant_binaries
@@ -265,8 +353,13 @@ dpkg -i bully_*.deb || apt-get -y --fix-broken install || true
 rm -f bully_*.deb
 
 # Install ath_masker
+# NOTE: this builds AND loads a kernel module. Inside a container image build
+# there are no headers for the running kernel and modules cannot be loaded, so
+# the whole block is best-effort (set +e) to avoid aborting the build; on the
+# VM/host it still builds and loads normally.
+set +e
 cd "${TOOLS}"
-git clone --depth 1 https://github.com/vanhoefm/ath_masker 
+git clone --depth 1 https://github.com/vanhoefm/ath_masker
 cd ath_masker/
 make
 
@@ -281,13 +374,18 @@ modprobe ath
 modprobe ath_masker
 cd "${TOOLS}"
 rm -rf ath_masker/ 2> /dev/null
+set -e
 
 
 # hostapd-mana
 apt-get install -y libnl-genl-3-dev libssl-dev
 cd "${TOOLS}"
 [ ! -d hostapd-mana ] && git clone https://github.com/sensepost/hostapd-mana
-cd hostapd-mana && make -C hostapd -j"$(nproc)"
+# hostapd's build needs a .config first (verify_config fails without it, same as
+# wacker above). Tolerate a build failure so one tool can't abort the whole
+# script and skip everything after it (hcxdumptool 7.1.2, wifiphisher, wifite2...).
+cd hostapd-mana/hostapd && cp -n defconfig .config && make -j"$(nproc)" || true
+cd "${TOOLS}"
 ln -sf /root/tools/hostapd-mana/hostapd/hostapd /usr/bin/hostapd-mana
 
 # eapeak with python2 if present
@@ -298,9 +396,11 @@ if [ ! -d eapeak ]; then
   git clone https://github.com/securestate/eapeak
   cd eapeak
   if command -v python2 >/dev/null 2>&1; then
-    pipenv --two install || echo "pipenv on Python 2 failed, continuing"
+    # Modern pipenv (2020.x+) removed the `--two` flag; select the interpreter
+    # explicitly by path instead so eapeak's Python 2 virtualenv is still created.
+    pipenv --python "$(command -v python2)" install || echo "pipenv on Python 2 failed, continuing"
   else
-    echo "python2 not available, skipping pipenv --two for eapeak"
+    echo "python2 not available, skipping Python 2 pipenv for eapeak"
   fi
 fi
 
@@ -348,7 +448,17 @@ fi
 apt-get install -y pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 cd "${TOOLS}"
 [ ! -d mdk4 ] && git clone https://github.com/aircrack-ng/mdk4
-cd mdk4 && make -j"$(nproc)" && make install
+# -Wno-unterminated-string-initialization silences ~500 harmless warnings GCC 15
+# emits on mdk4's manufactor.h OUI table (no -Werror upstream, so cosmetic only).
+# IMPORTANT: pass the suppression as an ENVIRONMENT assignment (before `make`),
+# NOT as a `make CFLAGS=...` command-line override. A command-line CFLAGS wins
+# over the Makefile's `CFLAGS += $(pkg-config --cflags libnl-3.0 libnl-genl-3.0)`
+# and `-Iosdep`, stripping the netlink/pcap include paths -- which made
+# channelhopper.c (netlink/genl/genl.h) and file.c (LINKTYPE_*/TCPDUMP_MAGIC)
+# fail to compile and silently skipped `make install`. As an env var it seeds the
+# `?=` default and the Makefile's `+=` still appends the includes, so the build
+# both suppresses the noise and keeps its include paths.
+cd mdk4 && CFLAGS="-g -O3 -Wall -Wextra -fcommon -Wno-unterminated-string-initialization" make -j"$(nproc)" && make install
 
 # air-hammer with python2 if available
 cd "${TOOLS}"
@@ -367,12 +477,27 @@ apt-get install -y python3-dev libssl-dev libffi-dev build-essential \
   python3-termcolor python3-twisted python3-urwid
 cd "${TOOLS}"
 [ ! -d wifipumpkin3 ] && git clone https://github.com/P0cL4bs/wifipumpkin3.git
-cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && make install || true
+# PIP_IGNORE_INSTALLED: the makefile's `pip install` pins old deps (urwid 2.1.2,
+# dnslib, dhcplib...) and tries to uninstall the apt-provided ones, which fails
+# with "uninstall-no-record-file" for distro packages. Skip uninstalls instead.
+cd wifipumpkin3 && sed -i 's/python3.7/python3/g' makefile && PIP_IGNORE_INSTALLED=1 make install || true
 
 # convenience
 chown -R user:user "${TOOLS}"
 ln -sf "${TOOLS}" /home/user/tools || true
-apt-get install -y macchanger wireshark-qt
+
+# /usr/bin/hostapd-mana points into /root/tools. Allow the lab user to traverse
+# the path and all tool subdirectories so the shell can find commands without
+# exposing /root itself for directory listing.
+setfacl -m u:user:--x /root
+setfacl -R -m u:user:--x "${TOOLS}"
+
+# Wireshark GUI for the GNOME desktop. Preseed the setuid-dumpcap prompt to "yes"
+# (noninteractive install would otherwise default to no) and add the lab user to
+# the wireshark group so packet capture works without running the GUI as root.
+echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections
+apt-get install -y macchanger wireshark
+usermod -aG wireshark user || true
 
 # Wacker
 cd "${TOOLS}"
@@ -387,6 +512,23 @@ cd wpa_supplicant-2.10/wpa_supplicant && make -j"$(nproc)" || true
 cd "${TOOLS}"
 [ ! -d hcxtools-src ] && git clone https://salsa.debian.org/pkg-security-team/hcxtools hcxtools-src
 cd hcxtools-src && make -j"$(nproc)" && make install || true
+
+# hcxdumptool from upstream source (latest). The distro package is 6.2.6 (2022)
+cd "${TOOLS}"
+apt-get install -y libpcap-dev pkg-config gcc make
+[ ! -d hcxdumptool-src ] && git clone https://github.com/ZerBea/hcxdumptool.git hcxdumptool-src
+cd hcxdumptool-src && git fetch --tags || true
+# Check out the newest *version* tag. `git rev-list --tags --max-count=1` +
+# `git describe` walked the commit graph and landed on an OLD tag (e.g. a 6.0.x
+# backport), which still uses SIOCGSTAMP directly and fails to build on modern
+# glibc ("SIOCGSTAMP undeclared"). Sorting tags by version and taking the top
+# one gives the actual latest release (7.x), which compiles cleanly.
+LATEST_HCXDUMPTOOL_TAG="$(git tag --sort=-v:refname | head -n1)"
+if [ -n "${LATEST_HCXDUMPTOOL_TAG}" ]; then
+  git checkout "${LATEST_HCXDUMPTOOL_TAG}" || true
+fi
+make -j"$(nproc)" && make install || true
+hash -r || true
 
 # Wifiphisher
 cd "${TOOLS}"
@@ -408,7 +550,8 @@ bzip2 -d assless-chaps/10-million-password-list-top-1000000.db.bz2 || true
 
 # dragondrain
 cd "${TOOLS}"
-git clone  https://github.com/vanhoefm/dragondrain-and-time
+# Skip clone if already present (re-provision) and tolerate transient failures.
+[ ! -d dragondrain-and-time ] && git clone https://github.com/vanhoefm/dragondrain-and-time || true
 apt-get update
 apt-get install autoconf automake libtool shtool libssl-dev pkg-config -y
 
@@ -432,3 +575,8 @@ sudo ln -sf "${TOOLS}"/dragondrain-and-time/src/dragondrain /usr/local/bin/drago
 
 
 echo -e "\n[+] Wireless assessment toolkit installed under ${TOOLS}"
+
+# Completion marker: install.sh checks for this, so a run that aborts before
+# reaching this line is treated as a hard failure rather than a success.
+: > "${TOOLS}/.installTools.done"
+echo "[+] installTools.sh completed successfully"

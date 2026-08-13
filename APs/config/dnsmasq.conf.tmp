@@ -20,13 +20,18 @@ dhcp-range=$IP_PSK.2,$IP_PSK.100,24h
 dhcp-host=$WLAN_WPS,$MAC_WPS,$IP_WPS.1
 dhcp-range=$IP_WPS.2,$IP_WPS.100,24h
 
-# MGT
-dhcp-host=$WLAN_MGT,$MAC_MGT,$IP_MGT.1
-dhcp-range=$IP_MGT.2,$IP_MGT.100,24h
+# CAMPUS PMKID AP (wifi-campus): single AP, one ESSID, client-less PMKID
+dhcp-host=$WLAN_ROAM1,$MAC_ROAM1,$IP_ROAM1.1
+dhcp-range=$IP_ROAM1.2,$IP_ROAM1.100,24h
 
-# MGT 2
-dhcp-host=$WLAN_MGT2,$MAC_MGT2,$IP_MGT2.1
-dhcp-range=$IP_MGT2.2,$IP_MGT2.100,24h
+# MGT — wifi-corp. wlan15 (AP1) + wlan16 (AP2) are bridged (br-mgt) into ONE L2
+# subnet, so a SINGLE DHCP scope serves clients from both APs: they all get a
+# 192.168.5.0/24 lease and reach the same 192.168.5.1 portal, whichever AP they
+# associate to or roam between. dnsmasq binds this range to br-mgt (the only iface
+# that owns a 192.168.5.x address); there is deliberately NO separate 192.168.6
+# scope any more. The dhcp-host just pins .1 (the gateway) so it is never leased.
+dhcp-host=$MAC_MGT,$IP_MGT.1
+dhcp-range=$IP_MGT.2,$IP_MGT.100,24h
 
 # MGT RELAY
 dhcp-host=$WLAN_MGT_RELAY,$MAC_MGT_RELAY,$IP_MGT_RELAY.1
@@ -44,9 +49,9 @@ dhcp-range=$IP_MGT_TLS.2,$IP_MGT_TLS.100,24h
 dhcp-host=$WLAN_MGT_MD5,$MAC_MGT_MD5,$IP_MGT_MD5.1
 dhcp-range=$IP_MGT_MD5.2,$IP_MGT_MD5.100,24h
 
-# Other
-#dhcp-host=wlan19,F0:9F:C2:71:22:88,192.168.9.1
-#dhcp-range=192.168.9.2,192.168.9.100,24h
+# MGT SIM
+dhcp-host=$WLAN_MGT_SIM,$MAC_MGT_SIM,$IP_MGT_SIM.1
+dhcp-range=$IP_MGT_SIM.2,$IP_MGT_SIM.100,24h
 
 dhcp-host=$WLAN_OTHER0,$MAC_OTHER0,$IP_OTHER0.1
 dhcp-range=$IP_OTHER0.2,$IP_OTHER0.100,24h

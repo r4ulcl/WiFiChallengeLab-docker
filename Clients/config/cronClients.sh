@@ -1,20 +1,18 @@
 #!/bin/bash
 
-#Load variables
-set -a
-source /root/wlan_config
+# Variables are inherited from the environment (docker-compose env_file: ./wlan_config)
+# via the parent startClients.sh, so there is no /root/wlan_config file to source here.
 
-
-function retry { 
+function retry {
     $1 && echo "success" || (echo "fail" && retry $1) 
 }
 
-#40-59 skip OPN
+#40-61 skip OPN (60-61 = SIM secure/rogue, need a DHCP lease to pass data)
 killall dhclien-wifichallenge 2> /dev/null &
 for N in `seq 40 46`; do
 	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
-for N in `seq 50 59`; do
+for N in `seq 50 61`; do
 	timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 done
 
@@ -30,7 +28,7 @@ do
 	for N in `seq 40 46`; do
 		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
-	for N in `seq 50 59`; do
+	for N in `seq 50 61`; do
 		timeout 5s dhclien-wifichallenge wlan$N 2> /dev/null &
 	done
     wait $!
@@ -40,7 +38,7 @@ done &
 while :
 do
 	# MGT MSCHAP
-	curl -s "http://$MAC_MGT_MSCHAP.1/login.php" --interface $WLAN_CLIENT_MGT_MSCHAP --compressed \
+	curl -s "http://$IP_MGT.1/login.php" --interface $WLAN_CLIENT_MGT_MSCHAP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_MSCHAP" \
 		--data-urlencode "Password=$PASS_MGT_MSCHAP_CLEAR" \
@@ -48,7 +46,7 @@ do
 		-c /tmp/userjuan -b /tmp/userjuan &
 
 	# MGT GTC
-	curl -s "http://$MAC_MGT_GTC.1/login.php" --interface $WLAN_CLIENT_MGT_GTC --compressed \
+	curl -s "http://$IP_MGT.1/login.php" --interface $WLAN_CLIENT_MGT_GTC --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$IDENTITY_MGT_GTC" \
 		--data-urlencode "Password=$PASS_MGT_GTC_CLEAR" \
@@ -101,14 +99,14 @@ do
 	fi
 
 	# PSK NOAP
-	curl -s "http://$WLAN_PSK_NOAP.1/login.php" --interface $WLAN_PSK_NOAP --compressed \
+	curl -s "http://$IP_PSK_NOAP.1/login.php" --interface $WLAN_PSK_NOAP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=anon1" \
 		--data-urlencode "Password=$PASS_PSK_NOAP_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userAnon1 -b /tmp/userAnon1 &
 
-	curl -s "http://$WLAN_PSK_NOAP2.1/login.php" --interface $WLAN_PSK_NOAP2 --compressed \
+	curl -s "http://$IP_PSK_NOAP2.1/login.php" --interface $WLAN_PSK_NOAP2 --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_PSK_NOAP" \
 		--data-urlencode "Password=$PASS_PSK_NOAP_CLEAR" \
@@ -224,7 +222,7 @@ done &
 while :
 do
 	#Infine traffic WEP
-	dhclien-wifichallenge $WLAN_CLIENT_WEP -v
+	dhclien-wifichallenge $WLAN_CLIENT_WEP -v >> /root/logs/dhclientWEP.log 2>&1
 	timeout -k 1 60s ping $IP_WEP.1 -s 1000 -f & 
     timeout -k 1 60s fping -l -p 1000 -b 1000 -q "$IP_WEP.1"
 done &
