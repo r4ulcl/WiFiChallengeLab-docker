@@ -28,6 +28,7 @@
 ### Miscellaneous Improvements
 
 * **network self-heal** service to recover the uplink on boot; disabled **Debian automatic updates**
+* Added automatic **Apache portal recovery** that monitors `login.php` and restarts the web service when it becomes unavailable
 * Removed **email/PII and legacy Netscape fields** from generated certificates
 * Reworked **healthchecks and compose files** across all variants; **hostapd per-SSID logs now capture stderr** (`2>&1`)
 * Gave **each AP/client a distinct, stable signal** via per-radio **RSSI jitter (~±3 dB)** in the `mac80211_hwsim` driver (in-kernel, deterministic per radio, no per-beacon flicker) instead of a racy userspace `iw txpower` loop that hostapd overrode
