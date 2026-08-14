@@ -113,16 +113,6 @@ require_pkg() {
 sudo systemctl unmask packagekit.service packagekit.socket 2>/dev/null || true
 sudo systemctl enable --now packagekit.service 2>/dev/null || true
 
-# ---------- initramfs MODULES tweak (qemu) -----------------------------------
-CONF="/etc/initramfs-tools/initramfs.conf"
-if [ -f "$CONF" ]; then
-  if grep -q '^MODULES=dep' "$CONF"; then
-    sudo sed -i 's/^MODULES=dep/MODULES=most/' "$CONF"
-    sudo update-initramfs -u -k all
-    echo "Initramfs rebuilt with MODULES=most"
-  fi
-fi
-
 # ---------- base system -------------------------------------------------------
 apt_update
 
@@ -1124,13 +1114,16 @@ sudo systemctl mask plymouth-quit-wait.service 2>/dev/null || true
 apt_remove plymouth plymouth-theme-*
 sudo update-initramfs -u
 
-# initramfs config without duplicates
+# Build a portable initramfs for every supported provider. QEMU boots the
+# primary disk as virtio (/dev/vda), while VirtualBox/VMware/Hyper-V may expose
+# it as /dev/sda. MODULES=dep can omit the virtio storage path after the image
+# is moved between providers, leaving the guest unable to find its root UUID.
 if [ -f /etc/initramfs-tools/initramfs.conf ]; then
-  sudo sed -i -E 's/^MODULES=.*/MODULES=dep/' /etc/initramfs-tools/initramfs.conf || true
-  grep -q '^MODULES=' /etc/initramfs-tools/initramfs.conf || echo "MODULES=dep" | sudo tee -a /etc/initramfs-tools/initramfs.conf >/dev/null
+  sudo sed -i -E 's/^MODULES=.*/MODULES=most/' /etc/initramfs-tools/initramfs.conf || true
+  grep -q '^MODULES=' /etc/initramfs-tools/initramfs.conf || echo "MODULES=most" | sudo tee -a /etc/initramfs-tools/initramfs.conf >/dev/null
   sudo sed -i -E 's/^COMPRESS=.*/COMPRESS=zstd/' /etc/initramfs-tools/initramfs.conf || true
   grep -q '^COMPRESS=' /etc/initramfs-tools/initramfs.conf || echo "COMPRESS=zstd" | sudo tee -a /etc/initramfs-tools/initramfs.conf >/dev/null
-  sudo update-initramfs -u
+  sudo update-initramfs -u -k all
 fi
 
 # Disable beep

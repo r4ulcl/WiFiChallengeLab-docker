@@ -59,6 +59,33 @@ Or RDP to IP 192.168.59.10 and port 3389 (using [remmina](https://remmina.org/) 
 ```
 ```
 
+## For QEMU
+
+On Linux, install QEMU/KVM and the Vagrant QEMU provider. The provider uses a
+virtio disk and virtio network device; the guest installer builds an initramfs
+that supports both QEMU (`/dev/vda`) and the SATA-style disks used by the other
+providers.
+
+```bash
+vagrant plugin install vagrant-qemu
+vagrant up qemu_vm --provider=qemu
+```
+
+Connect to the VM through Vagrant SSH:
+
+```bash
+vagrant ssh qemu_vm --provider=qemu
+```
+
+The QEMU provider uses its user-mode NAT network. Unlike VirtualBox and VMware,
+the QEMU definition does not provide a documented host-only RDP address.
+
+The helper script supports the same provider:
+
+```bash
+bash create.sh qemu
+```
+
 ## After create VM
 
 - SSH as user and as vagrant to configure GUI 
