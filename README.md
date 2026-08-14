@@ -102,7 +102,7 @@ Changes after v2.0 can be found at [Changelog.md](https://github.com/r4ulcl/WiFi
 Pick the method that fits your host:
 
 - **Option 1 - Prebuilt VM:** the fastest way to start on x86-64.
-- **Option 2 - Build a VM with Vagrant:** reproducible VirtualBox, VMware or Hyper-V builds.
+- **Option 2 - Build a VM with Vagrant:** reproducible VirtualBox, VMware, Hyper-V or QEMU builds.
 - **Option 3 - Install on a Debian 12 VM:** recommended for Apple Silicon (M1, M2) and other custom VMs.
 - **Option 4 - Run the containers directly:** for Kali or any Linux host already inside a VM.
 
@@ -126,32 +126,76 @@ cd wifichallenge-lab
 tar -xvf "WiFiChallenge Lab ${VERSION}.ova"
 ```
 
-Convert the VirtualBox disk to qcow2:
+Convert the VirtualBox disk to qcow2. The OVA contains a single compressed,
+monolithic VMDK; use the disk image explicitly instead of a `*.vmdk` wildcard:
 
 ```bash
-qemu-img convert -f vmdk -O qcow2 *.vmdk wifichallenge-lab.qcow2
+VMDK="WiFiChallenge Lab ${VERSION}-disk001.vmdk"
+QCOW2="$PWD/wifichallenge-lab.qcow2"
+
+qemu-img info -f vmdk "$VMDK"
+qemu-img check -f vmdk "$VMDK"
+qemu-img convert -p -m 1 -f vmdk -O qcow2 "$VMDK" "$QCOW2"
 ```
 
-Move the disk to the libvirt images folder:
+Only after `qemu-img convert` completes successfully, validate the new image:
 
 ```bash
-sudo mv wifichallenge-lab.qcow2 /var/lib/libvirt/images/
-sudo chown libvirt-qemu:libvirt-qemu /var/lib/libvirt/images/wifichallenge-lab.qcow2 2>/dev/null || true
-sudo chmod 644 /var/lib/libvirt/images/wifichallenge-lab.qcow2
+qemu-img check -f qcow2 "$QCOW2"
 ```
 
-Make sure the default network is running:
+You can keep the QCOW2 in the current directory. The `qemu:///system`
+connection must be able to read it; if QEMU reports a permission error, either
+move it to `/var/lib/libvirt/images/` or grant the QEMU user access to the
+containing directories and file.
+
+If you prefer the standard libvirt images folder:
 
 ```bash
+sudo mv "$QCOW2" /var/lib/libvirt/images/
+QCOW2="/var/lib/libvirt/images/wifichallenge-lab.qcow2"
+```
+
+If the host supports TUN/TAP, make sure the default libvirt network is running:
+
+```bash
+sudo modprobe tun 2>/dev/null || true
 sudo virsh --connect qemu:///system net-list --all
-sudo virsh --connect qemu:///system net-start default
+sudo virsh --connect qemu:///system net-start default 2>/dev/null || true
 sudo virsh --connect qemu:///system net-autostart default
 ```
 
 Import and start the VM:
 
 ```bash
-virt-install --connect qemu:///system --name wifichallenge-lab --memory 4096 --vcpus 2 --disk path=/var/lib/libvirt/images/wifichallenge-lab.qcow2,format=qcow2,bus=sata --import --os-variant generic --network network=default,model=e1000 --graphics spice --noautoconsole
+virt-install \
+  --connect qemu:///system \
+  --name wifichallenge-lab \
+  --memory 4096 \
+  --vcpus 2 \
+  --disk path="$QCOW2",format=qcow2,bus=sata \
+  --import \
+  --os-variant debian12 \
+  --network network=default,model=e1000 \
+  --graphics spice \
+  --noautoconsole
+```
+
+If the host has no usable TUN/TAP support and `virt-install` reports
+`Unable to open /dev/net/tun`, omit the network interface:
+
+```bash
+virt-install \
+  --connect qemu:///system \
+  --name wifichallenge-lab \
+  --memory 4096 \
+  --vcpus 2 \
+  --disk path="$QCOW2",format=qcow2,bus=sata \
+  --import \
+  --os-variant debian12 \
+  --network none \
+  --graphics spice \
+  --noautoconsole
 ```
 
 ### Option 2: Build the VM with Vagrant
@@ -181,6 +225,7 @@ Then bring up the VM for your provider:
 vagrant up vmware_vm                      # VMware
 vagrant up virtualbox_vm                  # VirtualBox
 vagrant up hyper-v_vm --provider=hyperv   # Hyper-V (run in an admin console)
+vagrant up qemu_vm --provider=qemu        # QEMU/KVM (Linux; requires vagrant-qemu)
 ```
 
 ### Option 3: Install on a Debian 12 VM (recommended for Apple Silicon)
