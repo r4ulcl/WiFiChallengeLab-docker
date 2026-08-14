@@ -229,10 +229,7 @@ if [ ! -d eaphammer ]; then
   apt-get install -y dsniff apache2 libffi-dev python3-openssl
   systemctl disable --now apache2 || true
   ./ubuntu-unattended-setup || echo "eaphammer unattended setup failed, continuing"
-  # Pin pyopenssl<25: eaphammer's cert_wizard uses crypto.X509Req(), which was
-  # deprecated in pyOpenSSL 24.x and REMOVED in 25.0.0 (AttributeError: module
-  # 'OpenSSL.crypto' has no attribute 'X509Req'). 24.x still ships it.
-  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy 'pyopenssl<25' gevent netifaces || true
+  python3 -m pip install --break-system-packages --upgrade flask flask_cors flask_socketio pywebcopy gevent netifaces || true
   wget -q https://raw.githubusercontent.com/lgandx/Responder/master/Responder.conf -O /root/tools/eaphammer/settings/core/Responder.ini || true
 fi
 ln -sf /usr/bin/python3 /usr/bin/python3.8 || true
@@ -243,6 +240,9 @@ if [ -f "${TOOLS}/eaphammer/pip.req" ]; then
 else
   echo "Warning: ${TOOLS}/eaphammer/pip.req not found; skipping eaphammer pip.req install"
 fi
+# Eaphammer's cert_wizard still uses OpenSSL.crypto.X509Req(), so reinstall a
+# pyOpenSSL release that retains that legacy API after its own requirements run.
+python3 -m pip install --break-system-packages --force-reinstall 'pyOpenSSL<26.2'
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
