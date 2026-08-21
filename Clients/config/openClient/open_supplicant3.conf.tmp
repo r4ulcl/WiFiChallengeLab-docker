@@ -1,3 +1,8 @@
+# --- Probe-request fingerprint persona: tablet / home device (Hotspot 2.0) ---
+# hs20=1 adds the Hotspot 2.0 Indication (vendor IE 221) to probe requests, giving a
+# distinct wifi_db fingerprint. Probe-only; association behaviour is unchanged.
+hs20=1
+
 
 
 network={

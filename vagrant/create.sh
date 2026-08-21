@@ -8,7 +8,7 @@ HALT=true
 OPTION=$1
 
 if [ -z "${OPTION}" ]; then
-    echo "Unknown option, only vmware, virtualbox or both"
+    echo "Unknown option, use vmware, virtualbox, hyper-v, qemu or all"
     exit 1
 fi
 
@@ -31,7 +31,7 @@ if [ "$OPTION" == "vmware" ]; then
         vagrant halt vmware_vm
     fi
 
-elif [ $OPTION == "virtualbox" ]; then
+elif [ "$OPTION" == "virtualbox" ]; then
     echo "VirtualBox"
     if [ "$DESTROY" = true ] ; then
         vagrant destroy virtualbox_vm --force
@@ -49,7 +49,7 @@ elif [ $OPTION == "virtualbox" ]; then
         vagrant halt virtualbox_vm 
     fi
 
-elif [ $OPTION == "hyper-v" ]; then
+elif [ "$OPTION" == "hyper-v" ]; then
     echo "hyper-v"
     if [ "$DESTROY" = true ] ; then
         vagrant destroy hyper-v_vm --force
@@ -65,6 +65,23 @@ elif [ $OPTION == "hyper-v" ]; then
     timeout 30s vagrant ssh hyper-v_vm
     if [ "$HALT" = true ] ; then
         vagrant halt hyper-v_vm 
+    fi
+
+elif [ "$OPTION" == "qemu" ]; then
+    echo "QEMU"
+    if [ "$DESTROY" = true ] ; then
+        vagrant destroy qemu_vm --provider=qemu --force
+    fi
+    D=`date`
+    echo "$D Start qemu_vm " | tee -a qemu_vm.log
+    vagrant up qemu_vm --provider=qemu
+    D=`date`
+    echo "$D Finish qemu_vm " | tee -a qemu_vm.log
+    vagrant halt qemu_vm --provider=qemu
+    vagrant up qemu_vm --provider=qemu
+    timeout 30s vagrant ssh qemu_vm --provider=qemu
+    if [ "$HALT" = true ] ; then
+        vagrant halt qemu_vm --provider=qemu
     fi
     
 
@@ -82,13 +99,18 @@ elif [ $OPTION == "all" ]; then
     bash $0 hyper-v &
     LAST3=$! 
 
+    # Start qemu
+    bash $0 qemu &
+    LAST4=$!
+
     #Wait for them
     wait $LAST1
     wait $LAST2
     wait $LAST3
+    wait $LAST4
 
 else
-    echo "Unknown option, only VMware, VirtualBox, hyper-v or all"
+    echo "Unknown option, use vmware, virtualbox, hyper-v, qemu or all"
     exit 1
 fi
 
@@ -96,7 +118,6 @@ fi
 
 
 exit 0
-
 
 
 

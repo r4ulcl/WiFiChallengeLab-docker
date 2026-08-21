@@ -1,9 +1,5 @@
 extensions = x509v3
 
 [ x509v3 ]
-basicConstraints      = CA:true,pathlen:0
-crlDistributionPoints = URI:http://WiFiChallenge.com/ca/mustermann.crl
-nsCertType            = sslCA,emailCA,objCA
-nsCaPolicyUrl         = "http://WiFiChallenge.com/ca/policy.htm"
-nsCaRevocationUrl     = "http://WiFiChallenge.com/ca/heimpold.crl"
-nsComment             = "WiFiChallenge CA"
+basicConstraints = critical,CA:true,pathlen:0
+keyUsage         = critical,keyCertSign,cRLSign

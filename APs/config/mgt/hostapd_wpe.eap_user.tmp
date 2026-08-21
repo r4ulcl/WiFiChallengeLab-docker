@@ -103,6 +103,10 @@
 #"8"*		AKA'	[2]
 
 # WPE - DO NOT REMOVE
+# Password-backed identities below deliberately use the complete phase-2 method
+# set advertised by this WPE AP. This keeps the credential valid regardless of
+# which supported inner method the supplicant negotiates. TLS remains
+# certificate-only.
 *       PEAP,TTLS,TLS,FAST
 #"t"    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "t" [2]
 
@@ -114,9 +118,9 @@
 "anonymous@CONTOSO"        GTC,MSCHAPV2
 
 
-"${IDENTITY_MGT_GTC}"     GTC,MSCHAPV2    "${PASS_MGT_GTC_CLEAR}"       [2]
-"${IDENTITY_MGT_MSCHAP}"   MSCHAPV2        "${PASS_MGT_MSCHAP_CLEAR}"         [2]
-"${IDENTITY_MGT_RELAY}"           MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"             [2]
+"${IDENTITY_MGT_GTC}"     TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2    "${PASS_MGT_GTC_CLEAR}"       [2]
+"${IDENTITY_MGT_MSCHAP}"   TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_MGT_MSCHAP_CLEAR}"         [2]
+"${IDENTITY_MGT_RELAY}"           TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"             [2]
 
-"${USER_CONTOSOTEST}"      MSCHAPV2        "${PASS_CONTOSOTEST_CLEAR}"        [2]
-"${USER_CONTOSOFTP}"       MSCHAPV2        "${PASS_CONTOSOFTP_CLEAR}"         [2]
+"${USER_CONTOSOTEST}"      TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_CONTOSOTEST_CLEAR}"        [2]
+"${USER_CONTOSOFTP}"       TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_CONTOSOFTP_CLEAR}"         [2]

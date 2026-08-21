@@ -66,11 +66,27 @@ ip netns add $NS
 echo "Waiting for APs (10 secs)"
 sleep 10 # wait for AP docker
 
-# Add WiFi interfaces wlan 40-59
-for I in `seq 40 59` ; do
-	PHY=`ls /sys/class/ieee80211/*/device/net/ | grep -B1 wlan$I | grep -Eo 'phy[0-9]+'`
-	iw phy $PHY set netns name /run/netns/$NS
+# Add WiFi interfaces wlan 40-69. Resolve the PHY from the exact interface
+# name; a broad grep can select the wrong radio (for example wlan4 also
+# matches wlan40). Fail immediately when a client radio is not available so
+# the container healthcheck does not report a misleading "healthy" state.
+CLIENT_RADIOS=0
+for I in `seq 40 69` ; do
+    WLAN="wlan${I}"
+    PHY="$(cat "/sys/class/net/${WLAN}/phy80211/name" 2>/dev/null)"
+    if [[ -z "$PHY" ]]; then
+        echo "ERROR: no PHY found for Clients interface ${WLAN}" >&2
+        exit 1
+    fi
+
+    echo "Assigning ${PHY} (${WLAN}) to ${NS}"
+    if ! iw phy "$PHY" set netns name "/run/netns/${NS}"; then
+        echo "ERROR: could not assign ${PHY} (${WLAN}) to ${NS}" >&2
+        exit 1
+    fi
+    CLIENT_RADIOS=$((CLIENT_RADIOS + 1))
 done
+echo "Clients radio assignment: ${CLIENT_RADIOS}/30 PHY devices (wlan40-wlan69)"
 
 #--------------------------------------------------------------------------------------------------
 
@@ -94,18 +110,19 @@ ip netns exec $NS ip route add default via ${VETH_ADDR}
 # Enable IP-forwarding.
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-# Flush forward rules.
-iptables -P FORWARD DROP
-iptables -F FORWARD
- 
-# Flush nat rules.
-iptables -t nat -F
-
-# Enable masquerading of 10.200.1.0.
-iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
- 
-iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
-iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
+# Do not flush the shared FORWARD or NAT tables here.  The AP namespace is
+# configured by another script in the same host network namespace; flushing
+# either table would remove the AP namespace's internet-sharing rules.
+# Keep the lab rules idempotent so restarting this container does not create
+# duplicate entries.
+if [[ -n "$IFACE" ]]; then
+   iptables -t nat -C POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE 2>/dev/null || \
+      iptables -t nat -A POSTROUTING -s ${VPEER_ADDR}/24 -o ${IFACE} -j MASQUERADE
+   iptables -C FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT 2>/dev/null || \
+      iptables -A FORWARD -i ${IFACE} -o ${VETH} -j ACCEPT
+   iptables -C FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT 2>/dev/null || \
+      iptables -A FORWARD -o ${IFACE} -i ${VETH} -j ACCEPT
+fi
 
 # Get into namespace and exec startAP
 ip netns exec ${NS} /bin/bash /root/startClients.sh --rcfile <(echo "PS1=\"${NS}> \"")

@@ -279,6 +279,18 @@ uplinks: []
       }
     ]
   },
+  {
+    ssid: $ESSID_ROAM
+    channels: [$CHANNEL_ROAM1]
+    security: [WPA2-PSK-CCMP, WPA2-PSK-FT-CCMP]
+    beacon_rate: 4760
+    bssids: [
+      {
+        address: "$MAC_ROAM1",
+        fingerprints: [ $NZYME_FINGERPRINT_ROAM ]
+      }
+    ]
+  },
 ]
 
 

@@ -103,10 +103,13 @@
 #"8"*		AKA'	[2]
 
 # WPE - DO NOT REMOVE - These entries are specifically in here 
-*		PEAP,TTLS,TLS,FAST
+# Password-backed identities use every password-capable phase-2 method that
+# this AP advertises. Keep relay identities method-flexible; the relay client
+# itself can still pin MSCHAPv2 when that is the method under test.
+*		PEAP,TTLS,TLS,FAST [ver=1]
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
-*	PEAP,TTLS,TLS,FAST [ver=1]
+*	PEAP,TTLS,TLS,FAST
 #"t"	    TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2  "t"	[2]
 
 #"t"	GTC,TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2 "password" [2]
@@ -115,5 +118,5 @@
 "CONTOSOREG\anonymous"		MSCHAPV2
 "anonymous@CONTOSOREG"  MSCHAPV2
 
-"${IDENTITY_MGT_RELAY}"        MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"    [2]
-"${IDENTITY_MGT_PHISHING}"      MSCHAPV2        "${PASS_MGT_PHISHING_CLEAR}"      [2]
+"${IDENTITY_MGT_RELAY}"        TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_MGT_RELAY_CLEAR}"    [2]
+"${IDENTITY_MGT_PHISHING}"      TTLS-PAP,TTLS-CHAP,TTLS-MSCHAP,MSCHAPV2,MD5,GTC,TTLS,TTLS-MSCHAPV2        "${PASS_MGT_PHISHING_CLEAR}"      [2]

@@ -4,3 +4,17 @@ vagrant/.vagrant/*
 vagrant/date.log
 .DS_Store
 nzyme/nzyme-logs/*
+vagrant/.env
+APs/mac80211_hwsim/cache/*
+APs/mac80211_hwsim/mac80211_hwsim.c
+APs/mac80211_hwsim/mac80211_hwsim.h
+APs/mac80211_hwsim/Kbuild
+APs/mac80211_hwsim/*.ko
+APs/mac80211_hwsim/*.o
+APs/mac80211_hwsim/*.mod*
+APs/mac80211_hwsim/.*.cmd
+APs/mac80211_hwsim/Module.symvers
+APs/mac80211_hwsim/modules.order
+REPORT.md
+/virtualbox.log
+/vmware.log

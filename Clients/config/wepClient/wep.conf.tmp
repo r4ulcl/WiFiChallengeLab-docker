@@ -1,3 +1,7 @@
+# --- Probe-request fingerprint persona: legacy device (minimal probe, no Passpoint) ---
+# Intentionally adds no extra probe-request IEs; keeps the bare kernel IE set as this
+# device's fingerprint, distinguishing it from the Passpoint-capable clients.
+
 network={
     ssid="$ESSID_WEP"
     key_mgmt=NONE

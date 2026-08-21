@@ -5,7 +5,7 @@ envsubst_tmp () {
     VARS=$(printf '${%s} ' \
         KEY_J3D5ETO \
         WIFICHALLENGE_VERSION \
-        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_)') \
+        $(compgen -e | grep -E '^(CHANNEL_|USER_|PASS_|FLAG_|IP_|ESSID_|MAC_|WLAN_|ANON_IDENTITY_|IDENTITY_|SIM_)') \
     )
 
     for F in ./*.tmp; do
@@ -72,17 +72,24 @@ envsubst_tmp
 cd /root/oweClient/
 envsubst_tmp
 
+cd /root/randmacClient/
+envsubst_tmp
+
 rm /root/wlan_config.clear
 
 #sleep 5
 
 #sudo modprobe mac80211_hwsim radios=13
 #40-59
-macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.log 
+
+# The macchanger calls below log into /root/logs, so the dir must exist first.
+mkdir -p /root/logs/
+
+macchanger -m $MAC_MGT_MSCHAP $WLAN_CLIENT_MGT_MSCHAP > /root/logs/macchanger.log
 macchanger -m $MAC_MGT_GTC $WLAN_CLIENT_MGT_GTC >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS $WLAN_CLIENT_MGT_TLS >> /root/logs/macchanger.log
 macchanger -m $MAC_TLS_PHISHING $WLAN_CLIENT_MGT_TLS_PHISHING >> /root/logs/macchanger.log
-macchanger -m $MAC_MGT_RELAY $WLAN_CLIENT_MGT_RELAY >> /root/logs/macchanger.log
+macchanger -m $MAC_CLIENT_MGT_RELAY $WLAN_CLIENT_MGT_RELAY >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS_W $WLAN_CLIENT_MGT_RELAY_TABLETS_W >> /root/logs/macchanger.log
 macchanger -m $MAC_CLIENT_MGT_RELAY_TABLETS $WLAN_CLIENT_MGT_RELAY_TABLETS >> /root/logs/macchanger.log
 
@@ -104,9 +111,10 @@ macchanger -m $MAC_CLIENT_OWE $WLAN_CLIENT_OWE >> /root/logs/macchanger.log
 
 
 
-#TODO
-macchanger -r wlan58 >> /root/logs/macchanger.log
-macchanger -r wlan59 >> /root/logs/macchanger.log
+macchanger -m $MAC_TLS_LEAK $WLAN_CLIENT_MGT_TLS_LEAK >> /root/logs/macchanger.log # MGT TLS leak (franz.ka)
+
+macchanger -m $MAC_CLIENT_MGT_SIM $WLAN_CLIENT_MGT_SIM >> /root/logs/macchanger.log # MGT SIM AKA' secure
+macchanger -m $MAC_CLIENT_MGT_SIM_LEAK $WLAN_CLIENT_MGT_SIM_LEAK >> /root/logs/macchanger.log # MGT SIM AKA' leak
 
 sleep 5
 
@@ -115,7 +123,6 @@ sleep 5
 #sleep 15
 
 # Delete logs to >> always
-mkdir /root/logs/ 2> /dev/null
 rm /root/logs/ 2> /dev/null
 
 # Exec cronClient
@@ -142,15 +149,29 @@ do
     wait $!
 done &
 
-# MGT Reg .6
+# MGT Reg .6 - ONE independent loop per relay interface.
 while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY -c /root/mgtClient/wpa_mschapv2_relay.conf >> /root/logs/supplicantMSCHAP_relay.log &
+    wait $!
+    sleep 2
+done &
 
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS_W -c /root/mgtClient/wpa_mschapv2_relay_tabletsW.conf >> /root/logs/supplicantMSCHAP_relay_tabletsW.log &
+    wait $!
+    sleep 2
+done &
+
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_RELAY_TABLETS -c /root/mgtClient/wpa_mschapv2_relay_tablets.conf >> /root/logs/supplicantMSCHAP_relay_tablets.log &
     wait $!
+    sleep 2
 done &
 
 # MGT client TLS .7
@@ -158,6 +179,14 @@ while :
 do
     TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
     sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS -c /root/mgtClient/wpa_TLS.conf >> /root/logs/supplicantTLS.log &
+    wait $!
+done &
+
+# MGT client TLS leaking (GLOBAL\franz.ka)
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_TLS_LEAK -c /root/mgtClient/wpa_TLS_leak.conf >> /root/logs/supplicantTLS_leak.log &
     wait $!
 done &
 
@@ -177,8 +206,35 @@ do
     wait $!
 done &
 
+# MGT SIM leak .9 - leaking EAP-AKA' (re-sends IMSI 214070936554128 in the clear)
+while :
+do
+    TIMEOUT=$(( ( RANDOM % 150 )  + 60 ))
+    sudo timeout -k 1s ${TIMEOUT}s  wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM_LEAK -c /root/mgtClient/wpa_sim_leak.conf >> /root/logs/supplicantSIM_leak.log &
+    wait $!
+done &
+
 # Wait for this ID at the end
 LAST=$!
+
+# MAC-randomizing station: every cycle it picks a new locally-administered MAC,
+# but its probe requests keep the same IEs and preferred-network list, so it can
+# still be fingerprinted and tracked across MAC changes.
+while :
+do
+    # Random unicast, locally-administered MAC (first octet bit1=1 => x2/x6/xA/xE).
+    RANDMAC=$(printf '%02x:%02x:%02x:%02x:%02x:%02x' \
+        "$(( (RANDOM & 0xFC) | 0x02 ))" \
+        "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))" \
+        "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))" "$(( RANDOM & 0xFF ))")
+    # macchanger needs the interface down; wpa_supplicant brings it back up.
+    ip link set $WLAN_CLIENT_RANDMAC down 2> /dev/null
+    macchanger -m "$RANDMAC" $WLAN_CLIENT_RANDMAC >> /root/logs/macchanger_randmac.log 2>&1
+    # Fixed dwell keeps the probe cadence regular (part of the fingerprint).
+    sudo timeout -k 1s 90s wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_RANDMAC -c /root/randmacClient/randmac.conf >> /root/logs/supplicantRANDMAC.log 2>&1 &
+    wait $!
+    sleep 2
+done &
 
 # PSK .2
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_PSK  -c /root/pskClient/wpa_psk.conf > /root/logs/supplicantPSK.log &
@@ -200,6 +256,11 @@ sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_WEP -c /root/wepClien
 
 # OWE
 sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_OWE -c /root/oweClient/owe.conf > /root/logs/supplicantOWE.log &
+
+# MGT SIM secure .9 - EAP-AKA' with anonymous identity (IMSI stays hidden).
+# Persistent (no re-auth loop) so the IMSI is not needlessly re-exposed; the
+# supplicant auto-reconnects on its own.
+sudo wpa_wifichallenge_supplicant -Dnl80211 -i$WLAN_CLIENT_MGT_SIM -c /root/mgtClient/wpa_sim.conf > /root/logs/supplicantSIM.log &
 
 
 sleep 10
@@ -225,7 +286,13 @@ fping -l -p 3000 -q \
   "$IP_MGT_RELAY_TABLETS.1" \
   "$IP_WEP.1" \
   "$IP_OWE.1" \
-  > /dev/null 2>&1
+  "$IP_MGT_SIM.1" \
+  > /dev/null 2>&1 &
+
+# Per-client signal variation is done in the driver (mac80211_hwsim.c, patched
+# by patch80211.sh in the AP image): each radio gets a small, stable per-radio
+# RSSI offset so every station shows a distinct PWR. Done in the kernel so it is
+# immune to the hostapd/supplicant txpower race an `iw set txpower` loop hit here.
 
 sleep 10 && echo "ALL SET"
 

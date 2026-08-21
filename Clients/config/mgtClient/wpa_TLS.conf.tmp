@@ -1,3 +1,9 @@
+# --- Probe-request fingerprint persona: enterprise laptop (Interworking, no HS2.0) ---
+# interworking=1 adds the Interworking element (IE 107) to probe requests, giving a
+# distinct wifi_db fingerprint. Probe-only; association behaviour is unchanged
+# (auto_interworking off, no cred{} blocks).
+interworking=1
+
 # Cleaned up example, see original wpa_supplicant.conf for comments.
 
 #ctrl_interface=/var/run/wpa_supplicant
@@ -15,11 +21,14 @@ network={
 	key_mgmt=WPA-EAP
 	auth_alg=OPEN
 	eap=TLS
-    #anonymous_identity="$ANON_IDENTITY_MGT_TLS"
+	#anonymous_identity="$ANON_IDENTITY_MGT_TLS_CLIENT"
 	identity="$IDENTITY_MGT_TLS"
+	# Force TLS 1.3 so the client certificate is sent encrypted (no cleartext
+	# cert, no username leak). Must match the AP's tls_flags TLS 1.3 setting.
+	phase1="tls_disable_tlsv1_0=1 tls_disable_tlsv1_1=1 tls_disable_tlsv1_2=1 tls_disable_tlsv1_3=0"
 	ca_cert="/root/certs/ca.crt"
 	client_cert="/root/certs/client.crt"
 	private_key="/root/certs/client.key"
-	private_key_passwd="whatever" 
+	private_key_passwd="whatever"
 	ieee80211w=2 # use Protected Management Frames (PMF)
 }
