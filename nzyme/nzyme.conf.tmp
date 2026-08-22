@@ -208,6 +208,18 @@ uplinks: []
     ]
   },
   {
+    # EAP-SIM / EAP-AKA / EAP-AKA' network.
+    ssid: $ESSID_MGT_SIM
+    channels: [$CHANNEL_MGT_SIM]
+    security: [WPA2-EAM-CCMP]
+    bssids: [
+      {
+        address: "$MAC_MGT_SIM",
+        fingerprints: [ $NZYME_FINGERPRINT_MGT_SIM ]
+      }
+    ]
+  },
+  {
     ssid: $ESSID_MGT_RELAY
     channels: [$CHANNEL_MGT_RELAY]
     security: [WPA2-EAM-CCMP]
@@ -282,7 +294,7 @@ uplinks: []
   {
     ssid: $ESSID_ROAM
     channels: [$CHANNEL_ROAM1]
-    security: [WPA2-PSK-CCMP, WPA2-PSK-FT-CCMP]
+    security: [WPA2-PSK-CCMP]
     beacon_rate: 4760
     bssids: [
       {
