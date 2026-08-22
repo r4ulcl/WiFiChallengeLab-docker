@@ -98,6 +98,17 @@ if [[ $(iw dev | grep -c wlan) -lt 20 ]] ; then
    sudo modprobe mac80211_hwsim_WiFiChallenge radios=71
 fi
 
+# wlan70 is reserved for nzyme and remains in the host network namespace. The
+# PCAP monitor cannot initialize while this device is down, so make its link
+# state explicit after every hwsim setup/reload.
+NZYME_WLAN="${WLAN:-wlan70}"
+if [ -e "/sys/class/net/${NZYME_WLAN}" ]; then
+   ip link set dev "${NZYME_WLAN}" up
+   echo "Nzyme monitor interface ${NZYME_WLAN} is up"
+else
+   echo "ERROR: nzyme monitor interface ${NZYME_WLAN} is missing" >&2
+fi
+
 # Rename interfaces APwlan, ClientWlan, wlan0 wlan5
 #TODO?
 
