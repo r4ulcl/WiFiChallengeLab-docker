@@ -123,6 +123,20 @@ EOF
   chmod 600 /etc/NetworkManager/system-connections/eth0-nat.nmconnection
 fi
 
+# Debian's older IBus releases show a spurious Plasma Wayland notification on
+# login: "Keymap changes do not work in Plasma Wayland". The issue is fixed in
+# IBus 1.5.29, but Debian 12 images can still carry an older version. IBus is
+# optional for the lab and is not responsible for normal keyboard layouts, so
+# remove the affected runtime instead of adding an unstable input-method update
+# to an imported EC2 guest. Plasma continues to manage layouts natively.
+if command -v dpkg-query >/dev/null 2>&1 && command -v apt-get >/dev/null 2>&1; then
+  ibus_version="$(dpkg-query -W -f='${Version}' ibus 2>/dev/null || true)"
+  if [[ -n "$ibus_version" ]] && dpkg --compare-versions "$ibus_version" lt 1.5.29~beta1; then
+    log "Removing affected IBus runtime (${ibus_version}) to prevent the Plasma Wayland keymap notification..."
+    run apt-get purge -y ibus
+  fi
+fi
+
 # VM Import/Export does not support predictable interface names. This gives the
 # NetworkManager DHCP profile a stable eth0 target when EC2 presents its NIC.
 if [[ -f /etc/default/grub ]] && ! grep -q 'net.ifnames=0' /etc/default/grub; then
