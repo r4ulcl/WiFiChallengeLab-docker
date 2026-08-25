@@ -246,31 +246,45 @@ python3 -m pip install --break-system-packages --force-reinstall 'pyOpenSSL<26.2
 
 # ---------- hostapd-wpe 2.11 -------------------------------------------------
 cd "${TOOLS}"
-apt-get install -y libsqlite3-dev
-if [ ! -d hostapd-2.11 ]; then
-  if wget -q https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch \
-      && wget -q https://w1.fi/releases/hostapd-2.11.tar.gz \
-      && tar zxf hostapd-2.11.tar.gz; then
-    rm -f hostapd-2.11.tar.gz
-    cd hostapd-2.11
-    if patch --dry-run -p1 < ../hostapd-2.11-wpe.patch >/dev/null 2>&1; then
-      patch -p1 < ../hostapd-2.11-wpe.patch
-      rm -f ../hostapd-2.11-wpe.patch
-      cd hostapd
-      make -j"$(nproc)"
-      make install
-      make wpe || true
-      cd /etc/hostapd-wpe/certs && ./bootstrap && make install || true
-    else
-      echo "Warning: hostapd-WPE patch does not match hostapd 2.11; skipping WPE build"
-      cd "${TOOLS}"
-      rm -rf hostapd-2.11 hostapd-2.11-wpe.patch
-    fi
-  else
-    echo "Warning: could not download hostapd-WPE sources; skipping WPE build"
-    rm -rf hostapd-2.11 hostapd-2.11.tar.gz hostapd-2.11-wpe.patch
-  fi
+apt-get install -y libsqlite3-dev libnl-3-dev libnl-genl-3-dev libssl-dev pkg-config
+HOSTAPD_WPE_SRC="${TOOLS}/hostapd-2.11"
+HOSTAPD_WPE_PATCH="${TOOLS}/hostapd-2.11-wpe.patch"
+
+# Build from fresh upstream source during clean-system provisioning.
+if ! command -v hostapd-wpe >/dev/null 2>&1; then
+  wget -q https://w1.fi/releases/hostapd-2.11.tar.gz -O hostapd-2.11.tar.gz
+  tar zxf hostapd-2.11.tar.gz
+  rm -f hostapd-2.11.tar.gz
+
+  wget -q https://raw.githubusercontent.com/aircrack-ng/aircrack-ng/master/patches/wpe/hostapd-wpe/hostapd-2.11-wpe.patch \
+    -O "${HOSTAPD_WPE_PATCH}"
+
+  # The upstream WPE patch was generated against a slightly older 2.11 tree:
+  # its first TLS hunk removes openssl/rand.h, which is already absent from the
+  # published tarball. Drop that obsolete hunk so patch does not incorrectly
+  # classify and skip every remaining tls_openssl.c hunk.
+  sed -i '/^@@ -29,7 +29,6 @@$/,/^@@ -50,6 +49,7 @@$/ {
+    /^@@ -50,6 +49,7 @@$/!d
+  }' "${HOSTAPD_WPE_PATCH}"
+
+  cd "${HOSTAPD_WPE_SRC}"
+  # --ignore-whitespace also handles two malformed leading spaces in the
+  # upstream main.c hunk without weakening content/context validation.
+  patch --batch --forward --ignore-whitespace -p1 < "${HOSTAPD_WPE_PATCH}"
+  rm -f "${HOSTAPD_WPE_PATCH}"
+
+  make -C "${HOSTAPD_WPE_SRC}/hostapd" -j"$(nproc)"
+  make -C "${HOSTAPD_WPE_SRC}/hostapd" wpe
+  # Install explicitly into root's standard PATH instead of relying on the
+  # upstream Makefile's BINDIR default.
+  install -m0755 "${HOSTAPD_WPE_SRC}/hostapd/hostapd-wpe" /usr/local/sbin/hostapd-wpe
+  install -m0755 "${HOSTAPD_WPE_SRC}/hostapd/hostapd_cli-wpe" /usr/local/bin/hostapd_cli-wpe
+  cd /etc/hostapd-wpe/certs
+  ./bootstrap
+  make install
 fi
+hash -r
+command -v hostapd-wpe >/dev/null
 
 # ---------- Aircrack-ng from source ------------------------------------------
 cd "${TOOLS}"
@@ -309,13 +323,20 @@ timeout 60s /usr/local/bin/hashcat -b || true
 
 # ---------- John the Ripper ---------------------------------------------------
 cd "${TOOLS}"
-apt-get -y install yasm pkg-config libgmp-dev libbz2-dev
-git clone https://github.com/openwall/john.git || true
-cd john/src
-./configure || true
-make -s clean || true
-make -sj"$(nproc)" || true
-#make install || true
+apt-get -y install john yasm pkg-config libgmp-dev libbz2-dev
+if [ ! -d john/src ]; then
+  git clone https://github.com/openwall/john.git john \
+    || echo "Warning: could not clone John jumbo; using the distro package"
+fi
+if [ -d john/src ] && cd john/src && ./configure && make -s clean && make -sj"$(nproc)"; then
+  # John resolves its support files relative to the real binary after following
+  # the symlink, while aliases are invisible to airgeddon's noninteractive check.
+  ln -sfn "${TOOLS}/john/run/john" /usr/local/bin/john
+else
+  echo "Warning: John jumbo build failed; using the distro john package"
+fi
+hash -r
+command -v john >/dev/null
 
 # ---------- Misc Wi-Fi tools --------------------------------------------------
 cd "${TOOLS}"
@@ -359,17 +380,25 @@ if [ ! -d /usr/local/rbenv/plugins/ruby-build ]; then
 else
   git -C /usr/local/rbenv/plugins/ruby-build pull --ff-only || true
 fi
-export PATH="/usr/local/rbenv/bin:$PATH"
-eval "$(/usr/local/rbenv/bin/rbenv init - bash)" || true
-/usr/local/rbenv/bin/rbenv install -s "${BEEF_RUBY_VER}" || true
-/usr/local/rbenv/bin/rbenv global "${BEEF_RUBY_VER}" || true
+export RBENV_ROOT=/usr/local/rbenv
+export PATH="${RBENV_ROOT}/bin:${RBENV_ROOT}/shims:$PATH"
+eval "$(rbenv init - bash)"
+rbenv install -s "${BEEF_RUBY_VER}"
+rbenv global "${BEEF_RUBY_VER}"
 cd /usr/share/beef
-if /usr/local/rbenv/bin/rbenv prefix "${BEEF_RUBY_VER}" >/dev/null 2>&1; then
-  /usr/local/rbenv/bin/rbenv local "${BEEF_RUBY_VER}"
+if rbenv prefix "${BEEF_RUBY_VER}" >/dev/null 2>&1; then
+  rbenv local "${BEEF_RUBY_VER}"
   if gem install bundler \
       && bundle config set --local without 'test' \
       && bundle install; then
-    install -m755 <(printf '#!/usr/bin/env bash\ncd /usr/share/beef && ./beef\n') /usr/local/bin/beef
+    cat >/usr/local/bin/beef <<'EOF'
+#!/usr/bin/env bash
+export RBENV_ROOT=/usr/local/rbenv
+export PATH="${RBENV_ROOT}/bin:${RBENV_ROOT}/shims:${PATH}"
+cd /usr/share/beef
+exec rbenv exec bundle exec ./beef "$@"
+EOF
+    chmod 0755 /usr/local/bin/beef
   else
     echo "Warning: BeEF dependencies could not be installed; disabling the BeEF launcher"
     rm -f /usr/local/bin/beef
@@ -378,6 +407,8 @@ else
   echo "Warning: Ruby ${BEEF_RUBY_VER} is unavailable; skipping BeEF bundle install"
   rm -f /usr/local/bin/beef
 fi
+hash -r
+command -v beef >/dev/null
 
 # airgeddon
 apt-get install -y lighttpd pixiewps isc-dhcp-server reaver crunch xterm hostapd ettercap-text-only mdk3 mdk4 arping ccze
@@ -385,6 +416,15 @@ systemctl disable --now lighttpd || true
 cd "${TOOLS}"
 [ ! -d airgeddon ] && git clone --depth 1 https://github.com/v1s1t0r1sh3r3/airgeddon.git
 cd airgeddon
+chmod 0755 airgeddon.sh
+# airgeddon derives its asset directory from $0 before resolving the script
+# symlink, so a plain symlink breaks when called outside its checkout.
+cat >/usr/local/bin/airgeddon <<'EOF'
+#!/usr/bin/env bash
+cd /root/tools/airgeddon
+exec ./airgeddon.sh "$@"
+EOF
+chmod 0755 /usr/local/bin/airgeddon
 sed -i '/^AIRGEDDON_AUTO_UPDATE=/c\AIRGEDDON_AUTO_UPDATE=false' .airgeddonrc || true
 sed -i '/^AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=/c\AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING=false' .airgeddonrc || true
 cd plugins
@@ -404,6 +444,8 @@ rm -rf dragon-drain-wpa3-airgeddon-plugin
 wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/bully_1.1.+git20190923-0kali1_amd64.deb || true
 dpkg -i bully_*.deb || apt-get -y --fix-broken install || true
 rm -f bully_*.deb
+hash -r
+command -v airgeddon >/dev/null
 
 # Install ath_masker
 # NOTE: this builds AND loads a kernel module. Inside a container image build

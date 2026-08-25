@@ -1,4 +1,4 @@
-# WiFiChallenge Lab v2.5
+# WiFiChallenge Lab v2.5.1
 #
 # Default: $env:DEV = "false" ; $env:LOCATION = "remote"
 # DEV:     $env:DEV = "true"  ; $env:LOCATION = "local"  ; vagrant up
@@ -10,7 +10,7 @@
 
 # Local variable, not a constant: Vagrant evaluates a Vagrantfile more than
 # once per run, and re-assigning a constant warns on every re-evaluation.
-lab_name = 'WiFiChallenge Lab v2.5'
+lab_name = 'WiFiChallenge Lab v2.5.1'
 
 # Preseed grub-pc so full-upgrade never prompts for an install device, then
 # apply all pending updates. $1 is the provider-specific fallback root disk.
