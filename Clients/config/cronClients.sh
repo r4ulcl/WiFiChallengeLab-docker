@@ -160,10 +160,10 @@ do
 		-c /tmp/userManager1 -b /tmp/userManager1 &
 
 	# WEP
-	curl -s "http://$IP_WEP.1/login.php" --interface $WLAN_CLIENT_WEP --compressed \
+	curl -L -s "http://$IP_WEP.1/login.php" --interface $WLAN_CLIENT_WEP --compressed \
 		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
 		--data-urlencode "Username=$USER_WEP" \
-		--data-urlencode "Password=$PASS_WEP_CLEAR" \
+		--data-urlencode "Password=$PASS_WEB_WEP_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userWEP -b /tmp/userWEP &
 
