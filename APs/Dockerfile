@@ -11,14 +11,31 @@ RUN apt-get update \
       php-cli systemd \
  && rm -rf /var/lib/apt/lists/*
 
-RUN cd ; wget https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz \
-	; tar  -xf libmicrohttpd-0.9.71.tar.gz ; cd libmicrohttpd-0.9.71 \
-	; ./configure --disable-https ; make ; sudo rm /usr/local/lib/libmicrohttpd* \
-	; sudo make install ; sudo rm /etc/ld.so.cache ; sudo ldconfig -v ; cd ..
+RUN set -eux; \
+	cd /tmp; \
+	wget -O libmicrohttpd-0.9.71.tar.gz \
+		https://mirrors.kernel.org/gnu/libmicrohttpd/libmicrohttpd-0.9.71.tar.gz; \
+	echo 'e8f445e85faf727b89e9f9590daea4473ae00ead38b237cf1eda55172b89b182  libmicrohttpd-0.9.71.tar.gz' | sha256sum -c -; \
+	tar -xzf libmicrohttpd-0.9.71.tar.gz; \
+	cd libmicrohttpd-0.9.71; \
+	./configure --disable-https; \
+	make -j"$(nproc)"; \
+	make install; \
+	ldconfig; \
+	test -f /usr/local/include/microhttpd.h; \
+	rm -rf /tmp/libmicrohttpd-0.9.71 /tmp/libmicrohttpd-0.9.71.tar.gz
 
-RUN cd ; wget https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0 \
-       ; tar -xf v9.8.0 && cd openNDS-9.8.0 ; sudo touch /dev/log \
-       ; make && make install && rm -rf ~/v9.8.0 ~/openNDS-9.8.0 ~/libmicrohttpd-0.9.71 ~/libmicrohttpd-0.9.71.tar.gz 
+RUN set -eux; \
+	cd /tmp; \
+	wget -O opennds-9.8.0.tar.gz \
+		https://codeload.github.com/opennds/opennds/tar.gz/v9.8.0; \
+	echo '11f4a48ef62007f56376c32a028f19183452c62eee6fddcb11aafe822e5ff1b4  opennds-9.8.0.tar.gz' | sha256sum -c -; \
+	tar -xzf opennds-9.8.0.tar.gz; \
+	cd openNDS-9.8.0; \
+	touch /dev/log; \
+	make -j"$(nproc)"; \
+	make install; \
+	rm -rf /tmp/openNDS-9.8.0 /tmp/opennds-9.8.0.tar.gz
 
 #Copy config files
 COPY config/open/ /root/open/
