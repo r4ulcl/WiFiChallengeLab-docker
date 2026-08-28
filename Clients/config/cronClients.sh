@@ -77,6 +77,22 @@ do
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userPhishing -b /tmp/userPhishing &
 
+	# MGT MD5
+	curl -s "http://$IP_MGT_MD5.1/login.php" --interface $WLAN_CLIENT_MGT_MD5 --compressed \
+		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
+		--data-urlencode "Username=$IDENTITY_MGT_MD5" \
+		--data-urlencode "Password=$PASS_MGT_MD5_CLEAR" \
+		--data-urlencode "Submit=Login" \
+		-c /tmp/userMD5 -b /tmp/userMD5 &
+
+	# MGT Relay Tablets
+	curl -s "http://$IP_MGT_RELAY_TABLETS.1/login.php" --interface $WLAN_CLIENT_MGT_RELAY_TABLETS --compressed \
+		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
+		--data-urlencode "Username=$IDENTITY_MGT_RELAY" \
+		--data-urlencode "Password=$PASS_MGT_RELAY_CLEAR" \
+		--data-urlencode "Submit=Login" \
+		-c /tmp/userTablets -b /tmp/userTablets &
+
 	# WPA PSK (login only if redirect)
 	STATUS=`curl -o /dev/null -w '%{http_code}\n' -s "http://$IP_PSK.1/lab.php" -c /tmp/userTest1 -b /tmp/userTest1`
 	if [ "$STATUS" -eq 302 ] ; then
@@ -142,6 +158,14 @@ do
 		--data-urlencode "Password=$PASS_WEB_DOWNGRADE_CLEAR" \
 		--data-urlencode "Submit=Login" \
 		-c /tmp/userManager1 -b /tmp/userManager1 &
+
+	# WEP
+	curl -s "http://$IP_WEP.1/login.php" --interface $WLAN_CLIENT_WEP --compressed \
+		-H 'Content-Type: application/x-www-form-urlencoded' -H 'Connection: keep-alive' \
+		--data-urlencode "Username=$USER_WEP" \
+		--data-urlencode "Password=$PASS_WEP_CLEAR" \
+		--data-urlencode "Submit=Login" \
+		-c /tmp/userWEP -b /tmp/userWEP &
 
 	wait $!
 	sleep 10
