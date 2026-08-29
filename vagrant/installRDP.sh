@@ -183,7 +183,10 @@ if need_cmd ufw; then ufw allow 3389/tcp || true; fi
 
 # Dynamic window
 sudo sed -i 's/^\s*allow_channels=.*/allow_channels=true/' /etc/xrdp/xrdp.ini
-sudo sed -i 's/^\s*max_bpp=.*/max_bpp=32/' /etc/xrdp/xrdp.ini
+# 24 rather than 32: the desktop is rendered by llvmpipe and shipped over the
+# network, so the alpha byte costs bandwidth and compression time on every
+# frame without adding anything the lab UI uses.
+sudo sed -i 's/^\s*max_bpp=.*/max_bpp=24/' /etc/xrdp/xrdp.ini
 
 # Ensure the Channels section allows drdynvc
 sudo awk '

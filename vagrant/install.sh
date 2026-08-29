@@ -1167,6 +1167,41 @@ sudo systemctl mask packagekit 2>/dev/null || true
 
 apt_purge packagekit packagekit-tools packagekit-gtk3-module || true
 
+# ---------- IBus: kill the bogus "Plasma Wayland" keymap notification --------
+# ibus-ui-gtk3, from the "ibus" package, pops "Keymap changes do not work in
+# Plasma Wayland at present" on sessions that are neither Plasma nor Wayland
+# (Debian #1063661, against bookworm's 1.5.27-5, which is what this image
+# ships). It shows on every RDP login: xrdp's startwm.sh runs /etc/X11/Xsession,
+# and Xsession.d/70im-config_launch starts the input method with its own panel
+# before gnome-session takes over. The lab needs no input method - the us/es
+# layouts set in configureUser.sh are plain xkb sources GNOME switches itself -
+# so remove it here, at the end of the build, where nothing can pull it back.
+ibus_pkgs=()
+for pkg in ibus ibus-gtk3 ibus-gtk4 ibus-data; do
+  if dpkg-query -W -f='${db:Status-Status}' "$pkg" 2>/dev/null | grep -qx installed; then
+    ibus_pkgs+=("$pkg")
+  fi
+done
+if [ "${#ibus_pkgs[@]}" -gt 0 ]; then
+  # gnome-shell only Recommends ibus (it Depends on libibus/gir1.2-ibus, which
+  # stay), so this guard should never fire. Shipping a desktop-less image
+  # because apt cascaded is not a risk worth taking silently.
+  if sudo apt-get -s purge "${ibus_pkgs[@]}" 2>/dev/null | grep -qE '^(Remv|Purg) (gnome-shell|gnome-session|gnome-core|gdm3|xrdp) '; then
+    echo "WARNING: purging IBus would remove the desktop; leaving it installed."
+  else
+    apt_purge "${ibus_pkgs[@]}"
+  fi
+fi
+
+# Belt and braces, and the actual fix if the guard above kept the package:
+# stop the X session from launching an input method at all.
+sudo rm -f /home/*/.xinputrc /etc/xdg/autostart/ibus.desktop 2>/dev/null || true
+sudo rm -f /home/*/.config/autostart/ibus.desktop 2>/dev/null || true
+if command -v im-config >/dev/null 2>&1; then
+  sudo im-config -n none >/dev/null 2>&1 || true
+fi
+sudo pkill -x ibus-daemon 2>/dev/null || true
+
 sudo journalctl --vacuum-time=2d || true
 sudo journalctl --vacuum-size=100M || true
 
