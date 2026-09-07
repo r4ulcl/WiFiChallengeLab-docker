@@ -407,7 +407,15 @@ sudo chown user:user /home/user/resetWiFi.sh
 
 sudo tee /root/updateWiFiChallengeLab.sh /home/user/updateWiFiChallengeLab.sh >/dev/null <<'EOF'
 #!/bin/bash
-cd /var/WiFiChallengeLab-docker
+cd /var/WiFiChallengeLab-docker || exit 1
+
+# Force the checkout to match the remote branch, discarding any local edits.
+# Ignored files (nzyme logs, compiled mac80211_hwsim sources) are kept.
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || echo "origin/${BRANCH}")"
+git fetch --all --prune --force
+git reset --hard "$UPSTREAM"
+
 sudo docker compose pull
 sudo docker compose up --detach
 EOF
