@@ -832,7 +832,7 @@ dns=systemd-resolved
 [keyfile]
 # Leave the mac80211_hwsim Wi-Fi radios and the docker/namespace veth plumbing
 # alone; the lab drives those with iw/hostapd/wpa_supplicant, not NetworkManager.
-unmanaged-devices=type:wifi;interface-name:veth*;interface-name:vpeer*;interface-name:docker*;interface-name:br-*;interface-name:hwsim*
+unmanaged-devices=interface-name:veth*;interface-name:vpeer*;interface-name:docker*;interface-name:br-*;interface-name:hwsim*
 EOF
 
 # 4) Explicit, name-independent DHCP profile for the NAT uplink (eth0 on the
