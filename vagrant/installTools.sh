@@ -343,11 +343,17 @@ cd "${TOOLS}"
 [ ! -d crEAP ] && git clone https://github.com/Snizz/crEAP
 apt-get install -y arp-scan
 
-# asleap legacy debs can be flaky on Debian
-wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/libssl1.0.2_1.0.2u-1~deb9u1_amd64.deb || true
-wget -q https://github.com/v1s1t0r1sh3r3/airgeddon_deb_packages/raw/refs/heads/master/amd64/asleap_2.2-1parrot0_amd64.deb || true
-dpkg -i libssl1.0.2_*.deb asleap_*.deb || apt-get -y --fix-broken install || true
-rm -f libssl1.0.2_*.deb asleap_*.deb
+# asleap
+apt-get install -y libpcap-dev libssl-dev || true
+asleap_build_dir="$(mktemp -d 2>/dev/null || true)"
+if [ -n "$asleap_build_dir" ] && [ -d "$asleap_build_dir" ]; then
+    git clone --depth 1 https://github.com/OscarAkaElvis/asleap.git "$asleap_build_dir/asleap" &&
+    make -C "$asleap_build_dir/asleap" clean &&
+    make -C "$asleap_build_dir/asleap" -j"$(nproc)" &&
+    make -C "$asleap_build_dir/asleap" install || true
+    rm -rf -- "$asleap_build_dir" || true
+fi
+unset asleap_build_dir
 
 # Bettercap
 apt-get install -y golang libpcap-dev libusb-1.0-0-dev libnetfilter-queue-dev
